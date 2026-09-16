@@ -10,7 +10,15 @@ import { cariAtauBuatKlien } from '../lib/klien'
 import './BookingModal.css'
 
 function todayStr() {
-  return new Date().toISOString().slice(0, 10)
+  // SEBELUMNYA pake new Date().toISOString().slice(0,10) -- itu bug,
+  // soalnya toISOString() convert ke UTC dulu sebelum diformat. WIB itu
+  // UTC+7, jadi pas jam dini hari (00:00-06:59 WIB), waktu UTC-nya masih
+  // di TANGGAL SEBELUMNYA -- hasilnya "Tanggal Booking" default ketiban
+  // mundur 1 hari pas jam-jam itu. Fix-nya: susun tanggal dari getter
+  // LOKAL (getFullYear/getMonth/getDate), sama persis pola toISO() yang
+  // udah dipakai di CustomDatePicker.jsx.
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 // Kapitalisasi huruf pertama tiap kata -- SENGAJA cuma nyentuh huruf
 // PERTAMA doang di tiap kata (bukan nge-lowercase-in sisanya), biar aman

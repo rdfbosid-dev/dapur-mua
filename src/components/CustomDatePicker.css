@@ -7,7 +7,7 @@
 
 .cdate-panel {
   position: absolute; top: calc(100% + 6px); left: 0; z-index: 30; min-width: 270px;
-  background: var(--field); border: 1px solid color-mix(in srgb, var(--button-border) 70%, transparent);
+  background: var(--box-dashboard); border: 1px solid color-mix(in srgb, var(--button-border) 70%, transparent);
   border-radius: 12px; padding: 12px; box-shadow: var(--shadow-modal);
 }
 .cdate-nav { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
@@ -38,10 +38,10 @@
    bawah -- soalnya beberapa dari itu specificity-nya sama (2 class),
    jadi yang belakangan di file yang menang; density harus KALAH kalau
    sel itu juga .selected (biar highlight pilihan tetap jelas beda). */
-.cdate-cell.density-1 { background: color-mix(in srgb, var(--h5) 50%, transparent); }
-.cdate-cell.density-2 { background: color-mix(in srgb, var(--h5) 90%, transparent); }
-.cdate-cell.density-3 { background: var(--pill); }
-.cdate-cell.density-4 { background: var(--notif); }
+.cdate-cell.density-1 { background: color-mix(in srgb, var(--h5) 50%, transparent); color: var(--h7); font-weight: 700; }
+.cdate-cell.density-2 { background: color-mix(in srgb, var(--h5) 90%, transparent); color: var(--h7); font-weight: 700; }
+.cdate-cell.density-3 { background: var(--pill); color: var(--h8); font-weight: 700; }
+.cdate-cell.density-4 { background: var(--notif); color: var(--h8); font-weight: 700; }
 
 /* Sel di luar bulan (numpang dari bulan sebelum/sesudah) yang kebetulan
    ada booking-nya -- ditimpa jadi warna netral tetap (bukan warna
@@ -55,7 +55,7 @@
   background: color-mix(in srgb, var(--ink-soft) 22%, transparent);
 }
 
-.cdate-cell.outside { color: var(--ink-faint); opacity: 0.4; }
+.cdate-cell.outside { color: var(--ink-faint); opacity: 1; font-weight: 700; }
 .cdate-cell.today { border: 1.5px solid var(--h3); }
 .cdate-cell.selected { background: color-mix(in srgb, var(--h3) 70%, transparent); color: #fff; font-weight: 700; }
 
