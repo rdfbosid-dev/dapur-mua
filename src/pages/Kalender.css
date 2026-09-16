@@ -1,3 +1,14 @@
+/* ---- Widget "Cek Ketersediaan Tanggal" -- card mandiri di atas
+   .kalender-layout, TERPISAH dari grid kalender bulanan (yang cuma bisa
+   nampilin 1 bulan yang lagi di-view). Numpang .card + .dash-booking-row/
+   .status-pill yang udah ada (sama kayak kartu Agenda di kalender-layout),
+   biar visualnya konsisten tanpa duplikasi style baru. ---- */
+.kalender-cek-card { margin-bottom: 18px; background: color-mix(in srgb, var(--box-dashboard) 90%, transparent); }
+.kalender-cek-head { margin-bottom: 14px; }
+.kalender-cek-head h3 { font-size: 15px; font-weight: 700; color: var(--ink-soft); margin-bottom: 4px; }
+.kalender-cek-head p { font-size: 12.5px; color: var(--ink-soft); line-height: 1.5; }
+.kalender-cek-result { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line-box); }
+
 .kalender-layout { display: grid; grid-template-columns: 1.5fr 1fr; gap: 18px; align-items: start; }
 
 /* ---- Banner "Hubungkan Kalender" di atas grid -- ide-nya numpang dari
@@ -197,6 +208,7 @@
   .kalender-layout { grid-template-columns: 1fr; gap: 14px; }
   .card.kalender-card { border: 1px solid var(--line-box); }
   .card.agenda-card { border: 1px solid var(--line-box); }
+  .kalender-cek-card { border: 1px solid var(--line-box); }
   .kalender-cell { aspect-ratio: 1; }
 
   .kalender-connect-banner { flex-wrap: wrap; }
@@ -211,6 +223,7 @@
 
 @media (max-width: 600px) {
   .kalender-card, .card.agenda-card { padding: 20px; border: 1px solid var(--line-box); }
+  .kalender-cek-card { padding: 20px; }
   .kalender-title { font-size: 14px; }
 
   .card-head-kalender h3 { font-size: 13px; margin-bottom: 10px; text-underline-offset: 6px; text-decoration-thickness: 1px; }

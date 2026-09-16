@@ -69,6 +69,24 @@ export default function BookingModal({ onClose, onSaved }) {
 
   const [existingClients, setExistingClients] = useState([])
   const [showSuggest, setShowSuggest] = useState(false)
+  const [bookingDates, setBookingDates] = useState([])
+
+  // Ambil semua tanggal_acara booking yang udah ada (punya user ini doang,
+  // RLS + .eq user_id) -- dipakai CustomDatePicker buat nampilin indikator
+  // kepadatan di field "Tanggal Acara" (lihat props bookingDates di bawah).
+  // Cuma ambil kolom tanggal_acara doang (bukan select * ), soalnya cuma
+  // itu yang kepake di sini.
+  useEffect(() => {
+    async function loadBookingDates() {
+      const { data } = await supabase
+        .from('bookings')
+        .select('tanggal_acara')
+        .eq('user_id', user.id)
+
+      if (data) setBookingDates(data.map((b) => b.tanggal_acara))
+    }
+    if (user) loadBookingDates()
+  }, [user])
 
   // Ambil daftar klien (dari tabel `klien`, yang masing-masing punya ID unik
   // asli) buat autocomplete di field Nama klien -- biar klien yang booking
@@ -272,7 +290,7 @@ export default function BookingModal({ onClose, onSaved }) {
             <div className="field-grid-booking cols-tanggal-jam-event">
               <div className="field">
                 <label>Tanggal Acara</label>
-                <CustomDatePicker value={tanggalAcara} onChange={setTanggalAcara} variant="modal" />
+                <CustomDatePicker value={tanggalAcara} onChange={setTanggalAcara} variant="modal" bookingDates={bookingDates} />
               </div>
               <div className="field">
                 <label>Jam Mulai</label>

@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import Sidebar from '../components/Sidebar'
 import BookingModal from '../components/BookingModal'
 import BookingDetailModal from '../components/BookingDetailModal'
+import CustomDatePicker from '../components/CustomDatePicker'
 import './Kalender.css'
 
 const BULAN_PENUH = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
@@ -76,6 +77,12 @@ export default function Kalender() {
 
   const [showKalenderLink, setShowKalenderLink] = useState(false)
   const [linkCopied, setLinkCopied] = useState(false)
+
+  // Tanggal yang lagi dicek user lewat widget "Cek Ketersediaan Tanggal"
+  // -- SENGAJA state terpisah dari `selectedDate` (yang punya grid
+  // bulanan), soalnya user bisa cek tanggal di bulan/tahun manapun
+  // (misal Januari 2027) TANPA perlu navigasi grid-nya dulu.
+  const [cekTanggal, setCekTanggal] = useState('')
 
   useEffect(() => {
     // Sama persis logikanya kayak di Pengaturan.jsx -- SENGAJA disalin
@@ -212,6 +219,47 @@ export default function Kalender() {
             </button>
           </div>
         )}
+
+        <div className="card kalender-cek-card">
+          <div className="kalender-cek-head">
+            <h3>Cek Ketersediaan Tanggal</h3>
+            <p>Ketik/pilih tanggal buat langsung lihat agenda di hari itu -- walau beda bulan atau tahun dari yang lagi ditampilin di kalender bawah.</p>
+          </div>
+          <CustomDatePicker
+            value={cekTanggal}
+            onChange={setCekTanggal}
+            placeholder="Pilih tanggal yang mau dicek"
+            variant="modal"
+            bookingDates={bookings.map((b) => b.tanggal_acara)}
+          />
+          {cekTanggal && (() => {
+            const [y, m, d] = cekTanggal.split('-').map(Number)
+            const target = new Date(y, m - 1, d)
+            const hasil = bookingsOn(target).sort((a, b) => (a.jam_start_makeup || '').localeCompare(b.jam_start_makeup || ''))
+            return (
+              <div className="kalender-cek-result">
+                {hasil.length === 0 ? (
+                  <div className="empty-state">Belum ada agenda makeup di tanggal ini.</div>
+                ) : (
+                  hasil.map((b) => (
+                    <div className="dash-booking-row" key={b.id} onClick={() => setSelectedBooking(b)} style={{ cursor: 'pointer' }}>
+                      <div className={`dash-b-avatar${isSelesai(b.tanggal_acara, b.jam_start_makeup) ? ' selesai' : ''}`}>{initialsOf(b.nama_klien)}</div>
+                      <div className="b-info">
+                        <div className="b-name">{b.nama_klien}</div>
+                        <div className="b-meta">
+                          {b.event || 'Booking'}{b.jam_start_makeup ? ` · ${b.jam_start_makeup.slice(0, 5)} WIB` : ''}
+                        </div>
+                      </div>
+                      <span className={`status-pill ${b.status_pembayaran === 'Lunas' ? 'lunas' : 'belum'}`}>
+                        {b.status_pembayaran}
+                      </span>
+                    </div>
+                  ))
+                )}
+              </div>
+            )
+          })()}
+        </div>
 
         <div className="kalender-layout">
           <div className="card kalender-card">

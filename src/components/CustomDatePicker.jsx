@@ -34,13 +34,27 @@ function buildGrid(year, month) {
   return cells
 }
 
-export default function CustomDatePicker({ value, onChange, placeholder = 'Pilih Tanggal', variant = null }) {
+export default function CustomDatePicker({ value, onChange, placeholder = 'Pilih Tanggal', variant = null, bookingDates = [] }) {
   const [open, setOpen] = useState(false)
   const selected = parseISO(value)
   const today = new Date()
   const [viewYear, setViewYear] = useState((selected || today).getFullYear())
   const [viewMonth, setViewMonth] = useState((selected || today).getMonth())
   const ref = useRef(null)
+
+  // Peta "tanggal ISO -> jumlah booking" -- dipakai buat nentuin warna
+  // kepadatan tiap sel, SAMA PERSIS logika threshold-nya kayak density
+  // di Kalender.jsx (0/1/2/3/4+), biar konsisten. bookingDates isinya
+  // array tanggal_acara mentah dari BookingModal (lewat props), di-itung
+  // di sini aja (bukan di parent) -- lebih deket ke tempat dipakainya.
+  const densityByDate = {}
+  bookingDates.forEach((iso) => {
+    if (!iso) return
+    densityByDate[iso] = (densityByDate[iso] || 0) + 1
+  })
+  function densityOf(count) {
+    return count === 0 ? 0 : count === 1 ? 1 : count === 2 ? 2 : count === 3 ? 3 : 4
+  }
 
   useEffect(() => {
     function handleClickOutside(e) {
@@ -111,11 +125,13 @@ export default function CustomDatePicker({ value, onChange, placeholder = 'Pilih
                 && cell.date.getMonth() === selected.getMonth()
                 && cell.date.getDate() === selected.getDate()
               const isToday = cell.date.toDateString() === today.toDateString()
+              const cellIso = toISO(cell.date.getFullYear(), cell.date.getMonth(), cell.date.getDate())
+              const density = densityOf(densityByDate[cellIso] || 0)
               return (
                 <button
                   type="button"
                   key={i}
-                  className={`cdate-cell${cell.inMonth ? '' : ' outside'}${isSelected ? ' selected' : ''}${isToday ? ' today' : ''}`}
+                  className={`cdate-cell density-${density}${cell.inMonth ? '' : ' outside'}${isSelected ? ' selected' : ''}${isToday ? ' today' : ''}`}
                   onClick={() => pickDay(cell.date)}
                 >
                   {cell.date.getDate()}
