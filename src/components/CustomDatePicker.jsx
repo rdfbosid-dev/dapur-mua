@@ -66,15 +66,20 @@ export default function CustomDatePicker({ value, onChange, placeholder = 'Pilih
 
   // Setiap kali dibuka, balik nampilin bulan yang ada tanggal terpilihnya
   // (atau bulan ini kalau belum ada yang dipilih) -- bukan nyangkut di
-  // bulan terakhir yang sempet dijelajahin.
+  // bulan terakhir yang sempet dijelajahin. SENGAJA cuma react ke `open`
+  // (nggak masukin `selected`/`today` ke dependency array -- itu bakal
+  // bikin efek ini re-run tiap ketik di field lain), dan setState di sini
+  // nge-sync tampilan bulan popup ke tanggal yang lagi dipilih tiap
+  // dibuka -- bukan pola cascading render yang dikhawatirin rule ini.
+  /* eslint-disable react-hooks/exhaustive-deps, react-hooks/set-state-in-effect */
   useEffect(() => {
     if (open) {
       const base = selected || today
       setViewYear(base.getFullYear())
       setViewMonth(base.getMonth())
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open])
+  /* eslint-enable react-hooks/exhaustive-deps, react-hooks/set-state-in-effect */
 
   function goPrev() {
     if (viewMonth === 0) { setViewMonth(11); setViewYear((y) => y - 1) }

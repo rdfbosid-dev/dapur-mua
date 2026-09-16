@@ -10,9 +10,6 @@ import './Kalender.css'
 const BULAN_PENUH = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
 const HARI = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
 
-function formatRupiah(n) {
-  return 'Rp' + (Number(n) || 0).toLocaleString('id-ID')
-}
 function initialsOf(name) {
   return (name || '?')
     .split(' ')
@@ -114,6 +111,10 @@ export default function Kalender() {
     else setBookings(data || [])
     setLoading(false)
   }
+  // Fetch sekali pas komponen pertama kali dipasang (dependency array
+  // kosong), pola standar "load data on mount", bukan cascading render
+  // yang dikhawatirin rule ini.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { loadBookings() }, [])
 
   const grid = useMemo(() => buildGrid(viewYear, viewMonth), [viewYear, viewMonth])

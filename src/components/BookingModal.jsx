@@ -159,7 +159,7 @@ export default function BookingModal({ onClose, onSaved }) {
 
     setSaving(true)
 
-    let klienId = null
+    let klienId
     try {
       klienId = await cariAtauBuatKlien(user.id, namaKlien, nomorWhatsApp)
     } catch (klienErr) {
@@ -366,7 +366,6 @@ export default function BookingModal({ onClose, onSaved }) {
             <div className="section-label">KLIEN</div>
             <div>
               {pesertaList.map((p, i) => {
-                const hairdoOff = p.layananTambahan === 'Tidak Ada'
                 return (
                   <div className="peserta-card" key={i}>
                     <div className="peserta-head">

@@ -52,6 +52,22 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
   const [confirmDeleteBooking, setConfirmDeleteBooking] = useState(false)
   const [confirmDeletePaymentId, setConfirmDeletePaymentId] = useState(null)
   const [saving, setSaving] = useState(false)
+  const [bookingDates, setBookingDates] = useState([])
+
+  // Sama persis pola & alasannya kayak di BookingModal.jsx -- dipakai
+  // CustomDatePicker buat nampilin indikator kepadatan di field "Tanggal
+  // Acara" versi edit ini juga.
+  useEffect(() => {
+    async function loadBookingDates() {
+      const { data } = await supabase
+        .from('bookings')
+        .select('tanggal_acara')
+        .eq('user_id', user.id)
+
+      if (data) setBookingDates(data.map((b) => b.tanggal_acara))
+    }
+    if (user) loadBookingDates()
+  }, [user])
 
   // form state buat mode edit
   const [tanggalBooking, setTanggalBooking] = useState('')
@@ -90,8 +106,14 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
   // biar angkanya PASTI sama kayak yang muncul di tabel Booking di luar.
   const [liveBooking, setLiveBooking] = useState(booking)
 
+  // SENGAJA cuma react ke `booking.id` -- `loadDetail` sendiri nggak
+  // dimasukin ke dependency array, soalnya dia "dilahirkan ulang" tiap
+  // render (bukan di-wrap useCallback); kalau dimasukin, efek ini bakal
+  // ke-trigger ulang TIAP render (bukan cuma pas ganti booking beneran),
+  // bikin fetch data berkali-kali nggak perlu.
   useEffect(() => {
     loadDetail()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [booking.id])
 
   async function loadDetail() {
@@ -180,7 +202,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
     setSaving(true)
     setError('')
 
-    let klienId = null
+    let klienId
     try {
       klienId = await cariAtauBuatKlien(user.id, namaKlien, nomorWhatsApp)
     } catch (klienErr) {
@@ -491,7 +513,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
               <div className="field-grid-booking cols-tanggal-jam-event" style={{ marginTop: 12 }}>
                 <div className="field">
                   <label>Tanggal Acara</label>
-                  <CustomDatePicker value={tanggalAcara} onChange={setTanggalAcara} variant="modal" />
+                  <CustomDatePicker value={tanggalAcara} onChange={setTanggalAcara} variant="modal" bookingDates={bookingDates} />
                 </div>
                 <div className="field">
                   <label>Jam Mulai</label>
