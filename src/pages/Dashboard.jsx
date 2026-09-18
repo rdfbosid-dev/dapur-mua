@@ -103,13 +103,21 @@ export default function Dashboard() {
     if (user) localStorage.setItem(`dapurmua-onboarded-${user.id}`, '1')
   }
 
+  // Fetch sekali pas komponen pertama kali dipasang, pola standar
+  // "load data on mount" -- bukan cascading render yang dikhawatirin.
+  /* eslint-disable react-hooks/set-state-in-effect, react-hooks/exhaustive-deps */
   useEffect(() => {
     loadBookings()
   }, [])
+  /* eslint-enable react-hooks/set-state-in-effect, react-hooks/exhaustive-deps */
 
+  // Baca status "notifikasi udah dibaca" dari localStorage sekali pas
+  // user-nya kebaca (bukan setiap render) -- sama persis alasannya
+  // kayak effect di atas.
   useEffect(() => {
     if (!user) return
     const stored = localStorage.getItem(`dapurmua-notif-read-${user.id}`)
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (stored) setNotifReadKey(stored)
   }, [user])
 
@@ -198,7 +206,7 @@ export default function Dashboard() {
       // booking (dua-duanya numpang b.id polos), bikin React `key`
       // dobel & salah render salah satu notifikasinya.
       id: `invoice-${b.id}`,
-      title: `Siapkan invoice untuk ${b.nama_klien}`,
+      title: `Invoice untuk ${b.nama_klien}`,
       desc: [
         formatTanggal(b.tanggal_acara),
         b.jam_start_makeup ? `${b.jam_start_makeup.slice(0, 5)} WIB` : null,

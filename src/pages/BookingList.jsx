@@ -67,6 +67,9 @@ export default function BookingList() {
     setLoading(false)
   }
 
+  // Fetch sekali pas komponen pertama kali dipasang, pola standar
+  // "load data on mount" -- bukan cascading render yang dikhawatirin.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { loadBookings() }, [])
 
   const tahunOptions = useMemo(() => {
@@ -90,6 +93,7 @@ export default function BookingList() {
 
   // Reset ke halaman 1 tiap kali pencarian/filter berubah, biar nggak
   // nyangkut di halaman yang udah nggak ada datanya.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setPage(1) }, [search, filterTahun, filterBulan])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
@@ -98,7 +102,7 @@ export default function BookingList() {
   const rangeStart = filtered.length === 0 ? 0 : (pageSafe - 1) * PAGE_SIZE + 1
   const rangeEnd = Math.min(pageSafe * PAGE_SIZE, filtered.length)
 
-  function handleSaved(kode) {
+  function handleSaved() {
     setShowModal(false)
     loadBookings()
   }
