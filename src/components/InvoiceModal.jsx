@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import './InvoiceModal.css'
 
@@ -165,7 +164,7 @@ function InvoicePaper({ profile, booking, peserta, payments, totalDibayar, sisa 
 }
 
 export default function InvoiceModal({ booking, peserta, payments, onClose }) {
-  const { profile, user } = useAuth()
+  const { profile } = useAuth()
 
   const totalDibayar = payments.reduce((s, p) => s + Number(p.jumlah), 0)
   const sisa = (booking.belanja_klien || 0) - totalDibayar
@@ -185,26 +184,6 @@ export default function InvoiceModal({ booking, peserta, payments, onClose }) {
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
-
-  // Nandain booking ini "invoice-nya udah ditangani" -- dipanggil pas
-  // user beneran kirim ke WA atau download PDF/PNG. Dipakai Dashboard.jsx
-  // buat mutusin notifikasi "Siapkan invoice untuk ..." masih perlu
-  // ditampilin apa udah boleh ilang. .eq('user_id', ...) SENGAJA tetep
-  // ditulis eksplisit walau RLS udah nanganin -- konsisten sama pola di
-  // file lain, jaga-jaga defensif. Fire-and-forget (nggak di-await di
-  // pemanggilnya) -- gagal nulis ini nggak boleh sampe ngeblokir aksi
-  // utama (kirim WA / download), itu cuma penanda tambahan doang.
-  function markInvoiceTerkirim() {
-    if (!user) return
-    supabase
-      .from('bookings')
-      .update({ invoice_terkirim_at: new Date().toISOString() })
-      .eq('id', booking.id)
-      .eq('user_id', user.id)
-      .then(({ error }) => {
-        if (error) console.error('Gagal nandain invoice terkirim:', error.message)
-      })
-  }
 
   function handlePrint() {
     setExportOpen(false)
@@ -279,7 +258,6 @@ export default function InvoiceModal({ booking, peserta, payments, onClose }) {
       link.click()
       document.body.removeChild(link)
       setTimeout(() => URL.revokeObjectURL(url), 3000)
-      markInvoiceTerkirim()
     } finally {
       setExporting(false)
     }
@@ -297,7 +275,6 @@ export default function InvoiceModal({ booking, peserta, payments, onClose }) {
       const imgHeight = (canvas.height * pageWidth) / canvas.width
       pdf.addImage(imgData, 'PNG', 0, 0, pageWidth, imgHeight)
       pdf.save(`Invoice-${booking.kode_booking || 'DapurMUA'}.pdf`)
-      markInvoiceTerkirim()
     } finally {
       setExporting(false)
     }
@@ -328,7 +305,6 @@ export default function InvoiceModal({ booking, peserta, payments, onClose }) {
   } else {
     window.open(waUrl, '_blank')
   }
-  markInvoiceTerkirim()
 }
 
   return (

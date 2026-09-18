@@ -68,11 +68,6 @@ export default function Dashboard() {
   const [selectedBooking, setSelectedBooking] = useState(null)
   const [notifOpen, setNotifOpen] = useState(false)
   const [notifReadKey, setNotifReadKey] = useState('')
-  // Peta booking_id -> invoice_terkirim_at, diambil LANGSUNG dari tabel
-  // bookings (BUKAN lewat VIEW booking_summary) -- sengaja dipisah biar
-  // nggak perlu ubah VIEW sama sekali (itu yang butuh security_invoker
-  // ulang tiap diubah, zona paling rawan insiden data bocor kemarin).
-  const [invoiceStatus, setInvoiceStatus] = useState({})
   const navigate = useNavigate()
   const [toast, setToast] = useState('')
 
@@ -111,32 +106,6 @@ export default function Dashboard() {
   useEffect(() => {
     loadBookings()
   }, [])
-
-  async function loadInvoiceStatus() {
-    if (!user) return
-    const { data } = await supabase
-      .from('bookings')
-      .select('id, invoice_terkirim_at')
-      .eq('user_id', user.id)
-    if (data) {
-      const map = {}
-      data.forEach((b) => { map[b.id] = b.invoice_terkirim_at })
-      setInvoiceStatus(map)
-    }
-  }
-
-  // Fetch terpisah, LANGSUNG ke tabel bookings (bukan booking_summary) --
-  // cuma ambil 2 kolom yang kepake doang (id + invoice_terkirim_at).
-  // eslint-disable-next-line react-hooks/set-state-in-effect, react-hooks/exhaustive-deps
-  useEffect(() => { loadInvoiceStatus() }, [user])
-
-  // Refresh lagi tiap kali panel notifikasi dibuka -- soalnya user bisa
-  // aja abis kirim/download invoice dari dalam InvoiceModal (nested di
-  // BookingDetailModal), terus balik lagi buka notif TANPA reload
-  // halaman -- tanpa refresh ini, status "udah ditangani"-nya bakal
-  // ketinggalan/nyangkut lama di state lokal yang lama.
-  // eslint-disable-next-line react-hooks/set-state-in-effect, react-hooks/exhaustive-deps
-  useEffect(() => { if (notifOpen) loadInvoiceStatus() }, [notifOpen])
 
   useEffect(() => {
     if (!user) return
@@ -199,12 +168,24 @@ export default function Dashboard() {
     })
     .sort((a, b) => new Date(a.tanggal_acara) - new Date(b.tanggal_acara))
 
-  // Booking yang jam mulainya udah lewat TAPI invoice-nya belum pernah
-  // ditandain terkirim (lihat invoiceStatus, diisi dari markInvoiceTerkirim()
-  // di InvoiceModal.jsx) -- diurutin dari yang paling lama lewat duluan.
+  // Booking yang lagi di jendela H-1 s/d H+1 (highlight khusus, TERPISAH
+  // dari bookingSegera di atas -- dua-duanya SENGAJA boleh muncul
+  // bareng buat booking yang sama, ini cuma reminder tambahan yang lebih
+  // "nempel" ke urusan invoice, bukan gantiin reminder booking biasa).
+  // Jendelanya: H-1 jam 00:00 sampai H+1 jam 23:59:59 -- misal acara
+  // 20 September, notif ini nongol 19-21 September, ilang mulai 22
+  // September (H+2).
   const perluInvoice = bookings
-    .filter((b) => waktuMulai(b) <= now && !invoiceStatus[b.id])
-    .sort((a, b) => waktuMulai(a) - waktuMulai(b))
+    .filter((b) => {
+      const acara = new Date(b.tanggal_acara)
+      acara.setHours(0, 0, 0, 0)
+      const mulaiWindow = new Date(acara)
+      mulaiWindow.setDate(mulaiWindow.getDate() - 1)
+      const akhirWindow = new Date(acara)
+      akhirWindow.setDate(akhirWindow.getDate() + 2)
+      return now >= mulaiWindow && now < akhirWindow
+    })
+    .sort((a, b) => new Date(a.tanggal_acara) - new Date(b.tanggal_acara))
 
   const isAkhirBulan = new Date(curYear, curMonth + 1, 0).getDate() === today.getDate()
 
