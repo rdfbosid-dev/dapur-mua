@@ -68,6 +68,11 @@ export default function Dashboard() {
   const [selectedBooking, setSelectedBooking] = useState(null)
   const [notifOpen, setNotifOpen] = useState(false)
   const [notifReadKey, setNotifReadKey] = useState('')
+  // Peta booking_id -> invoice_terkirim_at, diambil LANGSUNG dari tabel
+  // bookings (BUKAN lewat VIEW booking_summary) -- sengaja dipisah biar
+  // nggak perlu ubah VIEW sama sekali (itu yang butuh security_invoker
+  // ulang tiap diubah, zona paling rawan insiden data bocor kemarin).
+  const [invoiceStatus, setInvoiceStatus] = useState({})
   const navigate = useNavigate()
   const [toast, setToast] = useState('')
 
@@ -107,6 +112,32 @@ export default function Dashboard() {
     loadBookings()
   }, [])
 
+  async function loadInvoiceStatus() {
+    if (!user) return
+    const { data } = await supabase
+      .from('bookings')
+      .select('id, invoice_terkirim_at')
+      .eq('user_id', user.id)
+    if (data) {
+      const map = {}
+      data.forEach((b) => { map[b.id] = b.invoice_terkirim_at })
+      setInvoiceStatus(map)
+    }
+  }
+
+  // Fetch terpisah, LANGSUNG ke tabel bookings (bukan booking_summary) --
+  // cuma ambil 2 kolom yang kepake doang (id + invoice_terkirim_at).
+  // eslint-disable-next-line react-hooks/set-state-in-effect, react-hooks/exhaustive-deps
+  useEffect(() => { loadInvoiceStatus() }, [user])
+
+  // Refresh lagi tiap kali panel notifikasi dibuka -- soalnya user bisa
+  // aja abis kirim/download invoice dari dalam InvoiceModal (nested di
+  // BookingDetailModal), terus balik lagi buka notif TANPA reload
+  // halaman -- tanpa refresh ini, status "udah ditangani"-nya bakal
+  // ketinggalan/nyangkut lama di state lokal yang lama.
+  // eslint-disable-next-line react-hooks/set-state-in-effect, react-hooks/exhaustive-deps
+  useEffect(() => { if (notifOpen) loadInvoiceStatus() }, [notifOpen])
+
   useEffect(() => {
     if (!user) return
     const stored = localStorage.getItem(`dapurmua-notif-read-${user.id}`)
@@ -136,20 +167,59 @@ export default function Dashboard() {
   const bookingBulanIni = bookings.filter(isThisMonth)
   const pesertaBulanIni = bookingBulanIni.reduce((sum, b) => sum + (Number(b.total_klien) || 0), 0)
 
-  // ---- Notifikasi: booking dalam 3 hari ke depan + pengingat laporan
-  // bulanan kalau hari ini kebetulan hari terakhir di bulan ini. ----
+  // ---- Notifikasi: booking dalam 3 hari ke depan (sampai PERSIS jam
+  // mulai makeup-nya, bukan cuma tanggalnya doang) + pengingat laporan
+  // bulanan kalau hari ini kebetulan hari terakhir di bulan ini, +
+  // pengingat "siapkan invoice" buat booking yang jam mulainya udah
+  // lewat tapi invoice-nya belum pernah dikirim WA/didownload. ----
   const in3Days = new Date(today)
   in3Days.setDate(in3Days.getDate() + 3)
+
+  // Gabungin tanggal_acara + jam_start_makeup jadi 1 Date persis. Kalau
+  // jam_start_makeup kosong, fallback-nya "akhir hari itu" -- konsisten
+  // sama pola isSelesai() yang udah dipakai di Kalender.jsx/
+  // BookingDetailModal.jsx (booking tanpa jam dianggap belum lewat
+  // selama masih di tanggal yang sama).
+  function waktuMulai(b) {
+    const d = new Date(b.tanggal_acara)
+    if (b.jam_start_makeup) {
+      const [jam, menit] = b.jam_start_makeup.split(':').map(Number)
+      d.setHours(jam, menit || 0, 0, 0)
+    } else {
+      d.setHours(23, 59, 59, 999)
+    }
+    return d
+  }
+
+  const now = new Date()
   const bookingSegera = bookings
     .filter((b) => {
-      const d = new Date(b.tanggal_acara)
-      return d >= new Date(today.toDateString()) && d <= in3Days
+      const mulai = waktuMulai(b)
+      return mulai > now && mulai <= in3Days
     })
     .sort((a, b) => new Date(a.tanggal_acara) - new Date(b.tanggal_acara))
+
+  // Booking yang jam mulainya udah lewat TAPI invoice-nya belum pernah
+  // ditandain terkirim (lihat invoiceStatus, diisi dari markInvoiceTerkirim()
+  // di InvoiceModal.jsx) -- diurutin dari yang paling lama lewat duluan.
+  const perluInvoice = bookings
+    .filter((b) => waktuMulai(b) <= now && !invoiceStatus[b.id])
+    .sort((a, b) => waktuMulai(a) - waktuMulai(b))
 
   const isAkhirBulan = new Date(curYear, curMonth + 1, 0).getDate() === today.getDate()
 
   const notifications = [
+    ...perluInvoice.map((b) => ({
+      type: 'invoice',
+      id: b.id,
+      title: `Siapkan invoice untuk ${b.nama_klien}`,
+      desc: [
+        formatTanggal(b.tanggal_acara),
+        b.jam_start_makeup ? `${b.jam_start_makeup.slice(0, 5)} WIB` : null,
+      ].filter(Boolean).join(' · '),
+      lokasi: b.lokasi || null,
+      booking: b,
+    })),
     ...bookingSegera.map((b) => ({
       type: 'booking',
       id: b.id,
@@ -322,13 +392,15 @@ export default function Dashboard() {
                   key={n.id}
                   onClick={() => {
                     setNotifOpen(false)
-                    if (n.type === 'booking') setSelectedBooking(n.booking)
+                    if (n.type === 'booking' || n.type === 'invoice') setSelectedBooking(n.booking)
                     else navigate('/keuangan', { state: { highlightBulan: curMonth, highlightTahun: curYear } })
                   }}
                 >
                   <div className={`notif-icon ${n.type}`}>
                     {n.type === 'booking' ? (
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 3v3M16 3v3"/></svg>
+                    ) : n.type === 'invoice' ? (
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M7 3h8l4 4v14H7z"/><path d="M15 3v4h4M9 12h6M9 16h6"/></svg>
                     ) : (
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 3v18h18"/><path d="M7 14l4-5 3 3 5-7"/></svg>
                     )}

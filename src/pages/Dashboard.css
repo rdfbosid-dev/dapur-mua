@@ -48,6 +48,11 @@
 .notif-icon svg { width: 16px; height: 16px; }
 .notif-icon.booking { background: var(--ink-faint); color: var(--ink-soft); }
 .notif-icon.laporan { background: var(--pill); color: var(--h7); }
+/* Warna "urgent" (beda dari .laporan yang kebetulan numpang var(--pill)
+   juga) -- SENGAJA nge-pair var(--notif) + var(--h8), sama persis pola
+   warna "Belum Lunas" yang udah dipakai di status-pill lain, biar user
+   langsung asosiasiin ini sama "butuh ditindaklanjuti". */
+.notif-icon.invoice { background: var(--notif); color: var(--h8); }
 .notif-item-title { font-size: 13px; font-weight: 700; color: var(--ink-soft); }
 .notif-item-desc { font-size: 11px; color: var(--ink); margin-top: 1px; }
 .notif-item-loc { font-size: 11px; color: var(--ink); margin-top: 1px; }
