@@ -192,7 +192,12 @@ export default function Dashboard() {
   const notifications = [
     ...perluInvoice.map((b) => ({
       type: 'invoice',
-      id: b.id,
+      // Prefix "invoice-" WAJIB ada -- booking yang sama bisa punya 2
+      // notifikasi sekaligus (invoice + booking reminder) di jendela
+      // H-1/H/H+1. Tanpa prefix ini, id-nya bentrok sama notifikasi
+      // booking (dua-duanya numpang b.id polos), bikin React `key`
+      // dobel & salah render salah satu notifikasinya.
+      id: `invoice-${b.id}`,
       title: `Siapkan invoice untuk ${b.nama_klien}`,
       desc: [
         formatTanggal(b.tanggal_acara),
