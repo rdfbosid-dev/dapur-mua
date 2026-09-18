@@ -5,7 +5,7 @@ import { useTheme } from '../context/ThemeContext'
 import { openAdminWhatsApp } from '../lib/whatsapp'
 import './Sidebar.css'
 
-const navUtama = [
+const navUtamaMUA = [
   { to: '/dashboard', label: 'Dashboard', icon: 'grid' },
   { to: '/booking', label: 'Booking', icon: 'list' },
   { to: '/kalender', label: 'Kalender', icon: 'calendar' },
@@ -15,6 +15,15 @@ const navUtama = [
 const navRekapan = [
   { to: '/keuangan', label: 'Keuangan', icon: 'trend' },
   { to: '/laporan', label: 'Laporan', icon: 'file' },
+]
+
+// Nav admin -- SENGAJA cuma 2 item, numpang WRAPPER & class yang SAMA
+// (.nav-utama-group, .mobile-bottom-tabs, dst) kayak navUtamaMUA, biar
+// semua behavior mobile/z-index/safe-area yang udah teruji tetep kepake
+// apa adanya, nggak perlu bikin ulang dari nol buat admin.
+const navUtamaAdmin = [
+  { to: '/admin', label: 'Dashboard', icon: 'grid' },
+  { to: '/admin/users', label: 'Kelola User', icon: 'shield' },
 ]
 
 function Icon({ name }) {
@@ -52,6 +61,7 @@ export default function Sidebar({ headerAction = null }) {
   const { theme, toggleTheme } = useTheme()
   const logoSrc = theme === 'dark' ? '/icon-512-dark.png' : '/icon-512-light.png'
   const studioName = profile?.studio_name || ''
+  const navUtama = isAdmin ? navUtamaAdmin : navUtamaMUA
   const [mobileOpen, setMobileOpen] = useState(false)
   const location = useLocation()
 
@@ -97,7 +107,7 @@ export default function Sidebar({ headerAction = null }) {
         </div>
         <div>
           <div className="brand-name">Dapur MUA</div>
-          <div className="brand-sub">{studioName || 'Studio Saya'}</div>
+          <div className="brand-sub">{isAdmin ? 'Admin' : (studioName || 'Studio Saya')}</div>
         </div>
       </div>
 
@@ -121,32 +131,19 @@ export default function Sidebar({ headerAction = null }) {
         ))}
       </div>
 
-      <div className="nav-section">Rekapan</div>
-      {navRekapan.map((item) => (
-        <NavLink
-          key={item.to}
-          to={item.to}
-          className={({ isActive }) => 'nav-item' + (isActive ? ' active' : '')}
-        >
-          <Icon name={item.icon} />
-          {item.label}
-        </NavLink>
-      ))}
-
-      {/* SENGAJA dibungkus kondisi isAdmin -- bukan cuma "disembunyiin"
-          lewat CSS, tapi beneran nggak ke-render ke DOM sama sekali buat
-          user biasa. Ini lapisan tampilan doang -- lapisan yang beneran
-          nge-gate data ada di api/admin/users.js sendiri (verifikasi
-          token di server), jadi walau ada yang somehow maksa nongolin
-          elemen ini lewat DevTools, tetep nggak bisa narik data admin
-          beneran. */}
-      {isAdmin && (
+      {!isAdmin && (
         <>
-          <div className="nav-section">Admin</div>
-          <NavLink to="/admin" className={({ isActive }) => 'nav-item' + (isActive ? ' active' : '')}>
-            <Icon name="shield" />
-            Kelola User
-          </NavLink>
+          <div className="nav-section">Rekapan</div>
+          {navRekapan.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              className={({ isActive }) => 'nav-item' + (isActive ? ' active' : '')}
+            >
+              <Icon name={item.icon} />
+              {item.label}
+            </NavLink>
+          ))}
         </>
       )}
 
@@ -164,24 +161,28 @@ export default function Sidebar({ headerAction = null }) {
           <span className="theme-toggle-label">{theme === 'dark' ? 'Mode Gelap' : 'Mode Terang'}</span>
         </button>
 
-        <NavLink to="/panduan" className={({ isActive }) => 'nav-item' + (isActive ? ' active' : '')}>
-          <Icon name="book" />
-          Panduan
-        </NavLink>
+        {!isAdmin && (
+          <>
+            <NavLink to="/panduan" className={({ isActive }) => 'nav-item' + (isActive ? ' active' : '')}>
+              <Icon name="book" />
+              Panduan
+            </NavLink>
 
-        <button type="button" className="nav-item nav-item-bantuan" onClick={handleBantuan}>
-          <Icon name="help" />
-          Bantuan
-        </button>
+            <button type="button" className="nav-item nav-item-bantuan" onClick={handleBantuan}>
+              <Icon name="help" />
+              Bantuan
+            </button>
 
-        <NavLink to="/pengaturan" className={({ isActive }) => 'nav-item nav-item-pengaturan' + (isActive ? ' active' : '')} style={{ marginBottom: 12 }}>
-          <Icon name="settings" />
-          Pengaturan
-        </NavLink>
+            <NavLink to="/pengaturan" className={({ isActive }) => 'nav-item nav-item-pengaturan' + (isActive ? ' active' : '')} style={{ marginBottom: 12 }}>
+              <Icon name="settings" />
+              Pengaturan
+            </NavLink>
+          </>
+        )}
         <div className="profile">
           <div className="avatar">{profile?.logo_url ? <img src={profile.logo_url} alt="Logo" /> : initials}</div>
           <div>
-            <div className="profile-name">{studioName || 'Studio Saya'}</div>
+            <div className="profile-name">{isAdmin ? 'Admin' : (studioName || 'Studio Saya')}</div>
             <div className="profile-role">{user?.email}</div>
           </div>
         </div>
@@ -207,13 +208,15 @@ export default function Sidebar({ headerAction = null }) {
             <span>{item.label}</span>
           </NavLink>
         ))}
-        <NavLink
-          to="/pengaturan"
-          className={({ isActive }) => 'bottom-tab-item' + (isActive ? ' active' : '')}
-        >
-          <Icon name="settings" />
-          <span>Pengaturan</span>
-        </NavLink>
+        {!isAdmin && (
+          <NavLink
+            to="/pengaturan"
+            className={({ isActive }) => 'bottom-tab-item' + (isActive ? ' active' : '')}
+          >
+            <Icon name="settings" />
+            <span>Pengaturan</span>
+          </NavLink>
+        )}
       </nav>
     </>
   )

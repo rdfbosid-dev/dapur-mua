@@ -1,43 +1,20 @@
-/* Semua selector di file ini di-scope di bawah .admin-* -- pola yang
-   sama kayak file lain di project ini, biar nggak bentrok sama nama
-   class umum di halaman lain. */
+.admin-card-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
 
-.admin-table { width: 100%; border-collapse: collapse; }
-.admin-table thead th {
-  text-align: left; font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
-  color: var(--ink-soft); padding: 12px 14px; border-bottom: 1.5px solid var(--button-border);
+.admin-summary-card {
+  background: color-mix(in srgb, var(--box-dashboard) 90%, transparent);
+  border: 1.5px solid var(--line-box); border-radius: 18px; padding: 22px 20px;
+  box-shadow: var(--shadow-card);
 }
-.admin-table thead th.center { text-align: center; }
-.admin-table td { padding: 14px; border-bottom: 1px solid color-mix(in srgb, var(--button-border) 30%, transparent); vertical-align: top; }
+.admin-summary-value { font-family: 'Poppins', sans-serif; font-size: 30px; font-weight: 700; color: var(--h9); }
+.admin-summary-label { font-size: 12.5px; font-weight: 600; color: var(--ink-soft); margin-top: 4px; }
 
-.admin-studio-name { font-size: 13.5px; font-weight: 600; color: var(--h9); }
-.admin-studio-sub { font-size: 11.5px; color: var(--ink-soft); margin-top: 2px; }
-
-.admin-kontak-email { font-size: 12.5px; color: var(--ink-soft); margin-bottom: 4px; }
-.admin-wa-btn {
-  font-size: 11.5px; font-weight: 600; color: var(--h5); background: none; border: none;
-  padding: 0; cursor: pointer; font-family: inherit;
-}
-.admin-wa-btn:hover { text-decoration: underline; }
-
-.admin-tanggal { font-size: 12.5px; font-weight: 600; color: var(--ink-soft); }
-.admin-sisa { font-size: 11px; color: var(--ink-soft); margin-top: 2px; }
-/* Warna urgensi -- SENGAJA numpang var(--notif)/var(--h8) yang sama
-   kayak status "Belum Lunas" di tempat lain, biar konsisten: merah =
-   butuh perhatian sekarang. Kuning pake var(--pill)/var(--h8) versi
-   lebih soft buat level "waspada, belum darurat". */
-.admin-tanggal.urgent, .admin-sisa.urgent { color: var(--h8); font-weight: 700; }
-.admin-tanggal.waspada, .admin-sisa.waspada { color: var(--h5); }
-
-.admin-perpanjang-row { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
-.admin-perpanjang-row button {
-  font-size: 11px; font-weight: 600; padding: 7px 10px; border-radius: 8px;
-  border: 1.5px solid var(--button-border); background: var(--table-body); color: var(--ink-soft);
-  cursor: pointer; font-family: inherit; transition: background 0.15s, border-color 0.15s;
-}
-.admin-perpanjang-row button:hover { background: color-mix(in srgb, var(--button-prm-hover) 50%, transparent); border-color: color-mix(in srgb, var(--button-prm-hover) 50%, transparent); }
-.admin-perpanjang-row button:disabled { opacity: 0.5; cursor: default; }
+/* Card "Aktif" & "Segera Habis" dikasih aksen warna -- pola sama kayak
+   status-pill "Lunas"/"Belum Lunas" di tempat lain, biar user langsung
+   ngenalin arti warnanya tanpa mikir ulang. */
+.admin-summary-card.aktif .admin-summary-value { color: var(--h7); }
+.admin-summary-card.urgent { border-color: color-mix(in srgb, var(--h8) 40%, transparent); }
+.admin-summary-card.urgent .admin-summary-value { color: var(--h8); }
 
 @media (max-width: 900px) {
-  .admin-table { display: block; overflow-x: auto; }
+  .admin-card-grid { grid-template-columns: repeat(2, 1fr); }
 }

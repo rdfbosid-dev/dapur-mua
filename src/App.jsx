@@ -16,9 +16,10 @@ import Pengaturan from './pages/Pengaturan'
 import TrialHabis from './pages/TrialHabis'
 import Panduan from './pages/Panduan'
 import AdminDashboard from './pages/AdminDashboard'
+import AdminUsers from './pages/AdminUsers'
 
 function ProtectedRoute({ children }) {
-  const { user, loading, isLocked } = useAuth()
+  const { user, loading, isLocked, isAdmin } = useAuth()
 
   if (loading) {
     return (
@@ -36,6 +37,10 @@ function ProtectedRoute({ children }) {
   // (termasuk Pengaturan) kekunci, kecuali /trial-habis sendiri (itu route
   // terpisah, nggak lewat ProtectedRoute -- lihat di bawah).
   if (isLocked) return <Navigate to="/trial-habis" replace />
+  // Akun admin nggak boleh liat halaman MUA sama sekali -- termasuk kalau
+  // nyoba akses langsung lewat URL manual (misal /booking). Semua
+  // ProtectedRoute otomatis lempar balik ke /admin.
+  if (isAdmin) return <Navigate to="/admin" replace />
   return children
 }
 
@@ -65,7 +70,7 @@ function TrialGateRoute({ children }) {
 // Register) yang seharusnya nggak perlu dibuka lagi kalau user udah login.
 // Kalau ternyata masih ada sesi aktif, langsung lempar ke Dashboard.
 function GuestRoute({ children }) {
-  const { user, loading } = useAuth()
+  const { user, loading, isAdmin } = useAuth()
 
   if (loading) {
     return (
@@ -78,7 +83,7 @@ function GuestRoute({ children }) {
     )
   }
 
-  if (user) return <Navigate to="/dashboard" replace />
+  if (user) return <Navigate to={isAdmin ? '/admin' : '/dashboard'} replace />
   return children
 }
 
@@ -196,6 +201,14 @@ export default function App() {
               element={
                 <AdminRoute>
                   <AdminDashboard />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/admin/users"
+              element={
+                <AdminRoute>
+                  <AdminUsers />
                 </AdminRoute>
               }
             />
