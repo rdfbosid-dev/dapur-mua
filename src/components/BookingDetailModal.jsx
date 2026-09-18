@@ -192,8 +192,6 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
       // masih kehitung ke Total Tagihan.
       if (field.startsWith('layanan_lainnya') && !value.trim()) {
         const suffix = field.replace('layanan_lainnya', '')
-        // eslint-disable-next-line no-console
-        console.log('[DEBUG live-clear fired]', { field, value, suffix, willClear: `biaya_lainnya${suffix}` })
         updated[`biaya_lainnya${suffix}`] = 0
         updated[`keuntungan_lainnya${suffix}`] = 0
       }
@@ -237,8 +235,6 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
   }
 
   async function handleSaveEdit() {
-    // eslint-disable-next-line no-console
-    console.log('[DEBUG handleSaveEdit START]', { editPesertaCount: editPeserta.length })
     setSaving(true)
     setError('')
 
@@ -279,8 +275,6 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
       if (delErr) { setSaving(false); setError(delErr.message); return }
     }
 
-    // eslint-disable-next-line no-console
-    console.log('[DEBUG masuk ke loop peserta]', { jumlahPeserta: editPeserta.length })
     for (const p of editPeserta) {
       const payload = {
         nama_anggota: p.nama_anggota?.trim() || '',
@@ -298,8 +292,6 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
       for (let n = 1; n <= 5; n++) {
         const suffix = n === 1 ? '' : `_${n}`
         const namaAddOn = (p[`layanan_lainnya${suffix}`] || '').trim()
-        // eslint-disable-next-line no-console
-        console.log(`[DEBUG addon slot ${n}]`, { rawNama: p[`layanan_lainnya${suffix}`], namaAddOnTrimmed: namaAddOn, rawBiaya: p[`biaya_lainnya${suffix}`] })
         // Kalau nama add-on kosong, biaya & keuntungan-nya WAJIB ikut
         // dianggap kosong -- apapun angka yang kebetulan masih nyangkut
         // di field itu (misal user hapus nama tapi lupa/nggak ngeh field
@@ -311,11 +303,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
         payload[`keuntungan_lainnya${suffix}`] = namaAddOn ? (Number(p[`keuntungan_lainnya${suffix}`]) || 0) : 0
       }
       if (p.id) {
-        // eslint-disable-next-line no-console
-        console.log('[DEBUG update peserta]', { pesertaId: p.id, payload })
         const { error: upErr } = await supabase.from('peserta').update(payload).eq('id', p.id)
-        // eslint-disable-next-line no-console
-        console.log('[DEBUG update result]', { pesertaId: p.id, upErr })
         if (upErr) { setSaving(false); setError(upErr.message); return }
       } else {
         const { error: insErr } = await supabase.from('peserta').insert({ ...payload, booking_id: booking.id, user_id: user.id })
