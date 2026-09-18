@@ -153,9 +153,15 @@ function InvoicePaper({ profile, booking, peserta, payments, totalDibayar, sisa 
         </>
       )}
 
-      <div className="inv-note">
-        <div className="inv-label">Catatan</div>
-        <div className="inv-sub" style={{ whiteSpace: 'pre-line' }}>{booking.catatan || '—'}</div>
+      <div className="inv-note-row">
+        <div className="inv-note">
+          <div className="inv-label">Catatan</div>
+          <div className="inv-sub" style={{ whiteSpace: 'pre-line' }}>{booking.catatan || '—'}</div>
+        </div>
+        {/* sisa <= 0 (bukan cuma === 0) -- ngecover juga kasus klien
+            bayar lebih dari tagihan (overpay), tetep dianggap lunas,
+            bukan cuma pas pas persis Rp0. */}
+        {sisa <= 0 && <div className="inv-lunas-badge">LUNAS</div>}
       </div>
 
       <div className="inv-footer">Terima kasih atas kepercayaan Anda karena telah menggunakan jasa kami.</div>
