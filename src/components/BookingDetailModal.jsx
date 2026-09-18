@@ -181,7 +181,22 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
   }
 
   function updateEditPeserta(i, field, value) {
-    setEditPeserta((list) => list.map((p, idx) => (idx === i ? { ...p, [field]: value } : p)))
+    setEditPeserta((list) => list.map((p, idx) => {
+      if (idx !== i) return p
+      const updated = { ...p, [field]: value }
+      // Field addon namanya "layanan_lainnya" (slot 1) atau
+      // "layanan_lainnya_N" (slot 2-5) -- begitu salah satu dikosongin,
+      // pasangan biaya & keuntungannya (suffix yang sama) langsung
+      // ke-reset juga di form, bukan cuma pas nyimpen doang. Nutup bug
+      // nyata: user hapus nama tapi field biaya-nya nyangkut diem-diem
+      // masih kehitung ke Total Tagihan.
+      if (field.startsWith('layanan_lainnya') && !value.trim()) {
+        const suffix = field.replace('layanan_lainnya', '')
+        updated[`biaya_lainnya${suffix}`] = 0
+        updated[`keuntungan_lainnya${suffix}`] = 0
+      }
+      return updated
+    }))
   }
   function addEditPeserta() {
     setEditPeserta((list) => [...list, {
@@ -276,9 +291,16 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
       }
       for (let n = 1; n <= 5; n++) {
         const suffix = n === 1 ? '' : `_${n}`
-        payload[`layanan_lainnya${suffix}`] = (p[`layanan_lainnya${suffix}`] || '').trim() || null
-        payload[`biaya_lainnya${suffix}`] = Number(p[`biaya_lainnya${suffix}`]) || 0
-        payload[`keuntungan_lainnya${suffix}`] = Number(p[`keuntungan_lainnya${suffix}`]) || 0
+        const namaAddOn = (p[`layanan_lainnya${suffix}`] || '').trim()
+        // Kalau nama add-on kosong, biaya & keuntungan-nya WAJIB ikut
+        // dianggap kosong -- apapun angka yang kebetulan masih nyangkut
+        // di field itu (misal user hapus nama tapi lupa/nggak ngeh field
+        // biaya-nya nggak ikut ke-reset), nggak boleh diem-diem numpang
+        // ikut masuk ke Total Tagihan. Ini nutup bug nyata yang pernah
+        // beneran kejadian.
+        payload[`layanan_lainnya${suffix}`] = namaAddOn || null
+        payload[`biaya_lainnya${suffix}`] = namaAddOn ? (Number(p[`biaya_lainnya${suffix}`]) || 0) : 0
+        payload[`keuntungan_lainnya${suffix}`] = namaAddOn ? (Number(p[`keuntungan_lainnya${suffix}`]) || 0) : 0
       }
       if (p.id) {
         const { error: upErr } = await supabase.from('peserta').update(payload).eq('id', p.id)

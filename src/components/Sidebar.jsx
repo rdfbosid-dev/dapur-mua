@@ -104,14 +104,14 @@ export default function Sidebar({ headerAction = null }) {
         </button>
 
         <div className="brand">
-        <div className="brand-mark">
-          {profile?.logo_url && <img src={profile.logo_url} alt="Logo" />}
+          <div className="brand-mark">
+            {profile?.logo_url && <img src={profile.logo_url} alt="Logo" />}
+          </div>
+          <div>
+            <div className="brand-name">Dapur MUA</div>
+            <div className="brand-sub">{isAdmin ? 'Admin' : (studioName || 'Studio Saya')}</div>
+          </div>
         </div>
-        <div>
-          <div className="brand-name">Dapur MUA</div>
-          <div className="brand-sub">{isAdmin ? 'Admin' : (studioName || 'Studio Saya')}</div>
-        </div>
-      </div>
 
       {/* Section "Utama" (Dashboard/Booking/Kalender/Klien) dibungkus
           wrapper ini -- di DESKTOP tetep keliatan normal, tapi di MOBILE
@@ -119,35 +119,35 @@ export default function Sidebar({ headerAction = null }) {
           soalnya 4 item itu sekarang udah ada di bottom tab bar. Nggak
           dihapus dari JSX-nya sama sekali -- biar desktop (yang nggak
           punya bottom tab bar) tetep dapet akses penuh. */}
-      <div className="nav-utama-group">
-        <div className="nav-section">Utama</div>
-        {navUtama.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            className={({ isActive }) => 'nav-item' + (isActive ? ' active' : '')}
-          >
-            <Icon name={item.icon} />
-            {item.label}
-          </NavLink>
-        ))}
-      </div>
-
-      {!isAdmin && (
-        <>
-          <div className="nav-section">Rekapan</div>
-          {navRekapan.map((item) => (
+        <div className="nav-utama-group">
+          <div className="nav-section">Utama</div>
+            {navUtama.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
               className={({ isActive }) => 'nav-item' + (isActive ? ' active' : '')}
-            >
+              >
               <Icon name={item.icon} />
               {item.label}
             </NavLink>
-          ))}
-        </>
-      )}
+            ))}
+        </div>
+
+            {!isAdmin && (
+            <>
+              <div className="nav-section">Rekapan</div>
+              {navRekapan.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                className={({ isActive }) => 'nav-item' + (isActive ? ' active' : '')}
+                >
+                <Icon name={item.icon} />
+                {item.label}
+              </NavLink>
+              ))}
+            </>
+            )}
 
       <div className="sidebar-bottom">
         <button type="button" className="theme-toggle" onClick={toggleTheme}>

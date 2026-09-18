@@ -36,9 +36,12 @@ function addOnsToRow(addOns) {
   for (let n = 1; n <= 5; n++) {
     const suffix = n === 1 ? '' : `_${n}`
     const a = addOns[n - 1] || { nama: '', biaya: '', keuntungan: '' }
-    out[`layanan_lainnya${suffix}`] = a.nama.trim() || null
-    out[`biaya_lainnya${suffix}`] = Number(a.biaya) || 0
-    out[`keuntungan_lainnya${suffix}`] = Number(a.keuntungan) || 0
+    const nama = a.nama.trim()
+    // Kalau nama kosong, biaya & keuntungan-nya IKUT dianggap kosong --
+    // sama persis alasannya kayak fix di BookingDetailModal.jsx.
+    out[`layanan_lainnya${suffix}`] = nama || null
+    out[`biaya_lainnya${suffix}`] = nama ? (Number(a.biaya) || 0) : 0
+    out[`keuntungan_lainnya${suffix}`] = nama ? (Number(a.keuntungan) || 0) : 0
   }
   return out
 }
@@ -141,7 +144,22 @@ export default function BookingModal({ onClose, onSaved }) {
   function updateAddOn(pesertaIdx, addOnIdx, field, value) {
     setPesertaList((list) => list.map((p, idx) => {
       if (idx !== pesertaIdx) return p
-      return { ...p, addOnLainnya: p.addOnLainnya.map((a, ai) => (ai === addOnIdx ? { ...a, [field]: value } : a)) }
+      return {
+        ...p,
+        addOnLainnya: p.addOnLainnya.map((a, ai) => {
+          if (ai !== addOnIdx) return a
+          const updated = { ...a, [field]: value }
+          // Begitu nama-nya dikosongin, biaya & keuntungan langsung
+          // ke-reset di form-nya juga (bukan cuma pas nyimpen doang) --
+          // biar user LANGSUNG liat angkanya ilang, nggak nyangka
+          // masih "aman" padahal diem-diem masih nyangkut.
+          if (field === 'nama' && !value.trim()) {
+            updated.biaya = ''
+            updated.keuntungan = ''
+          }
+          return updated
+        }),
+      }
     }))
   }
   function addAddOn(pesertaIdx) {
