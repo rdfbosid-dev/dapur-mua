@@ -109,6 +109,7 @@
 .booking-detail-overlay .status-pill.lunas { background: var(--pill-alt); color: var(--h7); }
 
 .booking-detail-overlay .b-avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--ava-grad); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: var(--h7); }
+.booking-detail-overlay .b-avatar.selesai { background: var(--ava-grad-alt); color: var(--h7); }
 .booking-detail-overlay .b-info { flex: 1; min-width: 0; }
 .booking-detail-overlay .b-name { font-size: 12px; font-weight: 600; margin-bottom: 5px; color: var(--ink-soft); }
 .booking-detail-overlay .b-meta { font-size: 11px; color: var(--h5); }
