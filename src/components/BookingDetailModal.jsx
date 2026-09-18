@@ -237,6 +237,8 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
   }
 
   async function handleSaveEdit() {
+    // eslint-disable-next-line no-console
+    console.log('[DEBUG handleSaveEdit START]', { editPesertaCount: editPeserta.length })
     setSaving(true)
     setError('')
 
@@ -277,6 +279,8 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
       if (delErr) { setSaving(false); setError(delErr.message); return }
     }
 
+    // eslint-disable-next-line no-console
+    console.log('[DEBUG masuk ke loop peserta]', { jumlahPeserta: editPeserta.length })
     for (const p of editPeserta) {
       const payload = {
         nama_anggota: p.nama_anggota?.trim() || '',
