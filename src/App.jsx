@@ -15,6 +15,7 @@ import Laporan from './pages/Laporan'
 import Pengaturan from './pages/Pengaturan'
 import TrialHabis from './pages/TrialHabis'
 import Panduan from './pages/Panduan'
+import AdminDashboard from './pages/AdminDashboard'
 
 function ProtectedRoute({ children }) {
   const { user, loading, isLocked } = useAuth()
@@ -78,6 +79,32 @@ function GuestRoute({ children }) {
   }
 
   if (user) return <Navigate to="/dashboard" replace />
+  return children
+}
+
+// Guard KHUSUS /admin -- 2 lapis: pertama numpang syarat yang SAMA
+// kayak ProtectedRoute (harus login, nggak lagi kekunci trial), KEDUA
+// (yang baru) harus isAdmin juga. User biasa yang somehow nyasar ke
+// /admin (nyoba ketik manual URL-nya) dilempar diem-diem ke /dashboard
+// -- BUKAN ditampilin pesan error "akses ditolak" segala, biar nggak
+// malah "ngajarin" ada halaman rahasia di situ.
+function AdminRoute({ children }) {
+  const { user, loading, isLocked, isAdmin } = useAuth()
+
+  if (loading) {
+    return (
+      <div style={{
+        minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontFamily: "'Plus Jakarta Sans', sans-serif", color: '#8B8299'
+      }}>
+        Memuat...
+      </div>
+    )
+  }
+
+  if (!user) return <Navigate to="/login" replace />
+  if (isLocked) return <Navigate to="/trial-habis" replace />
+  if (!isAdmin) return <Navigate to="/dashboard" replace />
   return children
 }
 
@@ -162,6 +189,14 @@ export default function App() {
                 <ProtectedRoute>
                   <Panduan />
                 </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin"
+              element={
+                <AdminRoute>
+                  <AdminDashboard />
+                </AdminRoute>
               }
             />
             <Route path="*" element={<Navigate to="/" replace />} />

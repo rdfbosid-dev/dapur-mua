@@ -3,6 +3,15 @@ import { supabase } from '../lib/supabase'
 
 const AuthContext = createContext(null)
 
+// UUID akun "RodifMUA" -- SATU-SATUNYA akun admin, di-hardcode SENGAJA
+// (bukan kolom "is_admin" di profiles) biar nggak ada cara buat "jadi
+// admin" lewat data yang bisa diubah-ubah dari mana pun -- harus
+// diubah manual di kode ini + api/admin/users.js kalau suatu hari
+// beneran perlu ganti/nambah admin. DUA tempat ini WAJIB selalu sama
+// persis, itu 2 lapis pengecekan independen (frontend cuma nentuin
+// tampilan menu, api/admin/users.js yang beneran nge-gate akses data).
+const ADMIN_USER_ID = '5a6ae3db-228c-464a-9b1e-f94e3071fdc9'
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -39,7 +48,7 @@ export function AuthProvider({ children }) {
       studio_name: '', kode_prefix: '', instagram: '', whatsapp: '', logo_url: null, kode_kalender: null,
       trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), subscription_status: 'trial', kalender_synced_at: null,
     }
-    const { data: created, error: createErr } = await supabase
+    const { data: created } = await supabase
       .from('profiles')
       .upsert({ id: userId, ...fallback })
       .select('studio_name, kode_prefix, instagram, whatsapp, logo_url, kode_kalender, trial_ends_at, subscription_status, kalender_synced_at')
@@ -121,13 +130,25 @@ export function AuthProvider({ children }) {
     new Date(profile.trial_ends_at) < new Date()
   )
 
+  const isAdmin = user?.id === ADMIN_USER_ID
+
   return (
-    <AuthContext.Provider value={{ user, loading, signOut, profile, refreshProfile, isLocked }}>
+    <AuthContext.Provider value={{ user, loading, signOut, profile, refreshProfile, isLocked, isAdmin }}>
       {children}
     </AuthContext.Provider>
   )
 }
 
+// Fast Refresh idealnya cuma jalan mulus kalau 1 file isinya komponen
+// doang -- file ini juga export `useAuth` (bukan komponen). Efeknya
+// CUMA soal Developer Experience (edit file ini pas lagi `npm run dev`
+// bakal full-reload, bukan hot-swap sehalus biasanya) -- BUKAN bug,
+// BUKAN ngaruh ke hasil build production sama sekali. Pola "context +
+// hook custom-nya di 1 file yang sama" ini standar & umum dipakai --
+// misahin ke 2 file beda cuma buat nyenengin linter berarti harus
+// update import di SEMUA halaman yang pake useAuth, nggak sepadan buat
+// warning yang efeknya cuma kosmetik.
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   const ctx = useContext(AuthContext)
   if (!ctx) throw new Error('useAuth harus dipakai di dalam <AuthProvider>')

@@ -134,7 +134,7 @@ export default async function handler(req, res) {
       .update({ kalender_synced_at: new Date().toISOString() })
       .eq('id', profile.id)
       .is('kalender_synced_at', null)
-  } catch (e) {
+  } catch {
     // sengaja diem -- lihat alasan di komentar atas
   }
 

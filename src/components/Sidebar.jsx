@@ -40,13 +40,15 @@ function Icon({ name }) {
       return <svg {...common}><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5Z"/></svg>
     case 'book':
       return <svg {...common}><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>
+    case 'shield':
+      return <svg {...common}><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3Z"/><path d="m9 12 2 2 4-4"/></svg>
     default:
       return null
   }
 }
 
 export default function Sidebar({ headerAction = null }) {
-  const { user, profile } = useAuth()
+  const { user, profile, isAdmin } = useAuth()
   const { theme, toggleTheme } = useTheme()
   const logoSrc = theme === 'dark' ? '/icon-512-dark.png' : '/icon-512-light.png'
   const studioName = profile?.studio_name || ''
@@ -54,6 +56,7 @@ export default function Sidebar({ headerAction = null }) {
   const location = useLocation()
 
   // otomatis nutup drawer tiap kali pindah halaman
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setMobileOpen(false) }, [location.pathname])
 
   const initials = (studioName || user?.email || '?')
@@ -129,6 +132,23 @@ export default function Sidebar({ headerAction = null }) {
           {item.label}
         </NavLink>
       ))}
+
+      {/* SENGAJA dibungkus kondisi isAdmin -- bukan cuma "disembunyiin"
+          lewat CSS, tapi beneran nggak ke-render ke DOM sama sekali buat
+          user biasa. Ini lapisan tampilan doang -- lapisan yang beneran
+          nge-gate data ada di api/admin/users.js sendiri (verifikasi
+          token di server), jadi walau ada yang somehow maksa nongolin
+          elemen ini lewat DevTools, tetep nggak bisa narik data admin
+          beneran. */}
+      {isAdmin && (
+        <>
+          <div className="nav-section">Admin</div>
+          <NavLink to="/admin" className={({ isActive }) => 'nav-item' + (isActive ? ' active' : '')}>
+            <Icon name="shield" />
+            Kelola User
+          </NavLink>
+        </>
+      )}
 
       <div className="sidebar-bottom">
         <button type="button" className="theme-toggle" onClick={toggleTheme}>
