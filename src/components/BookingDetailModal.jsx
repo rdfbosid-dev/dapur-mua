@@ -955,7 +955,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
 
       {showInvoice && (
         <InvoiceModal
-          booking={booking}
+          booking={liveBooking}
           peserta={peserta}
           payments={payments}
           onClose={() => setShowInvoice(false)}
