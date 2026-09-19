@@ -77,6 +77,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
 
   const [peserta, setPeserta] = useState([])
   const [payments, setPayments] = useState([])
+  const [bundlingItems, setBundlingItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -85,6 +86,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
   const [showRincian, setShowRincian] = useState(false)
   const [confirmDeleteBooking, setConfirmDeleteBooking] = useState(false)
   const [confirmDeletePaymentId, setConfirmDeletePaymentId] = useState(null)
+  const [confirmDeleteBundlingId, setConfirmDeleteBundlingId] = useState(null)
   const [saving, setSaving] = useState(false)
   const [bookingDates, setBookingDates] = useState([])
 
@@ -125,6 +127,17 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
   const [payDate, setPayDate] = useState(new Date().toISOString().slice(0, 10))
   const [payNote, setPayNote] = useState('')
 
+  // form Paket Bundling baru -- level booking (bukan per klien), pola
+  // CRUD-nya niru persis "Riwayat Pembayaran" di atas.
+  const [showAddBundling, setShowAddBundling] = useState(false)
+  const [bundlingNama, setBundlingNama] = useState('')
+  const [bundlingBiaya, setBundlingBiaya] = useState('')
+  const [bundlingUntung, setBundlingUntung] = useState('')
+  const [editingBundlingId, setEditingBundlingId] = useState(null)
+  const [editBundlingNama, setEditBundlingNama] = useState('')
+  const [editBundlingBiaya, setEditBundlingBiaya] = useState('')
+  const [editBundlingUntung, setEditBundlingUntung] = useState('')
+
   // edit pembayaran yang udah ada
   const [editingPaymentId, setEditingPaymentId] = useState(null)
   const [editPayAmount, setEditPayAmount] = useState('')
@@ -154,17 +167,19 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
     setLoading(true)
     setError('')
 
-    const [{ data: pesertaData, error: pesertaErr }, { data: paymentData, error: paymentErr }, { data: bookingData, error: bookingErr }] = await Promise.all([
+    const [{ data: pesertaData, error: pesertaErr }, { data: paymentData, error: paymentErr }, { data: bundlingData, error: bundlingErr }, { data: bookingData, error: bookingErr }] = await Promise.all([
       supabase.from('peserta').select('*').eq('booking_id', booking.id).order('urutan'),
       supabase.from('payments').select('*').eq('booking_id', booking.id).order('tanggal', { ascending: false }),
+      supabase.from('bundling_items').select('*').eq('booking_id', booking.id).order('created_at'),
       supabase.from('booking_summary').select('*').eq('id', booking.id).single(),
     ])
 
-    if (pesertaErr || paymentErr) {
-      setError((pesertaErr || paymentErr).message)
+    if (pesertaErr || paymentErr || bundlingErr) {
+      setError((pesertaErr || paymentErr || bundlingErr).message)
     } else {
       setPeserta(pesertaData || [])
       setPayments(paymentData || [])
+      setBundlingItems(bundlingData || [])
       if (!bookingErr && bookingData) setLiveBooking(bookingData)
     }
     setLoading(false)
@@ -370,11 +385,68 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
     onChanged()
   }
 
+  function startEditBundling(item) {
+    setEditingBundlingId(item.id)
+    setEditBundlingNama(item.nama)
+    setEditBundlingBiaya(item.biaya)
+    setEditBundlingUntung(item.keuntungan)
+  }
+
+  async function handleAddBundling(e) {
+    e.preventDefault()
+    if (!bundlingNama.trim()) { setError('Nama paket bundling harus diisi.'); return }
+
+    setSaving(true)
+    setError('')
+    const { error: err } = await supabase.from('bundling_items').insert({
+      booking_id: booking.id,
+      user_id: user.id,
+      nama: bundlingNama.trim(),
+      biaya: Number(bundlingBiaya) || 0,
+      keuntungan: Number(bundlingUntung) || 0,
+    })
+    setSaving(false)
+
+    if (err) { setError(err.message); return }
+
+    setShowAddBundling(false)
+    setBundlingNama(''); setBundlingBiaya(''); setBundlingUntung('')
+    await loadDetail()
+    onChanged()
+  }
+
+  async function handleSaveEditBundling(itemId) {
+    if (!editBundlingNama.trim()) { setError('Nama paket bundling harus diisi.'); return }
+    setSaving(true)
+    setError('')
+    const { error: err } = await supabase
+      .from('bundling_items')
+      .update({ nama: editBundlingNama.trim(), biaya: Number(editBundlingBiaya) || 0, keuntungan: Number(editBundlingUntung) || 0 })
+      .eq('id', itemId)
+    setSaving(false)
+    if (err) { setError(err.message); return }
+    setEditingBundlingId(null)
+    await loadDetail()
+    onChanged()
+  }
+
+  async function handleDeleteBundling(itemId) {
+    setSaving(true)
+    setError('')
+    const { error: err } = await supabase.from('bundling_items').delete().eq('id', itemId)
+    setSaving(false)
+    setConfirmDeleteBundlingId(null)
+    if (err) { setError(err.message); return }
+    await loadDetail()
+    onChanged()
+  }
+
   async function handleDeleteBooking() {
     setSaving(true)
     setError('')
-    // peserta & payments punya "on delete cascade" ke booking_id, jadi
-    // ikut kehapus otomatis begitu baris booking-nya dihapus.
+    // peserta, payments, & bundling_items punya "on delete cascade" ke
+    // booking_id, jadi ikut kehapus otomatis begitu baris booking-nya
+    // dihapus.
     const { error: err } = await supabase.from('bookings').delete().eq('id', booking.id)
     setSaving(false)
     if (err) { setError(err.message); return }
@@ -528,6 +600,70 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                 </form>
               )}
 
+              {/* Paket Bundling -- level BOOKING (bukan per klien),
+                  buat kerjasama vendor luar (fotografer, sewa attire,
+                  dll). Beda sama Add On: biaya PENUH masuk Tagihan tapi
+                  cuma bagian UNTUNG-nya yang masuk Omzet/Penghasilan --
+                  liat penjelasan lengkap di RincianKeuanganModal.jsx. */}
+              <div className="detail-label-history">Paket Bundling</div>
+              {bundlingItems.length > 0 && (
+                <div className="pay-history">
+                  {bundlingItems.map((item) => (
+                    editingBundlingId === item.id ? (
+                      <div className="pay-edit-row" key={item.id}>
+                        <div className="field-grid-detail add-edit-pay-cols-3">
+                          <div className="field"><label>Nama Paket</label><input type="text" placeholder="contoh: Fotografer @fourgrads" value={editBundlingNama} onChange={(e) => setEditBundlingNama(e.target.value)} /></div>
+                          <div className="field"><label>Biaya Ditagih ke Klien</label><input type="text" inputMode="numeric" placeholder="Rp0" value={editBundlingBiaya ? `Rp${formatAngkaInput(editBundlingBiaya)}` : ''} onChange={(e) => setEditBundlingBiaya(parseAngkaInput(e.target.value))} /></div>
+                          <div className="field"><label>Untung/Komisi MUA</label><input type="text" inputMode="numeric" placeholder="Rp0" value={editBundlingUntung ? `Rp${formatAngkaInput(editBundlingUntung)}` : ''} onChange={(e) => setEditBundlingUntung(parseAngkaInput(e.target.value))} /></div>
+                        </div>
+                        <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                          <button type="button" className="btn-payment" onClick={() => setEditingBundlingId(null)}>Batal</button>
+                          <button type="button" className="btn-payment" onClick={() => handleSaveEditBundling(item.id)} disabled={saving}>Simpan</button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="pay-row" key={item.id}>
+                        <span>{item.nama}</span>
+                        <span>Ditagih {formatRupiah(item.biaya)}</span>
+                        <span className="pay-amount">Untung {formatRupiah(item.keuntungan)}</span>
+                        <span className="pay-note"></span>
+                        <div className="pay-actions">
+                          <button type="button" onClick={() => startEditBundling(item)}>Edit</button>
+                          <button type="button" onClick={() => setConfirmDeleteBundlingId(item.id)}>Hapus</button>
+                          {confirmDeleteBundlingId === item.id && (
+                            <div className="pay-confirm-popup">
+                              <p>Yakin mau hapus paket bundling ini?</p>
+                              <div className="pay-confirm-popup-actions">
+                                <button type="button" className="pay-confirm-cancel" onClick={() => setConfirmDeleteBundlingId(null)}>Batal</button>
+                                <button type="button" className="pay-confirm-yes" onClick={() => handleDeleteBundling(item.id)} disabled={saving}>
+                                  {saving ? '...' : 'Ya, hapus'}
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  ))}
+                </div>
+              )}
+
+              {!showAddBundling ? (
+                <button type="button" className="add-payment" onClick={() => setShowAddBundling(true)}>+ Tambah Paket Bundling</button>
+              ) : (
+                <form onSubmit={handleAddBundling} className="add-payment-card" style={{ marginTop: 8 }}>
+                  <div className="field-grid-detail add-edit-pay-cols-3">
+                    <div className="field"><label>Nama Paket</label><input type="text" placeholder="contoh: Fotografer @fourgrads" value={bundlingNama} onChange={(e) => setBundlingNama(e.target.value)} /></div>
+                    <div className="field"><label>Biaya Ditagih ke Klien</label><input type="text" inputMode="numeric" placeholder="Rp0" value={bundlingBiaya ? `Rp${formatAngkaInput(bundlingBiaya)}` : ''} onChange={(e) => setBundlingBiaya(parseAngkaInput(e.target.value))} /></div>
+                    <div className="field"><label>Untung/Komisi MUA</label><input type="text" inputMode="numeric" placeholder="Rp0" value={bundlingUntung ? `Rp${formatAngkaInput(bundlingUntung)}` : ''} onChange={(e) => setBundlingUntung(parseAngkaInput(e.target.value))} /></div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 5, marginTop: 4 }}>
+                    <button type="button" className="btn-payment" onClick={() => setShowAddBundling(false)}>Batal</button>
+                    <button type="submit" className="btn-payment" disabled={saving}>{saving ? 'Menyimpan...' : 'Tambah Paket Bundling'}</button>
+                  </div>
+                </form>
+              )}
+
               <div className="section-label">Klien ({peserta.length})</div>
               {peserta.map((p) => (
                 <div className="peserta-view-row" key={p.id}>
@@ -536,11 +672,11 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                     <div className="b-name">{p.nama_anggota} {p.peran ? `— (${p.peran})` : ''}</div>
                     <div className="b-meta">
                       {p.jenis_paket || p.kategori_makeup} ({p.dikerjakan_oleh_makeup}) — {formatRupiah(p.biaya_makeup)}
-                      {p.layanan_tambahan !== 'Tidak Ada' ? ` · ${p.layanan_tambahan} (${p.dikerjakan_oleh_tambahan})` : ''}
+                      {p.layanan_tambahan !== 'Tidak Ada' ? ` | ${p.layanan_tambahan} (${p.dikerjakan_oleh_tambahan})` : ''}
                       {[1, 2, 3, 4, 5].map((n) => {
                         const suffix = n === 1 ? '' : `_${n}`
                         const nama = p[`layanan_lainnya${suffix}`]
-                        return nama ? ` · ${nama} (${formatRupiah(p[`biaya_lainnya${suffix}`])})` : ''
+                        return nama ? ` | ${nama} ${formatRupiah(p[`biaya_lainnya${suffix}`])}` : ''
                       }).join('')}
                     </div>
                   </div>
@@ -789,7 +925,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
           <div className="delete-confirm-banner">
             <div className="delete-confirm-text">
               <b>Yakin menghapus data booking {liveBooking.nama_klien}?</b>
-              <span>{peserta.length} peserta dan {payments.length} catatan pembayaran juga akan ikut terhapus.< br/>
+              <span>{peserta.length} peserta, {payments.length} catatan pembayaran, dan {bundlingItems.length} paket bundling juga akan ikut terhapus.< br/>
               Data yang sudah dihapus tidak bisa dikembalikan.</span>
             </div>
           </div>
