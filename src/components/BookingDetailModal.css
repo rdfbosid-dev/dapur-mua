@@ -166,7 +166,7 @@
 .booking-detail-overlay .peserta-view-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid color-mix(in srgb, var(--ink-soft) 50%, transparent); }
 .booking-detail-overlay .peserta-view-row:last-child { border-bottom: none; }
 
-.booking-detail-overlay .add-payment { margin-left: 5px; padding: 5px 5px; background: color-mix(in srgb, var(--active-nav) 50%, transparent); border-radius: 5px; border: none;
+.booking-detail-overlay .add-payment { margin-left: 5px; padding: 10px 5px; background: color-mix(in srgb, var(--active-nav) 50%, transparent); border-radius: 5px; border: none;
   color: var(--ink-soft); font-size: 12px; font-weight: 500; cursor: pointer; text-align: center; transition: background 0.15s;
   margin-bottom: 5px;
 }
