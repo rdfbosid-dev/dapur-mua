@@ -8,6 +8,7 @@ import { EVENT_OPTIONS, EVENT_CUSTOM_SENTINEL, KATEGORI_MAKEUP_OPTIONS } from '.
 import { cariAtauBuatKlien } from '../lib/klien'
 import { formatAngkaInput, parseAngkaInput } from '../lib/format'
 import InvoiceModal from './InvoiceModal'
+import RincianKeuanganModal from './RincianKeuanganModal'
 import './BookingModal.css'
 import './BookingDetailModal.css'
 
@@ -70,6 +71,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
 
   const [editMode, setEditMode] = useState(false)
   const [showInvoice, setShowInvoice] = useState(false)
+  const [showRincian, setShowRincian] = useState(false)
   const [confirmDeleteBooking, setConfirmDeleteBooking] = useState(false)
   const [confirmDeletePaymentId, setConfirmDeletePaymentId] = useState(null)
   const [saving, setSaving] = useState(false)
@@ -413,7 +415,8 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                 <span className={`status-pill ${liveBooking.status_pembayaran === 'Lunas' ? 'lunas' : 'belum'}`}>
                   {liveBooking.status_pembayaran}
                 </span>
-                <button className="btn-ghost" style={{ marginLeft: 'auto', marginRight: 10}} onClick={() => setShowInvoice(true)}>Invoice</button>
+                <button className="btn-ghost" style={{ marginLeft: 'auto' }} onClick={() => setShowRincian(true)}>Rincian Keuangan</button>
+                <button className="btn-ghost" onClick={() => setShowInvoice(true)}>Invoice</button>
                 <button className="btn-ghost" onClick={enterEditMode}>Edit Booking</button>
               </div>
 
@@ -809,6 +812,18 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
           peserta={peserta}
           payments={payments}
           onClose={() => setShowInvoice(false)}
+        />
+      )}
+
+      {/* liveBooking (BUKAN booking prop asli) -- biar rincian ini selalu
+          ikut ke-update kalau ada perubahan data di sesi ini (edit
+          peserta/pembayaran), sama persis sumbernya kayak section
+          PEMBAYARAN di atas. */}
+      {showRincian && (
+        <RincianKeuanganModal
+          booking={liveBooking}
+          peserta={peserta}
+          onClose={() => setShowRincian(false)}
         />
       )}
     </div>

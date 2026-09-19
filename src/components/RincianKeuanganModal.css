@@ -1,0 +1,72 @@
+/* Semua selector di file ini di-scope di bawah .rincian-overlay -- pola
+   yang sama kayak file modal lain di project ini. */
+
+.rincian-overlay {
+  position: fixed; inset: 0; background: rgb(36, 55, 62, 0.6);
+  display: flex; align-items: center; justify-content: center; padding: 24px;
+  z-index: 95;
+}
+.rincian-overlay .modal {
+  background: var(--box-dashboard); border: 1.5px solid var(--line-box); border-radius: 24px; width: 100%; max-width: 460px;
+  max-height: 88vh; display: flex; flex-direction: column; overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+.rincian-overlay .modal-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px; flex-shrink: 0;
+}
+.rincian-overlay .modal-head h2 { font-size: 18px; color: var(--ink-soft); }
+.rincian-overlay .modal-close {
+  width: 32px; height: 32px; border-radius: 10px; border: none; background: color-mix(in srgb, var(--h3) 20%, transparent);
+  color: var(--h3); font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s;
+}
+.rincian-overlay .modal-close:hover { background: color-mix(in srgb, var(--h3) 50%, transparent); }
+.rincian-overlay .modal-body { padding: 6px 20px 20px; overflow-y: auto; flex: 1; -webkit-overflow-scrolling: touch; }
+.rincian-overlay .modal-foot { display: flex; justify-content: flex-end; padding: 14px 20px; flex-shrink: 0; }
+.rincian-overlay .btn-ghost {
+  padding: 9px 18px; border-radius: 11px; border: 1.5px solid var(--button-border); background: var(--table-body);
+  font-size: 13px; font-weight: 600; color: var(--ink-soft); cursor: pointer; font-family: inherit;
+  transition: background 0.15s;
+}
+.rincian-overlay .btn-ghost:hover { background: color-mix(in srgb, var(--button-prm-hover) 50%, transparent); }
+
+/* 2 kartu besar Omzet & Penghasilan -- Penghasilan dikasih aksen warna
+   beda (var(--h7), hijau -- sama kayak warna "Sudah Dibayar" di section
+   PEMBAYARAN) biar keliatan itu "angka final yang paling penting". */
+.rincian-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px; }
+.rincian-summary-item {
+  background: var(--grad1); border: 3px solid var(--border1); border-radius: 14px; padding: 14px 16px;
+}
+.rincian-summary-item.penghasilan { background: var(--grad2); border: 3px solid var(--border2) }
+.rincian-summary-label-omzet { font-size: 11.5px; font-weight: 600; color: var(--label1); margin-bottom: 4px; }
+.rincian-summary-label-penghasilan { font-size: 11.5px; font-weight: 600; color: var(--label2); margin-bottom: 4px; }
+.rincian-summary-value-omzet { font-family: 'Poppins', sans-serif; font-size: 19px; font-weight: 700; color: var(--label1); }
+.rincian-summary-value-penghasilan { font-family: 'Poppins', sans-serif; font-size: 19px; font-weight: 700; color: var(--label2); }
+.rincian-summary-item.penghasilan .rincian-summary-value { color: var(--h7); }
+
+.rincian-section { margin-bottom: 16px; }
+.rincian-section-title {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+  color: var(--ink-soft); margin-bottom: 8px;
+}
+.rincian-row {
+  display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  font-size: 13px; color: var(--ink-soft); padding: 7px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--button-border) 30%, transparent);
+}
+.rincian-row b { color: var(--ink-soft); font-weight: 700; }
+
+.rincian-note {
+  font-size: 11.5px; color: var(--ink-soft); opacity: 0.75; line-height: 1.5;
+  margin-top: 4px; padding-top: 10px; border-top: 1px solid color-mix(in srgb, var(--button-border) 30%, transparent);
+}
+
+@media (max-width: 640px) {
+  .rincian-overlay { padding: 0; align-items: flex-end; }
+  .rincian-overlay .modal { max-width: 100%; max-height: 92vh; border-radius: 22px 22px 0 0; }
+  .rincian-overlay .modal-head { padding: 16px 18px; }
+  .rincian-overlay .modal-body { padding: 4px 18px 18px; }
+  .rincian-overlay .modal-foot { padding: 12px 18px 18px; }
+  .rincian-summary { grid-template-columns: 1fr 1fr; gap: 10px; }
+}

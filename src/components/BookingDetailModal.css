@@ -82,7 +82,7 @@
 .booking-detail-overlay .btn-primary-detail:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
 /* Titik A: jarak sebelum badge status (di bawah judul modal) */
-.booking-detail-overlay .detail-header { display: flex; align-items: center; margin-top: 0; margin-bottom: 5px; }
+.booking-detail-overlay .detail-header { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 10px; margin-top: 0; margin-bottom: 5px; }
 
 /* Sumber jarak TUNGGAL sebelum tiap section-label (INFO BOOKING/PEMBAYARAN/PESERTA) --
    ini yang bikin titik B dan C otomatis seragam sama titik A di atas. Elemen
