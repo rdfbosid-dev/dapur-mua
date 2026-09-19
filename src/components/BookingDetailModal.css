@@ -215,6 +215,7 @@
   display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0;
 }
 .booking-detail-overlay .field-grid-peserta.cols-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 5px; }
+.booking-detail-overlay .addon-remove-row { display: flex; justify-content: flex-end; margin-bottom: 6px; }
 .booking-detail-overlay .peserta-remove {
   font-size: 12px; font-weight: 550; color: var(--h8); cursor: pointer; background: var(--notif); border: 1px solid var(--notif);
   padding: 4px 8px; border-radius: 7px; transition: background 0.15s;

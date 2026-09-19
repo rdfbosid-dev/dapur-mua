@@ -719,14 +719,26 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                         const untungField = `keuntungan_lainnya${suffix}`
                         return (
                           <div key={n}>
+                            {/* Tombol Hapus SENGAJA dipindah jadi baris sendiri,
+                                di ATAS pasangan field Nama+Biaya -- bukan nempel
+                                di sebelah label kayak sebelumnya. Alasannya: kalau
+                                nempel di label, di mobile (ruang sempit) dia suka
+                                "terdorong" turun ke baris ke-2 -- efeknya field
+                                "Add On Item Lainnya N" jadi lebih tinggi dari field
+                                "Biaya Add On Item" di sebelahnya (yang labelnya
+                                cuma 1 baris), bikin 2 input-nya nggak sejajar lagi.
+                                Dengan taruh Hapus di baris sendiri (di luar grid
+                                2 kolom), tinggi label kedua field itu SELALU sama,
+                                jadi kedua input-nya dijamin selalu sejajar, apapun
+                                lebar layarnya. */}
+                            {n === p._addonCount && n > 1 && (
+                              <div className="addon-remove-row">
+                                <button type="button" className="peserta-remove" onClick={() => removeAddOnSlot(i)}>Hapus Add On Item {n}</button>
+                              </div>
+                            )}
                             <div className="field-grid-peserta cols-2">
                               <div className="field">
-                                <div className="field-label-row">
-                                  <label>{n === 1 ? 'Add On Item Lainnya' : `Add On Item Lainnya ${n}`}</label>
-                                  {n === p._addonCount && n > 1 && (
-                                    <button type="button" className="peserta-remove" onClick={() => removeAddOnSlot(i)}>Hapus</button>
-                                  )}
-                                </div>
+                                <label>{n === 1 ? 'Add On Item Lainnya' : `Add On Item Lainnya ${n}`}</label>
                                 <input type="text" placeholder="contoh: Softlens" value={p[namaField] || ''} onChange={(e) => updateEditPeserta(i, namaField, e.target.value)} />
                               </div>
                               {(p[namaField] || '').trim() && (
