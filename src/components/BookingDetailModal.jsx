@@ -7,10 +7,21 @@ import CustomTimePicker from './CustomTimePicker'
 import { EVENT_OPTIONS, EVENT_CUSTOM_SENTINEL, KATEGORI_MAKEUP_OPTIONS } from '../lib/constants'
 import { cariAtauBuatKlien } from '../lib/klien'
 import { formatAngkaInput, parseAngkaInput } from '../lib/format'
+import './BookingModal.css'
+// SENGAJA ditaruh SEBELUM import komponen anak (InvoiceModal,
+// RincianKeuanganModal) di bawah ini -- urutan `import` di JS nentuin
+// urutan CSS digabung pas di-build. InvoiceModal & RincianKeuanganModal
+// dirender NESTED di dalam DOM modal ini (lihat bagian bawah file),
+// jadi elemen `.modal` punya mereka SAMA-SAMA kena aturan
+// `.booking-detail-overlay .modal` di sini (spesifisitasnya sama-sama
+// 2 class). Kalau CSS file ini ke-load BELAKANGAN (kayak sebelumnya),
+// dia yang "menang" pas ada rebutan -- nge-timpa lebar modal Invoice/
+// Rincian Keuangan yang seharusnya beda. Dengan diperduluin di sini,
+// giliran CSS Invoice/RincianKeuangan (yang di-import setelahnya)
+// yang ke-load belakangan & menang buat elemen mereka sendiri.
+import './BookingDetailModal.css'
 import InvoiceModal from './InvoiceModal'
 import RincianKeuanganModal from './RincianKeuanganModal'
-import './BookingModal.css'
-import './BookingDetailModal.css'
 
 function formatRupiah(n) {
   const num = Number(n) || 0
