@@ -227,7 +227,7 @@
   z-index: 95;
 }
 .klien-modal-overlay .modal {
-  background: var(--table-body); border: 1.5px solid var(--line-modal); border-radius: 24px; width: 100%; max-width: 400px;
+  background: var(--table-body); border: 1.5px solid var(--line-box); border-radius: 24px; width: 100%; max-width: 400px;
   max-height: 60vh; display: flex; flex-direction: column; overflow: hidden;
   box-shadow: 0 24px 60px -12px var(--shadow-modal);
 }
