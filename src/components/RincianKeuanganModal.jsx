@@ -161,13 +161,21 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
             </div>
           )}
 
-          {bundlingItems.length > 0 && (
+          {bundlingItems.filter((b) => !b.parent_id).length > 0 && (
             <div className="rincian-section">
               <div className="rincian-section-title">Paket Bundling</div>
-              {bundlingItems.map((item) => (
-                <div className="rincian-row" key={item.id}>
-                  <span>{item.nama}</span>
-                  <b>Untung {formatRupiah(item.keuntungan)}</b>
+              {bundlingItems.filter((b) => !b.parent_id).map((item) => (
+                <div key={item.id}>
+                  <div className="rincian-row">
+                    <span>{item.nama}</span>
+                    <b>Untung {formatRupiah(item.keuntungan)}</b>
+                  </div>
+                  {bundlingItems.filter((c) => c.parent_id === item.id).map((child) => (
+                    <div className="rincian-row" key={child.id} style={{ paddingLeft: 20 }}>
+                      <span>↳ {child.nama}</span>
+                      <b>Untung {formatRupiah(child.keuntungan)}</b>
+                    </div>
+                  ))}
                 </div>
               ))}
             </div>

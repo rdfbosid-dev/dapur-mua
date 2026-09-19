@@ -141,7 +141,7 @@ function InvoicePaper({ profile, booking, peserta, payments, bundlingItems = [],
           Yang ditampilin cuma BIAYA PENUH yang ditagih ke klien -- untung/
           komisi MUA itu data INTERNAL, nggak pernah ditampilin di sini
           (liat RincianKeuanganModal.jsx buat versi internalnya). */}
-      {bundlingItems.length > 0 && (
+      {bundlingItems.filter((b) => !b.parent_id).length > 0 && (
         <table className="inv-table">
           <thead>
             <tr>
@@ -150,12 +150,23 @@ function InvoicePaper({ profile, booking, peserta, payments, bundlingItems = [],
             </tr>
           </thead>
           <tbody>
-            {bundlingItems.map((item) => (
-              <tr key={item.id}>
-                <td>{item.nama}</td>
-                <td className="right">{formatRupiah(item.biaya)}</td>
-              </tr>
-            ))}
+            {bundlingItems.filter((b) => !b.parent_id).flatMap((item) => {
+              const rows = [
+                <tr key={item.id}>
+                  <td>{item.nama}</td>
+                  <td className="right">{formatRupiah(item.biaya)}</td>
+                </tr>,
+              ]
+              bundlingItems.filter((c) => c.parent_id === item.id).forEach((child) => {
+                rows.push(
+                  <tr key={child.id}>
+                    <td style={{ paddingLeft: 20 }}>↳ {child.nama}</td>
+                    <td className="right">{formatRupiah(child.biaya)}</td>
+                  </tr>
+                )
+              })
+              return rows
+            })}
           </tbody>
         </table>
       )}
