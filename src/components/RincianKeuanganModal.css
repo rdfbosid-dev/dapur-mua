@@ -7,7 +7,7 @@
   z-index: 95;
 }
 .rincian-overlay .modal {
-  background: var(--box-dashboard); border: 1.5px solid var(--line-box); border-radius: 24px; width: 100%; max-width: 460px;
+  background: var(--table-body); border: 1.5px solid var(--line-box); border-radius: 24px; width: 100%; max-width: 460px;
   max-height: 88vh; display: flex; flex-direction: column; overflow: hidden;
   box-shadow: var(--shadow-card);
 }

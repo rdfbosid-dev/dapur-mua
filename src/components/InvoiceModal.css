@@ -6,7 +6,7 @@
   z-index: 95;
 }
 .invoice-overlay .modal {
-  background: var(--table-body); border: 1.5px solid var(--line-modal); border-radius: 24px; width: 100%; max-width: 720px;
+  background: var(--table-body); border: 1.5px solid var(--line-box); border-radius: 24px; width: 100%; max-width: 600px;
   max-height: 88vh; display: flex; flex-direction: column; overflow: hidden;
   box-shadow: var(--shadow-modal);
 }
@@ -22,11 +22,17 @@
 }
 .invoice-overlay .modal-close:hover { background: color-mix(in srgb, var(--h3) 50%, transparent); color: var(--h3); }
 .invoice-overlay .modal-body { padding: 22px 26px; overflow-y: auto; flex: 1; -webkit-overflow-scrolling: touch; }
-.invoice-overlay .modal-foot { display: flex; justify-content: flex-end; gap: 10px; padding: 16px 26px; flex-shrink: 0; }
+.invoice-overlay .modal-foot { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; padding: 16px 26px; flex-shrink: 0; }
 .invoice-overlay .btn-ghost {
-  padding: 5px 0; border-radius: 8px; border: 1.5px solid var(--button-border); background: var(--table-body);
+  padding: 5px 10px; border-radius: 8px; border: 1.5px solid var(--button-border); background: var(--table-body);
   font-size: 12px; font-weight: 600; color: var(--ink-soft); cursor: pointer; font-family: inherit;
-  transition: background 0.15s, border-color 0.15s; margin-bottom: 20px; line-height: 1.4;
+  transition: background 0.15s, border-color 0.15s; line-height: 1.4;
+  /* flex-shrink:0 -- tanpa ini, begitu ruang di .modal-foot pas-pasan
+     (3 tombol + gap 10px x2 di modal 600px), flexbox defaultnya maksa
+     nyusutin tombol di BAWAH lebar natural teksnya sendiri -- itu yang
+     bikin teks kepepet nempel ke tepi tombol. Dikunci di sini biar
+     tombol SELALU minimal selebar teks+padding-nya, apapun kondisinya. */
+  flex-shrink: 0;
 }
 .invoice-overlay .btn-ghost:hover { background: color-mix(in srgb, var(--button-prm-hover) 50%, transparent); border: 1.5px solid color-mix(in srgb, var(--button-prm-hover) 50%, transparent); }
 .invoice-overlay .btn-ghost:disabled { opacity: 0.6; cursor: default; }
