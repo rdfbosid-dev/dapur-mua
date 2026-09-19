@@ -667,7 +667,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                             <button type="button" onClick={() => setConfirmDeleteBundlingId(item.id)}>Hapus</button>
                             {confirmDeleteBundlingId === item.id && (
                               <div className="pay-confirm-popup">
-                                <p>Yakin mau hapus paket bundling ini? Add on di dalamnya ikut kehapus.</p>
+                                <p>Yakin mau hapus paket bundling ini? < br/>Add on di dalamnya ikut kehapus.</p>
                                 <div className="pay-confirm-popup-actions">
                                   <button type="button" className="pay-confirm-cancel" onClick={() => setConfirmDeleteBundlingId(null)}>Batal</button>
                                   <button type="button" className="pay-confirm-yes" onClick={() => handleDeleteBundling(item.id)} disabled={saving}>

@@ -675,9 +675,9 @@ export default function BookingModal({ onClose, onSaved }) {
                   </div>
                   <div className="peserta-body">
                     <div className="field-grid-bundling">
-                      <div className="field"><label>Nama Paket</label><input type="text" placeholder="contoh: Fotografer @fourgrads" value={b.nama} onChange={(e) => updateBundling(i, 'nama', e.target.value)} /></div>
-                      <div className="field"><label>Biaya Ditagih ke Klien</label><input type="text" inputMode="numeric" placeholder="Rp0" value={b.biaya ? `Rp${formatAngkaInput(b.biaya)}` : ''} onChange={(e) => updateBundling(i, 'biaya', parseAngkaInput(e.target.value))} /></div>
-                      <div className="field"><label>Untung/Komisi MUA</label><input type="text" inputMode="numeric" placeholder="Rp0" value={b.untung ? `Rp${formatAngkaInput(b.untung)}` : ''} onChange={(e) => updateBundling(i, 'untung', parseAngkaInput(e.target.value))} /></div>
+                      <div className="field"><label>Nama Paket</label><input type="text" placeholder="contoh: Fotografer/Attire" value={b.nama} onChange={(e) => updateBundling(i, 'nama', e.target.value)} /></div>
+                      <div className="field"><label>Biaya Paket (Ditagih ke Klien)</label><input type="text" inputMode="numeric" placeholder="Rp0" value={b.biaya ? `Rp${formatAngkaInput(b.biaya)}` : ''} onChange={(e) => updateBundling(i, 'biaya', parseAngkaInput(e.target.value))} /></div>
+                      <div className="field"><label>Untung untuk MUA (jika ada)</label><input type="text" inputMode="numeric" placeholder="Rp0" value={b.untung ? `Rp${formatAngkaInput(b.untung)}` : ''} onChange={(e) => updateBundling(i, 'untung', parseAngkaInput(e.target.value))} /></div>
                     </div>
 
                     {/* Add On DI DALAM paket ini (misal paket Fotografer
@@ -692,9 +692,9 @@ export default function BookingModal({ onClose, onSaved }) {
                           <button type="button" className="peserta-remove" onClick={() => removeBundlingAddOn(i, ai)}>Hapus Add On {ai + 1}</button>
                         </div>
                         <div className="field-grid-bundling">
-                          <div className="field"><label>Nama Add On</label><input type="text" placeholder="contoh: Strobist" value={a.nama} onChange={(e) => updateBundlingAddOn(i, ai, 'nama', e.target.value)} /></div>
-                          <div className="field"><label>Biaya Ditagih ke Klien</label><input type="text" inputMode="numeric" placeholder="Rp0" value={a.biaya ? `Rp${formatAngkaInput(a.biaya)}` : ''} onChange={(e) => updateBundlingAddOn(i, ai, 'biaya', parseAngkaInput(e.target.value))} /></div>
-                          <div className="field"><label>Untung/Komisi MUA</label><input type="text" inputMode="numeric" placeholder="Rp0" value={a.untung ? `Rp${formatAngkaInput(a.untung)}` : ''} onChange={(e) => updateBundlingAddOn(i, ai, 'untung', parseAngkaInput(e.target.value))} /></div>
+                          <div className="field"><label>Nama Add On</label><input type="text" placeholder="contoh: Lighting" value={a.nama} onChange={(e) => updateBundlingAddOn(i, ai, 'nama', e.target.value)} /></div>
+                          <div className="field"><label>Biaya (Ditagih ke Klien)</label><input type="text" inputMode="numeric" placeholder="Rp0" value={a.biaya ? `Rp${formatAngkaInput(a.biaya)}` : ''} onChange={(e) => updateBundlingAddOn(i, ai, 'biaya', parseAngkaInput(e.target.value))} /></div>
+                          <div className="field"><label>Untung untuk MUA (jika ada)</label><input type="text" inputMode="numeric" placeholder="Rp0" value={a.untung ? `Rp${formatAngkaInput(a.untung)}` : ''} onChange={(e) => updateBundlingAddOn(i, ai, 'untung', parseAngkaInput(e.target.value))} /></div>
                         </div>
                       </div>
                     ))}

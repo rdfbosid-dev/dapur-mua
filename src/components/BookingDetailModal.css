@@ -51,7 +51,7 @@
 .booking-detail-overlay .btn-payment {
   padding: 5px 10px; border-radius: 8px; border: 1px solid color-mix(in srgb, var(--button-prm-hover) 50%, transparent); background: color-mix(in srgb, var(--button-prm-hover) 50%, transparent);
   font-size: 12px; font-weight: 600; color: var(--h7); cursor: pointer; font-family: inherit;
-  transition: background 0.15s, border-color 0.15s; line-height: 1.4;
+  transition: background 0.15s, border-color 0.15s; line-height: 1.4; margin-top: 10px;
 }
 
 .booking-detail-overlay .btn-payment:hover {
@@ -148,7 +148,7 @@
   padding: 10px; width: 240px; box-shadow: var(--shadow-modal);
 }
 .booking-detail-overlay .pay-confirm-popup p {
-  font-size: 11px; font-weight: 500; color: var(--ink-soft); margin: 5px 0 10px; line-height: 1.4; text-align: center;
+  font-size: 11px; font-weight: 500; color: var(--ink-soft); margin: 5px 0 10px; line-height: 1.4; text-align: left;
 }
 .booking-detail-overlay .pay-confirm-popup-actions { display: flex; gap: 8px; justify-content: flex-end; }
 .booking-detail-overlay button.pay-confirm-yes {
