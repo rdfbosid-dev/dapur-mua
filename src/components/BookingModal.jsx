@@ -606,7 +606,7 @@ export default function BookingModal({ onClose, onSaved }) {
 
             {/* Paket Bundling -- level BOOKING, di LUAR loop peserta di
                 atas (beda sama Add On yang nempel per klien). */}
-            <div className="section-label">Paket Bundling</div>
+            <div className="section-label">PAKET BUNDLING</div>
             <div>
               {bundlingList.map((b, i) => (
                 <div className="peserta-card" key={i}>
