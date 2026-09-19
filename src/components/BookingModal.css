@@ -85,7 +85,11 @@
 .booking-modal-overlay .quickfill-btn {
   font-size: 10px; font-weight: 500; color: var(--h1); background: var(--ink-faint);
   border: none; border-radius: 5px; padding: 4px 6px; cursor: pointer; transition: background 0.15s;
-  margin-top: -2px;
+  /* align-self:flex-start -- .field itu flex-column, default-nya SEMUA
+     anak (label/input/tombol) stretch ngikutin lebar penuh container.
+     Itu pas buat input, tapi bukan buat tombol kecil kayak gini --
+     override biar cuma selebar teksnya sendiri, nempel rata kiri. */
+  align-self: flex-start; margin-top: 2px;
 }
 .booking-modal-overlay .quickfill-btn:hover { background: color-mix(in srgb, var(--ink-faint) 50%, transparent); }
 .booking-modal-overlay .field input,
@@ -142,6 +146,7 @@
   display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0;
 }
 .booking-modal-overlay .field-grid-peserta.cols-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 5px; }
+.booking-modal-overlay .addon-remove-row { display: flex; justify-content: flex-end; margin-bottom: 6px; }
 .booking-modal-overlay .peserta-remove {
   font-size: 12px; font-weight: 550; color: var(--h8); cursor: pointer; background: var(--notif); border: 1px solid var(--notif);
   padding: 4px 8px; border-radius: 7px; transition: background 0.15s;
@@ -236,9 +241,9 @@
   .booking-modal-overlay .field-grid-peserta.cols-2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; margin-bottom: 5px; }
 
   .booking-modal-overlay .quickfill-btn {
-    font-size: 7px; font-weight: 500; color: var(--h1); background: var(--ink-faint);
-    border: none; border-radius: 5px; padding: 4px; cursor: pointer; transition: background 0.15s;
-    margin-top: 0;
+    font-size: 10px; font-weight: 500; color: var(--h1); background: var(--ink-faint);
+    border: none; border-radius: 5px; padding: 4px 6px; cursor: pointer; transition: background 0.15s;
+    align-self: flex-start; margin-top: 2px;
   }
   .booking-modal-overlay .toggle-row-rambut { display: flex; gap: 3px; }
 }

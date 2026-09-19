@@ -412,19 +412,28 @@ export default function BookingModal({ onClose, onSaved }) {
                     <div className="peserta-body">
                       <div className="field-grid-peserta cols-2">
                         <div className="field">
-                          <div className="field-label-row">
-                            <label>Nama Klien</label>
-                            {i === 0 && namaKlien.trim() && (
-                              <button
-                                type="button"
-                                className="quickfill-btn"
-                                onClick={() => updatePeserta(0, 'nama', namaKlien.trim())}
-                              >
-                                Pakai nama klien utama
-                              </button>
-                            )}
-                          </div>
+                          <label>Nama Klien</label>
                           <input type="text" placeholder="contoh: Jenny Black Pink" value={p.nama} onChange={(e) => updatePeserta(i, 'nama', e.target.value)} onBlur={(e) => updatePeserta(i, 'nama', capitalizeWords(e.target.value))} />
+                          {/* Tombol quickfill SENGAJA dipindah ke BAWAH input
+                              (bukan nempel di sebelah label "Nama Klien" lagi)
+                              -- sebelumnya, di layar sempit (misal iPhone 15,
+                              yang lebar logicalnya malah lebih SEMPIT dari
+                              iPhone XR meski modelnya lebih baru), label +
+                              tombol itu nggak muat sebaris, bikin teks "Nama
+                              Klien" ke-pecah jadi 2 baris DAN kolom "Peran" di
+                              sebelahnya ikut keganggu tata letaknya. Ditaruh di
+                              bawah input, tombol ini dapet lebar PENUH 1 kolom
+                              buat dirinya sendiri, nggak pernah rebutan ruang
+                              horizontal sama kolom Peran lagi. */}
+                          {i === 0 && namaKlien.trim() && (
+                            <button
+                              type="button"
+                              className="quickfill-btn"
+                              onClick={() => updatePeserta(0, 'nama', namaKlien.trim())}
+                            >
+                              Pakai nama klien utama
+                            </button>
+                          )}
                         </div>
                         <div className="field">
                           <label>Peran</label>
@@ -516,14 +525,20 @@ export default function BookingModal({ onClose, onSaved }) {
                           Keuntungan cuma nongol begitu nama item-nya diisi. */}
                       {p.addOnLainnya.map((a, ai) => (
                         <div key={ai}>
+                          {/* Hapus di baris sendiri, di ATAS pasangan field --
+                              sama persis alasannya kayak fix di
+                              BookingDetailModal.jsx: biar kolom "Add On Item"
+                              & "Biaya Add On Item" SELALU sejajar, nggak
+                              ketarik turun gara-gara tombol Hapus kepaksa
+                              wrap ke baris baru di layar sempit. */}
+                          {ai > 0 && (
+                            <div className="addon-remove-row">
+                              <button type="button" className="peserta-remove" onClick={() => removeAddOn(i, ai)}>Hapus Add On Item {ai + 1}</button>
+                            </div>
+                          )}
                           <div className="field-grid-peserta cols-2">
                             <div className="field">
-                              <div className="field-label-row">
-                                <label>{ai === 0 ? 'Add On Item' : `Add On Item ${ai + 1}`}</label>
-                                {ai > 0 && (
-                                  <button type="button" className="peserta-remove" onClick={() => removeAddOn(i, ai)}>Hapus</button>
-                                )}
-                              </div>
+                              <label>{ai === 0 ? 'Add On Item' : `Add On Item ${ai + 1}`}</label>
                               <input type="text" placeholder="contoh: Softlens/Kuku Palsu/Melati/lainnya" value={a.nama} onChange={(e) => updateAddOn(i, ai, 'nama', e.target.value)} />
                             </div>
                             {a.nama.trim() && (
