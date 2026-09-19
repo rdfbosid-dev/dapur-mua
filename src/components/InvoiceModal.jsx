@@ -124,13 +124,15 @@ function InvoicePaper({ profile, booking, peserta, payments, totalDibayar, sisa 
             }
             return rows
           })}
-          {Number(booking.biaya_transport) > 0 && (
-            <tr>
-              <td></td>
-              <td>Transport</td>
-              <td className="right">{formatRupiah(booking.biaya_transport)}</td>
-            </tr>
-          )}
+          {/* SENGAJA selalu ditampilin, walau nilainya Rp0 -- itu jadi
+              bukti eksplisit ke klien & arsip user kalau transport-nya
+              MEMANG Rp0 (gratis/nggak ada ongkos), bukan kelupaan diisi.
+              Baris kosong itu beda maknanya sama baris "Rp0". */}
+          <tr>
+            <td></td>
+            <td>Transport</td>
+            <td className="right">{formatRupiah(booking.biaya_transport)}</td>
+          </tr>
         </tbody>
       </table>
 
