@@ -219,9 +219,18 @@ export default function BookingModal({ onClose, onSaved }) {
       return
     }
 
-    const pesertaRows = pesertaList.map((p) => ({
+    const pesertaRows = pesertaList.map((p, i) => ({
       booking_id: booking.id,
       user_id: user.id,
+      // "urutan" ini WAJIB, JANGAN andelin created_at buat nentuin
+      // urutan tampilan -- semua baris peserta di 1 booking di-insert
+      // dalam SATU perintah bulk insert kayak di bawah ini, jadi
+      // created_at-nya PERSIS SAMA buat semuanya (now() cuma dievaluasi
+      // sekali per statement). Tanpa kolom ini, urutan tampilan cuma
+      // nebak dari posisi fisik data, yang bisa berubah sendiri begitu
+      // salah satu baris di-edit nanti. Lihat juga fix yang sama di
+      // BookingDetailModal.jsx.
+      urutan: i,
       nama_anggota: p.nama.trim(),
       peran: p.peran.trim(),
       jenis_paket: p.jenisPaket.trim(),

@@ -142,7 +142,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
     setError('')
 
     const [{ data: pesertaData, error: pesertaErr }, { data: paymentData, error: paymentErr }, { data: bookingData, error: bookingErr }] = await Promise.all([
-      supabase.from('peserta').select('*').eq('booking_id', booking.id).order('created_at'),
+      supabase.from('peserta').select('*').eq('booking_id', booking.id).order('urutan'),
       supabase.from('payments').select('*').eq('booking_id', booking.id).order('tanggal', { ascending: false }),
       supabase.from('booking_summary').select('*').eq('id', booking.id).single(),
     ])
@@ -275,8 +275,14 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
       if (delErr) { setSaving(false); setError(delErr.message); return }
     }
 
-    for (const p of editPeserta) {
+    for (const [i, p] of editPeserta.entries()) {
       const payload = {
+        // "urutan" ditulis ulang dari POSISI ASLI di array ini setiap
+        // kali disimpan -- jadi tampilan (baik di sini maupun di
+        // Invoice) selalu sinkron persis sama urutan yang keliatan di
+        // form ini, apapun yang terjadi ke baris lain. Lihat penjelasan
+        // lengkap kenapa ini perlu di BookingModal.jsx.
+        urutan: i,
         nama_anggota: p.nama_anggota?.trim() || '',
         peran: p.peran?.trim() || '',
         jenis_paket: (p.jenis_paket || '').trim(),
