@@ -532,7 +532,9 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                 <span className={`status-pill ${liveBooking.status_pembayaran === 'Lunas' ? 'lunas' : 'belum'}`}>
                   {liveBooking.status_pembayaran}
                 </span>
-                <button className="btn-ghost" style={{ marginLeft: 'auto' }} onClick={() => setShowRincian(true)}>Rincian Keuangan</button>
+              </div>
+              <div className="detail-actions">
+                <button className="btn-ghost" onClick={() => setShowRincian(true)}>Rincian Keuangan</button>
                 <button className="btn-ghost" onClick={() => setShowInvoice(true)}>Invoice</button>
                 <button className="btn-ghost" onClick={enterEditMode}>Edit Booking</button>
               </div>
@@ -649,7 +651,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                       nampilin angka polos (bukan "Ditagih Rp300.000"
                       digabung 1 baris) -- itu yang tadinya bikin
                       kepanjangan & numpuk ke bawah di kolom yang sempit. */}
-                  <div className="pay-row pay-row-header">
+                  <div className="pay-row pay-row-header pay-row-bundling">
                     <span></span>
                     <span>Ditagih</span>
                     <span>Untung</span>
@@ -671,7 +673,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                           </div>
                         </div>
                       ) : (
-                        <div className="pay-row">
+                        <div className="pay-row pay-row-bundling">
                           <span>{item.nama}</span>
                           <span>{formatRupiah(item.biaya)}</span>
                           <span className="pay-amount">{formatRupiah(item.keuntungan)}</span>
@@ -712,7 +714,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                             </div>
                           </div>
                         ) : (
-                          <div className="pay-row" key={child.id} style={{ marginLeft: 20 }}>
+                          <div className="pay-row pay-row-bundling" key={child.id} style={{ marginLeft: 20 }}>
                             <span>↳ {child.nama}</span>
                             <span>{formatRupiah(child.biaya)}</span>
                             <span className="pay-amount">{formatRupiah(child.keuntungan)}</span>
