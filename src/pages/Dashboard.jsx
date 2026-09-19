@@ -239,7 +239,7 @@ export default function Dashboard() {
   const belanjaKlienBulanIni = bookingBulanIni.reduce((sum, b) => sum + (Number(b.belanja_klien) || 0), 0)
   const transportBulanIni = bookingBulanIni.reduce((sum, b) => sum + (Number(b.biaya_transport) || 0), 0)
   const komisiTimBulanIni = omzetBulanIni - penghasilanBulanIni
-  const belumLunas = bookings.filter((b) => b.status_pembayaran === 'Belum Lunas')
+  const belumLunas = bookingBulanIni.filter((b) => b.status_pembayaran === 'Belum Lunas')
   const bookingHariIni = bookings.filter(isToday)
 
   function countBy(arr, key) {
@@ -480,7 +480,7 @@ export default function Dashboard() {
                   </div>
                 </div>
                 <div className="kpi-value-status">{belumLunas.length}</div>
-                <div className="kpi-sub-status">Klien perlu ditagih</div>
+                <div className="kpi-sub-status">Klien perlu ditagih bulan ini</div>
               </div>
             </div>
 
@@ -693,8 +693,8 @@ export default function Dashboard() {
                   Booking terbanyak dari <b>{sumberCounts[0]?.[0]} ({Math.round((sumberCounts[0]?.[1] / bookingBulanIni.length) * 100)}%)</b>
                   {' · '}Event <b>{eventCounts[0]?.[0]}</b> mendominasi <b>({Math.round((eventCounts[0]?.[1] / bookingBulanIni.length) * 100)}%)</b>
                   {belumLunas.length > 0
-                    ? <> · Ingatkan <b>{belumLunas.length} klien</b> yang belum lunas, ya!</>
-                    : ' · Semua booking sudah lunas 🎉'}
+                    ? <> · Ingatkan <b>{belumLunas.length} klien</b> yang belum lunas bulan ini, ya!</>
+                    : ' · Semua booking bulan ini sudah lunas 🎉'}
                 </span>
               </div>
             )}
