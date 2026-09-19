@@ -6,10 +6,6 @@ function formatRupiah(n) {
   return sign + 'Rp' + Math.abs(num).toLocaleString('id-ID')
 }
 
-function sum(arr, field) {
-  return arr.reduce((s, p) => s + (Number(p[field]) || 0), 0)
-}
-
 // Modal INTERNAL buat MUA sendiri -- beda total sama section "PEMBAYARAN"
 // di BookingDetailModal (yang itu soal tagihan KE KLIEN). Ini jawab
 // pertanyaan "dari booking ini, MUA-nya dapet berapa & dari mana aja".
@@ -17,21 +13,43 @@ function sum(arr, field) {
 // di detail booking) -- biar nggak nyampur 2 jenis informasi yang beda
 // audiens-nya, dan biar detail booking yang udah lumayan padat nggak
 // tambah panjang.
+//
+// SEMUA section di bawah SENGAJA dipecah PER ITEM (per klien, per add
+// on, per paket bundling) -- BUKAN digabung/dijumlahin -- biar user
+// bisa liat & cocokin manual satu-satu, dari mana asal tiap rupiah-nya.
 export default function RincianKeuanganModal({ booking, peserta, bundlingItems = [], onClose }) {
-  const makeupMe = peserta.filter((p) => p.dikerjakan_oleh_makeup === 'Me')
-  const makeupTim = peserta.filter((p) => p.dikerjakan_oleh_makeup === 'Tim')
-  const punyaTambahan = (p) => p.layanan_tambahan && p.layanan_tambahan !== 'Tidak Ada'
-  const tambahanMe = peserta.filter((p) => punyaTambahan(p) && p.dikerjakan_oleh_tambahan === 'Me')
-  const tambahanTim = peserta.filter((p) => punyaTambahan(p) && p.dikerjakan_oleh_tambahan === 'Tim')
-
-  const biayaAddOn = booking.biaya_lainnya_total || 0
-  const untungAddOn = booking.keuntungan_lainnya_total || 0
   const transport = booking.biaya_transport || 0
+  const punyaTambahan = (p) => p.layanan_tambahan && p.layanan_tambahan !== 'Tidak Ada'
 
-  // Pecah add-on PER ITEM (bukan cuma total gabungan) -- ngambil dari
-  // tiap peserta, tiap slot 1-5, biar user bisa liat & cocokin manual
-  // satu-satu (misal: Photographer, Strobist, Attire -- masing-masing
-  // baris sendiri, bukan dijumlahin jadi 1 angka doang).
+  // Makeup & Tambahan -- PER KLIEN, bukan digabung jadi 1 baris "Me · N
+  // klien" kayak sebelumnya. Kalau dikerjain Tim: "biaya" itu yang
+  // DITAGIH ke klien (biaya_makeup/biaya_tambahan, jumlah PENUH),
+  // "untung" itu bagian yang beneran masuk kantong Me (komisi dari
+  // studio) -- 2 angka yang beda, makanya ditampilin terpisah. Kalau
+  // dikerjain Me sendiri: nggak ada pemisahan itu, semua yang ditagih
+  // ITU JUGA penghasilan Me, jadi biaya = untung (untung-nya nggak usah
+  // ditampilin dobel, sama kayak pola di Add On).
+  const makeupRows = peserta.map((p) => {
+    const tim = p.dikerjakan_oleh_makeup === 'Tim'
+    return {
+      nama: p.nama_anggota,
+      tim,
+      biaya: Number(p.biaya_makeup) || 0,
+      untung: tim ? Number(p.komisi_makeup_tim) || 0 : Number(p.biaya_makeup) || 0,
+    }
+  })
+
+  const tambahanRows = peserta.filter(punyaTambahan).map((p) => {
+    const tim = p.dikerjakan_oleh_tambahan === 'Tim'
+    return {
+      nama: p.nama_anggota,
+      tim,
+      biaya: Number(p.biaya_tambahan) || 0,
+      untung: tim ? Number(p.komisi_tambahan) || 0 : Number(p.biaya_tambahan) || 0,
+    }
+  })
+
+  // Add-on PER ITEM -- ngambil dari tiap peserta, tiap slot 1-5.
   const addOnItems = []
   peserta.forEach((p) => {
     for (let n = 1; n <= 5; n++) {
@@ -48,42 +66,42 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
     }
   })
 
-  const makeupMeTotal = sum(makeupMe, 'biaya_makeup')
-  const makeupTimTotal = sum(makeupTim, 'komisi_makeup_tim')
-  const tambahanMeTotal = sum(tambahanMe, 'biaya_tambahan')
-  const tambahanTimTotal = sum(tambahanTim, 'komisi_tambahan')
-  // Bundling -- BEDA sama Add On: yang masuk Omzet/Penghasilan cuma
-  // UNTUNG-nya doang, biaya penuh yang ditagih ke klien nggak dihitung
-  // sebagai pemasukan bisnis MUA (itu duit yang diterusin ke vendor
-  // luar). Liat diskusi lengkapnya soal ini di percakapan sebelumnya.
-  const untungBundlingTotal = sum(bundlingItems, 'keuntungan')
+  const bundlingTop = bundlingItems.filter((b) => !b.parent_id)
+  const makeupMeAda = makeupRows.some((r) => !r.tim)
+  const makeupTimAda = makeupRows.some((r) => r.tim)
+  const tambahanMeAda = tambahanRows.some((r) => !r.tim)
+  const tambahanTimAda = tambahanRows.some((r) => r.tim)
 
-  // Komponen rumus Omzet & Penghasilan -- SENGAJA cuma masukin komponen
-  // yang emang ada baris-nya di daftar rincian DI ATAS (misal kalau
-  // nggak ada yang pake Layanan Tambahan, komponen itu nggak usah
-  // muncul di rumus juga) -- biar user bisa NYOCOKIN LANGSUNG, angka di
-  // rumus ini match persis sama baris yang dia liat di atasnya.
-  const komponenOmzet = [
-    makeupMe.length > 0 && { label: 'Makeup Me', nilai: makeupMeTotal },
-    makeupTim.length > 0 && { label: 'Makeup Tim', nilai: makeupTimTotal },
-    tambahanMe.length > 0 && { label: 'Tambahan Me', nilai: tambahanMeTotal },
-    tambahanTim.length > 0 && { label: 'Tambahan Tim', nilai: tambahanTimTotal },
-    addOnItems.length > 0 && { label: 'Add On', nilai: biayaAddOn },
-    bundlingItems.length > 0 && { label: 'Untung Bundling', nilai: untungBundlingTotal },
-    transport > 0 && { label: 'Transport', nilai: transport },
-  ].filter(Boolean)
+  // Rumus -- SENGAJA cuma nulis LABEL/poin-nya doang, BUKAN angka --
+  // biar rumus ini jelasin KONSEPNYA ("dari mana asalnya Omzet"),
+  // bukan sekadar ngulang angka yang udah keliatan di kartu Omzet/
+  // Penghasilan & baris-baris rincian di atas.
+  const rumusOmzet = [
+    makeupMeAda && 'Biaya Makeup (Me)',
+    makeupTimAda && 'Komisi Makeup (Tim)',
+    tambahanMeAda && 'Biaya Tambahan (Me)',
+    tambahanTimAda && 'Komisi Tambahan (Tim)',
+    addOnItems.length > 0 && 'Biaya Add On',
+    bundlingTop.length > 0 && 'Untung Bundling',
+    transport > 0 && 'Transport',
+  ].filter(Boolean).join(' + ')
 
-  const komponenPenghasilan = [
-    makeupMe.length > 0 && { label: 'Makeup Me', nilai: makeupMeTotal },
-    makeupTim.length > 0 && { label: 'Makeup Tim', nilai: makeupTimTotal },
-    tambahanMe.length > 0 && { label: 'Tambahan Me', nilai: tambahanMeTotal },
-    tambahanTim.length > 0 && { label: 'Tambahan Tim', nilai: tambahanTimTotal },
-    addOnItems.length > 0 && { label: 'Untung Add On', nilai: untungAddOn },
-    bundlingItems.length > 0 && { label: 'Untung Bundling', nilai: untungBundlingTotal },
-  ].filter(Boolean)
+  const rumusPenghasilan = [
+    makeupMeAda && 'Biaya Makeup (Me)',
+    makeupTimAda && 'Komisi Makeup (Tim)',
+    tambahanMeAda && 'Biaya Tambahan (Me)',
+    tambahanTimAda && 'Komisi Tambahan (Tim)',
+    addOnItems.length > 0 && 'Untung Add On',
+    bundlingTop.length > 0 && 'Untung Bundling',
+  ].filter(Boolean).join(' + ')
 
-  function formatRumus(komponen) {
-    return komponen.map((k) => `${formatRupiah(k.nilai)} (${k.label})`).join(' + ')
+  function BiayaUntung({ biaya, untung }) {
+    return (
+      <div className="rincian-addon-nilai">
+        <b>{formatRupiah(biaya)}</b>
+        {untung !== biaya && <span className="rincian-addon-untung">Untung {formatRupiah(untung)}</span>}
+      </div>
+    )
   }
 
   return (
@@ -106,37 +124,27 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
             </div>
           </div>
 
-          <div className="rincian-section">
-            <div className="rincian-section-title">Layanan Makeup</div>
-            {makeupMe.length > 0 && (
-              <div className="rincian-row">
-                <span>Dikerjakan Sendiri (Me) · {makeupMe.length} klien</span>
-                <b>{formatRupiah(sum(makeupMe, 'biaya_makeup'))}</b>
-              </div>
-            )}
-            {makeupTim.length > 0 && (
-              <div className="rincian-row">
-                <span>Dikerjakan Tim · {makeupTim.length} klien</span>
-                <b>{formatRupiah(sum(makeupTim, 'komisi_makeup_tim'))}</b>
-              </div>
-            )}
-          </div>
+          {makeupRows.length > 0 && (
+            <div className="rincian-section">
+              <div className="rincian-section-title">Layanan Makeup</div>
+              {makeupRows.map((r, idx) => (
+                <div className="rincian-row" key={idx}>
+                  <span>{r.nama} ({r.tim ? 'Tim' : 'Me'})</span>
+                  <BiayaUntung biaya={r.biaya} untung={r.untung} />
+                </div>
+              ))}
+            </div>
+          )}
 
-          {(tambahanMe.length > 0 || tambahanTim.length > 0) && (
+          {tambahanRows.length > 0 && (
             <div className="rincian-section">
               <div className="rincian-section-title">Layanan Tambahan (Hairdo/Hijabdo+)</div>
-              {tambahanMe.length > 0 && (
-                <div className="rincian-row">
-                  <span>Dikerjakan Sendiri (Me) · {tambahanMe.length} klien</span>
-                  <b>{formatRupiah(sum(tambahanMe, 'biaya_tambahan'))}</b>
+              {tambahanRows.map((r, idx) => (
+                <div className="rincian-row" key={idx}>
+                  <span>{r.nama} ({r.tim ? 'Tim' : 'Me'})</span>
+                  <BiayaUntung biaya={r.biaya} untung={r.untung} />
                 </div>
-              )}
-              {tambahanTim.length > 0 && (
-                <div className="rincian-row">
-                  <span>Dikerjakan Tim · {tambahanTim.length} klien</span>
-                  <b>{formatRupiah(sum(tambahanTim, 'komisi_tambahan'))}</b>
-                </div>
-              )}
+              ))}
             </div>
           )}
 
@@ -146,34 +154,25 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
               {addOnItems.map((item, idx) => (
                 <div className="rincian-row" key={idx}>
                   <span>{item.nama}{peserta.length > 1 ? ` (${item.pesertaNama})` : ''}</span>
-                  <div className="rincian-addon-nilai">
-                    <b>{formatRupiah(item.biaya)}</b>
-                    {/* Untung ditampilin terpisah dari biaya -- biar
-                        kelihatan berapa MARGIN yang diambil per item,
-                        bukan cuma total ditagih ke klien. Nggak
-                        ditampilin kalau angkanya sama persis (redundan). */}
-                    {item.untung !== item.biaya && (
-                      <span className="rincian-addon-untung">Untung {formatRupiah(item.untung)}</span>
-                    )}
-                  </div>
+                  <BiayaUntung biaya={item.biaya} untung={item.untung} />
                 </div>
               ))}
             </div>
           )}
 
-          {bundlingItems.filter((b) => !b.parent_id).length > 0 && (
+          {bundlingTop.length > 0 && (
             <div className="rincian-section">
               <div className="rincian-section-title">Paket Bundling</div>
-              {bundlingItems.filter((b) => !b.parent_id).map((item) => (
+              {bundlingTop.map((item) => (
                 <div key={item.id}>
                   <div className="rincian-row">
                     <span>{item.nama}</span>
-                    <b>Untung {formatRupiah(item.keuntungan)}</b>
+                    <BiayaUntung biaya={item.biaya} untung={item.keuntungan} />
                   </div>
                   {bundlingItems.filter((c) => c.parent_id === item.id).map((child) => (
                     <div className="rincian-row" key={child.id} style={{ paddingLeft: 20 }}>
                       <span>↳ {child.nama}</span>
-                      <b>Untung {formatRupiah(child.keuntungan)}</b>
+                      <BiayaUntung biaya={child.biaya} untung={child.keuntungan} />
                     </div>
                   ))}
                 </div>
@@ -192,8 +191,8 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
           )}
 
           <div className="rincian-note">
-            <div className="rincian-rumus"><b>Omzet</b> = {formatRumus(komponenOmzet)} = {formatRupiah(booking.omzet)}</div>
-            <div className="rincian-rumus"><b>Penghasilan</b> = {formatRumus(komponenPenghasilan)} = {formatRupiah(booking.penghasilan)}</div>
+            <div className="rincian-rumus"><b>Omzet</b> = {rumusOmzet}</div>
+            <div className="rincian-rumus"><b>Penghasilan</b> = {rumusPenghasilan}</div>
           </div>
         </div>
 
