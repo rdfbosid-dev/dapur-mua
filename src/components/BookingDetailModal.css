@@ -83,7 +83,7 @@
 
 /* Titik A: jarak sebelum badge status (di bawah judul modal) */
 .booking-detail-overlay .detail-header { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 10px; margin-top: 0; margin-bottom: 5px; }
-.booking-detail-overlay .detail-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px 10px; margin-bottom: 12px; }
+.booking-detail-overlay .detail-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px 10px; margin-bottom: 10px; }
 
 /* Sumber jarak TUNGGAL sebelum tiap section-label (INFO BOOKING/PEMBAYARAN/PESERTA) --
    ini yang bikin titik B dan C otomatis seragam sama titik A di atas. Elemen
@@ -105,7 +105,7 @@
 }
 .booking-detail-overlay .detail-grid > div { font-size: 12px; font-weight: 600; color: var(--h5); }
 
-.booking-detail-overlay .status-pill { font-size: 11px; font-weight: 600; padding: 5px 10px; border-radius: 8px; white-space: nowrap; margin-bottom: 20px; }
+.booking-detail-overlay .status-pill { font-size: 11px; font-weight: 600; padding: 5px 10px; border-radius: 8px; white-space: nowrap; margin-bottom: 10px; }
 .booking-detail-overlay .status-pill.belum { background: var(--pill); color: var(--h8); }
 .booking-detail-overlay .status-pill.lunas { background: var(--pill-alt); color: var(--h7); }
 

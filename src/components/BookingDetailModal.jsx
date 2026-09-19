@@ -714,8 +714,8 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                             </div>
                           </div>
                         ) : (
-                          <div className="pay-row pay-row-bundling" key={child.id} style={{ marginLeft: 20 }}>
-                            <span>↳ {child.nama}</span>
+                          <div className="pay-row pay-row-bundling" key={child.id}>
+                            <span style={{ paddingLeft: 20 }}>↳ {child.nama}</span>
                             <span>{formatRupiah(child.biaya)}</span>
                             <span className="pay-amount">{formatRupiah(child.keuntungan)}</span>
                             <span className="pay-note"></span>
