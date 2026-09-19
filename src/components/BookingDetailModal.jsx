@@ -200,7 +200,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
   }
   function addEditPeserta() {
     setEditPeserta((list) => [...list, {
-      nama_anggota: '', peran: '', kategori_makeup: 'Reguler', jenis_paket: '', dikerjakan_oleh_makeup: 'Me',
+      nama_anggota: '', peran: '', kategori_makeup: 'Regular', jenis_paket: '', dikerjakan_oleh_makeup: 'Me',
       biaya_makeup: 0, komisi_makeup_tim: 0, layanan_tambahan: 'Tidak Ada',
       dikerjakan_oleh_tambahan: 'Me', biaya_tambahan: 0, komisi_tambahan: 0,
       layanan_lainnya: '', biaya_lainnya: 0, keuntungan_lainnya: 0,
@@ -636,7 +636,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                           <label>Kategori</label>
                           <CustomSelect
                             options={KATEGORI_MAKEUP_OPTIONS}
-                            value={p.kategori_makeup || 'Reguler'}
+                            value={p.kategori_makeup || 'Regular'}
                             onChange={(v) => updateEditPeserta(i, 'kategori_makeup', v)}
                             variant="modal"
                           />

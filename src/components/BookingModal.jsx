@@ -49,7 +49,7 @@ function addOnsToRow(addOns) {
 function blankPeserta(nama = '') {
   return {
     nama, peran: '',
-    kategoriMakeup: 'Reguler', jenisPaket: '', dikerjakanOlehMakeup: 'Me',
+    kategoriMakeup: 'Regular', jenisPaket: '', dikerjakanOlehMakeup: 'Me',
     biayaMakeup: '', komisiMakeup: '',
     layananTambahan: 'Tidak Ada', dikerjakanOlehTambahan: 'Me',
     biayaTambahan: '', komisiTambahan: '',
