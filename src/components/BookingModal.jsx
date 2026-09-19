@@ -168,6 +168,20 @@ export default function BookingModal({ onClose, onSaved }) {
       return { ...p, addOnLainnya: [...p.addOnLainnya, { nama: '', biaya: '', keuntungan: '' }] }
     }))
   }
+
+  // Paket Bundling -- level BOOKING (bukan per klien kayak Add On),
+  // buat kerjasama vendor luar. Sama persis konsepnya kayak yang udah
+  // ada di BookingDetailModal.jsx, cuma di sini buat booking BARU.
+  const [bundlingList, setBundlingList] = useState([])
+  function addBundling() {
+    setBundlingList((list) => [...list, { nama: '', biaya: '', untung: '' }])
+  }
+  function updateBundling(i, field, value) {
+    setBundlingList((list) => list.map((b, idx) => (idx === i ? { ...b, [field]: value } : b)))
+  }
+  function removeBundling(i) {
+    setBundlingList((list) => list.filter((_, idx) => idx !== i))
+  }
   function removeAddOn(pesertaIdx, addOnIdx) {
     setPesertaList((list) => list.map((p, idx) => {
       if (idx !== pesertaIdx) return p
@@ -264,6 +278,28 @@ export default function BookingModal({ onClose, onSaved }) {
       if (dpError) {
         setSaving(false)
         setError('Booking & peserta tersimpan, tapi gagal simpan DP: ' + dpError.message)
+        return
+      }
+    }
+
+    // Baris yang nama-nya masih kosong (user klik "+ Tambah Paket
+    // Bundling" tapi nggak jadi diisi) SENGAJA di-skip, nggak dikirim
+    // ke database -- sama persis filosofinya kayak Add On Item.
+    const bundlingRows = bundlingList
+      .filter((b) => b.nama.trim())
+      .map((b) => ({
+        booking_id: booking.id,
+        user_id: user.id,
+        nama: b.nama.trim(),
+        biaya: Number(b.biaya) || 0,
+        keuntungan: Number(b.untung) || 0,
+      }))
+
+    if (bundlingRows.length > 0) {
+      const { error: bundlingError } = await supabase.from('bundling_items').insert(bundlingRows)
+      if (bundlingError) {
+        setSaving(false)
+        setError('Booking, peserta, & DP tersimpan, tapi gagal simpan paket bundling: ' + bundlingError.message)
         return
       }
     }
@@ -566,6 +602,28 @@ export default function BookingModal({ onClose, onSaved }) {
                 )
               })}
               <button type="button" className="add-peserta" onClick={addPeserta}>+ Tambah Klien</button>
+            </div>
+
+            {/* Paket Bundling -- level BOOKING, di LUAR loop peserta di
+                atas (beda sama Add On yang nempel per klien). */}
+            <div className="section-label">Paket Bundling</div>
+            <div>
+              {bundlingList.map((b, i) => (
+                <div key={i}>
+                  {/* Hapus di baris sendiri, di ATAS field-nya -- pola
+                      yang sama kayak fix Add On kemarin, biar 3 kolom
+                      di bawahnya selalu sejajar rapi di mobile. */}
+                  <div className="addon-remove-row">
+                    <button type="button" className="peserta-remove" onClick={() => removeBundling(i)}>Hapus Paket {i + 1}</button>
+                  </div>
+                  <div className="field-grid-bundling">
+                    <div className="field"><label>Nama Paket</label><input type="text" placeholder="contoh: Fotografer @fourgrads" value={b.nama} onChange={(e) => updateBundling(i, 'nama', e.target.value)} /></div>
+                    <div className="field"><label>Biaya Ditagih ke Klien</label><input type="text" inputMode="numeric" placeholder="Rp0" value={b.biaya ? `Rp${formatAngkaInput(b.biaya)}` : ''} onChange={(e) => updateBundling(i, 'biaya', parseAngkaInput(e.target.value))} /></div>
+                    <div className="field"><label>Untung/Komisi MUA</label><input type="text" inputMode="numeric" placeholder="Rp0" value={b.untung ? `Rp${formatAngkaInput(b.untung)}` : ''} onChange={(e) => updateBundling(i, 'untung', parseAngkaInput(e.target.value))} /></div>
+                  </div>
+                </div>
+              ))}
+              <button type="button" className="add-peserta" onClick={addBundling}>+ Tambah Paket Bundling</button>
             </div>
           </div>
 
