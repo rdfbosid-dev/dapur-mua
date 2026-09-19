@@ -971,6 +971,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
         <RincianKeuanganModal
           booking={liveBooking}
           peserta={peserta}
+          bundlingItems={bundlingItems}
           onClose={() => setShowRincian(false)}
         />
       )}

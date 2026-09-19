@@ -17,7 +17,7 @@ function sum(arr, field) {
 // di detail booking) -- biar nggak nyampur 2 jenis informasi yang beda
 // audiens-nya, dan biar detail booking yang udah lumayan padat nggak
 // tambah panjang.
-export default function RincianKeuanganModal({ booking, peserta, onClose }) {
+export default function RincianKeuanganModal({ booking, peserta, bundlingItems = [], onClose }) {
   const makeupMe = peserta.filter((p) => p.dikerjakan_oleh_makeup === 'Me')
   const makeupTim = peserta.filter((p) => p.dikerjakan_oleh_makeup === 'Tim')
   const punyaTambahan = (p) => p.layanan_tambahan && p.layanan_tambahan !== 'Tidak Ada'
@@ -52,6 +52,11 @@ export default function RincianKeuanganModal({ booking, peserta, onClose }) {
   const makeupTimTotal = sum(makeupTim, 'komisi_makeup_tim')
   const tambahanMeTotal = sum(tambahanMe, 'biaya_tambahan')
   const tambahanTimTotal = sum(tambahanTim, 'komisi_tambahan')
+  // Bundling -- BEDA sama Add On: yang masuk Omzet/Penghasilan cuma
+  // UNTUNG-nya doang, biaya penuh yang ditagih ke klien nggak dihitung
+  // sebagai pemasukan bisnis MUA (itu duit yang diterusin ke vendor
+  // luar). Liat diskusi lengkapnya soal ini di percakapan sebelumnya.
+  const untungBundlingTotal = sum(bundlingItems, 'keuntungan')
 
   // Komponen rumus Omzet & Penghasilan -- SENGAJA cuma masukin komponen
   // yang emang ada baris-nya di daftar rincian DI ATAS (misal kalau
@@ -64,6 +69,7 @@ export default function RincianKeuanganModal({ booking, peserta, onClose }) {
     tambahanMe.length > 0 && { label: 'Tambahan Me', nilai: tambahanMeTotal },
     tambahanTim.length > 0 && { label: 'Tambahan Tim', nilai: tambahanTimTotal },
     addOnItems.length > 0 && { label: 'Add On', nilai: biayaAddOn },
+    bundlingItems.length > 0 && { label: 'Untung Bundling', nilai: untungBundlingTotal },
     transport > 0 && { label: 'Transport', nilai: transport },
   ].filter(Boolean)
 
@@ -73,6 +79,7 @@ export default function RincianKeuanganModal({ booking, peserta, onClose }) {
     tambahanMe.length > 0 && { label: 'Tambahan Me', nilai: tambahanMeTotal },
     tambahanTim.length > 0 && { label: 'Tambahan Tim', nilai: tambahanTimTotal },
     addOnItems.length > 0 && { label: 'Untung Add On', nilai: untungAddOn },
+    bundlingItems.length > 0 && { label: 'Untung Bundling', nilai: untungBundlingTotal },
   ].filter(Boolean)
 
   function formatRumus(komponen) {
@@ -149,6 +156,18 @@ export default function RincianKeuanganModal({ booking, peserta, onClose }) {
                       <span className="rincian-addon-untung">Untung {formatRupiah(item.untung)}</span>
                     )}
                   </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {bundlingItems.length > 0 && (
+            <div className="rincian-section">
+              <div className="rincian-section-title">Paket Bundling</div>
+              {bundlingItems.map((item) => (
+                <div className="rincian-row" key={item.id}>
+                  <span>{item.nama}</span>
+                  <b>Untung {formatRupiah(item.keuntungan)}</b>
                 </div>
               ))}
             </div>
