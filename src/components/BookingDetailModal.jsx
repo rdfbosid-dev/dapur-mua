@@ -642,6 +642,20 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
               <div className="detail-label-history">Paket Bundling</div>
               {bundlingItems.filter((b) => !b.parent_id).length > 0 && (
                 <div className="pay-history">
+                  {/* Baris header -- numpang grid ".pay-row" yang SAMA
+                      persis kayak baris data di bawahnya, biar kolom
+                      "Ditagih"/"Untung" ini sejajar persis sama
+                      angkanya. Baris data sendiri sekarang cuma
+                      nampilin angka polos (bukan "Ditagih Rp300.000"
+                      digabung 1 baris) -- itu yang tadinya bikin
+                      kepanjangan & numpuk ke bawah di kolom yang sempit. */}
+                  <div className="pay-row pay-row-header">
+                    <span></span>
+                    <span>Ditagih</span>
+                    <span>Untung</span>
+                    <span></span>
+                    <span></span>
+                  </div>
                   {bundlingItems.filter((b) => !b.parent_id).map((item) => (
                     <div key={item.id}>
                       {editingBundlingId === item.id ? (
@@ -659,8 +673,8 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                       ) : (
                         <div className="pay-row">
                           <span>{item.nama}</span>
-                          <span>Ditagih {formatRupiah(item.biaya)}</span>
-                          <span className="pay-amount">Untung {formatRupiah(item.keuntungan)}</span>
+                          <span>{formatRupiah(item.biaya)}</span>
+                          <span className="pay-amount">{formatRupiah(item.keuntungan)}</span>
                           <span className="pay-note"></span>
                           <div className="pay-actions">
                             <button type="button" onClick={() => startEditBundling(item)}>Edit</button>
@@ -700,8 +714,8 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                         ) : (
                           <div className="pay-row" key={child.id} style={{ marginLeft: 20 }}>
                             <span>↳ {child.nama}</span>
-                            <span>Ditagih {formatRupiah(child.biaya)}</span>
-                            <span className="pay-amount">Untung {formatRupiah(child.keuntungan)}</span>
+                            <span>{formatRupiah(child.biaya)}</span>
+                            <span className="pay-amount">{formatRupiah(child.keuntungan)}</span>
                             <span className="pay-note"></span>
                             <div className="pay-actions">
                               <button type="button" onClick={() => startEditBundling(child)}>Edit</button>
@@ -735,7 +749,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                           </div>
                         </form>
                       ) : (
-                        <button type="button" className="add-payment" style={{ marginLeft: 20, marginTop: 4, marginBottom: 10 }} onClick={() => setAddingAddOnForParentId(item.id)}>+ Tambah Add On Paket Ini</button>
+                        <button type="button" className="add-payment" style={{ marginLeft: 20, marginTop: 10, marginBottom: 10 }} onClick={() => setAddingAddOnForParentId(item.id)}>+ Tambah Add On Paket Ini</button>
                       )}
                     </div>
                   ))}

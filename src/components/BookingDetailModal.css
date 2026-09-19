@@ -51,7 +51,7 @@
 .booking-detail-overlay .btn-payment {
   padding: 5px 10px; border-radius: 8px; border: 1px solid color-mix(in srgb, var(--button-prm-hover) 50%, transparent); background: color-mix(in srgb, var(--button-prm-hover) 50%, transparent);
   font-size: 12px; font-weight: 600; color: var(--h7); cursor: pointer; font-family: inherit;
-  transition: background 0.15s, border-color 0.15s; line-height: 1.4; margin-top: 10px;
+  transition: background 0.15s, border-color 0.15s; line-height: 1.4;
 }
 
 .booking-detail-overlay .btn-payment:hover {
@@ -134,6 +134,15 @@
 }
 .booking-detail-overlay .pay-row:hover { background: linear-gradient(80deg, var(--active-nav) 0%, var(--table-body) 100%); }
 .booking-detail-overlay .pay-row:last-child { border-bottom: none; }
+/* Baris header (Paket Bundling) -- numpang grid ".pay-row" yang sama
+   biar kolomnya sejajar persis sama baris data, tapi tampilannya
+   dibedain: nggak ada background/hover, teksnya kecil-muted-kapital
+   kayak label section lainnya di app ini. */
+.booking-detail-overlay .pay-row-header {
+  background: none; border-bottom: none; padding: 0 10px; margin-bottom: 2px;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-soft); opacity: 0.7;
+}
+.booking-detail-overlay .pay-row-header:hover { background: none; }
 .booking-detail-overlay .pay-amount { font-weight: 700; color: var(--ink-soft); text-align: right; }
 .booking-detail-overlay .pay-actions { position: relative; display: flex; gap: 5px; }
 .booking-detail-overlay .pay-actions button {
