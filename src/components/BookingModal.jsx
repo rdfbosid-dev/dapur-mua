@@ -609,17 +609,17 @@ export default function BookingModal({ onClose, onSaved }) {
             <div className="section-label">Paket Bundling</div>
             <div>
               {bundlingList.map((b, i) => (
-                <div key={i}>
-                  {/* Hapus di baris sendiri, di ATAS field-nya -- pola
-                      yang sama kayak fix Add On kemarin, biar 3 kolom
-                      di bawahnya selalu sejajar rapi di mobile. */}
-                  <div className="addon-remove-row">
-                    <button type="button" className="peserta-remove" onClick={() => removeBundling(i)}>Hapus Paket {i + 1}</button>
+                <div className="peserta-card" key={i}>
+                  <div className="peserta-head">
+                    <div className="peserta-title"><span className="peserta-num">{i + 1}</span>Paket {i + 1}</div>
+                    <button type="button" className="peserta-remove" onClick={() => removeBundling(i)}>Hapus</button>
                   </div>
-                  <div className="field-grid-bundling">
-                    <div className="field"><label>Nama Paket</label><input type="text" placeholder="contoh: Fotografer @fourgrads" value={b.nama} onChange={(e) => updateBundling(i, 'nama', e.target.value)} /></div>
-                    <div className="field"><label>Biaya Ditagih ke Klien</label><input type="text" inputMode="numeric" placeholder="Rp0" value={b.biaya ? `Rp${formatAngkaInput(b.biaya)}` : ''} onChange={(e) => updateBundling(i, 'biaya', parseAngkaInput(e.target.value))} /></div>
-                    <div className="field"><label>Untung/Komisi MUA</label><input type="text" inputMode="numeric" placeholder="Rp0" value={b.untung ? `Rp${formatAngkaInput(b.untung)}` : ''} onChange={(e) => updateBundling(i, 'untung', parseAngkaInput(e.target.value))} /></div>
+                  <div className="peserta-body">
+                    <div className="field-grid-bundling">
+                      <div className="field"><label>Nama Paket</label><input type="text" placeholder="contoh: Fotografer @fourgrads" value={b.nama} onChange={(e) => updateBundling(i, 'nama', e.target.value)} /></div>
+                      <div className="field"><label>Biaya Ditagih ke Klien</label><input type="text" inputMode="numeric" placeholder="Rp0" value={b.biaya ? `Rp${formatAngkaInput(b.biaya)}` : ''} onChange={(e) => updateBundling(i, 'biaya', parseAngkaInput(e.target.value))} /></div>
+                      <div className="field"><label>Untung/Komisi MUA</label><input type="text" inputMode="numeric" placeholder="Rp0" value={b.untung ? `Rp${formatAngkaInput(b.untung)}` : ''} onChange={(e) => updateBundling(i, 'untung', parseAngkaInput(e.target.value))} /></div>
+                    </div>
                   </div>
                 </div>
               ))}
