@@ -958,6 +958,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
           booking={liveBooking}
           peserta={peserta}
           payments={payments}
+          bundlingItems={bundlingItems}
           onClose={() => setShowInvoice(false)}
         />
       )}

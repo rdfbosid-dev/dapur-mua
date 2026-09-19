@@ -40,7 +40,7 @@ function IconIG() {
 // bukan cuma soal warna/ukuran CSS doang). Sengaja dibedain di sini
 // (bukan di CSS) soalnya beda ikon vs teks itu beda STRUKTUR markup,
 // bukan cuma beda style.
-function InvoicePaper({ profile, booking, peserta, payments, totalDibayar, sisa }) {
+function InvoicePaper({ profile, booking, peserta, payments, bundlingItems = [], totalDibayar, sisa }) {
   return (
     <div className="invoice-paper">
       <div className="inv-header">
@@ -136,6 +136,30 @@ function InvoicePaper({ profile, booking, peserta, payments, totalDibayar, sisa 
         </tbody>
       </table>
 
+      {/* Tabel TERPISAH dari LAYANAN di atas -- ini kerjasama vendor
+          luar (fotografer, attire, dll), bukan layanan makeup langsung.
+          Yang ditampilin cuma BIAYA PENUH yang ditagih ke klien -- untung/
+          komisi MUA itu data INTERNAL, nggak pernah ditampilin di sini
+          (liat RincianKeuanganModal.jsx buat versi internalnya). */}
+      {bundlingItems.length > 0 && (
+        <table className="inv-table">
+          <thead>
+            <tr>
+              <th>Paket Bundling</th>
+              <th className="right">Biaya</th>
+            </tr>
+          </thead>
+          <tbody>
+            {bundlingItems.map((item) => (
+              <tr key={item.id}>
+                <td>{item.nama}</td>
+                <td className="right">{formatRupiah(item.biaya)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+
       <div className="inv-summary">
         <div className="inv-summary-row"><span>Total Tagihan</span><b>{formatRupiah(booking.belanja_klien)}</b></div>
         <div className="inv-summary-row"><span>Sudah Dibayar</span><b>{formatRupiah(totalDibayar)}</b></div>
@@ -171,7 +195,7 @@ function InvoicePaper({ profile, booking, peserta, payments, totalDibayar, sisa 
   )
 }
 
-export default function InvoiceModal({ booking, peserta, payments, onClose }) {
+export default function InvoiceModal({ booking, peserta, payments, bundlingItems = [], onClose }) {
   const { profile } = useAuth()
 
   const totalDibayar = payments.reduce((s, p) => s + Number(p.jumlah), 0)
@@ -325,7 +349,7 @@ export default function InvoiceModal({ booking, peserta, payments, onClose }) {
           </div>
 
           <div className="modal-body">
-            <InvoicePaper profile={profile} booking={booking} peserta={peserta} payments={payments} totalDibayar={totalDibayar} sisa={sisa} />
+            <InvoicePaper profile={profile} booking={booking} peserta={peserta} payments={payments} bundlingItems={bundlingItems} totalDibayar={totalDibayar} sisa={sisa} />
           </div>
 
           <div className="modal-foot invoice-no-print">
@@ -360,7 +384,7 @@ export default function InvoiceModal({ booking, peserta, payments, onClose }) {
           tampilan branded yang identik. */}
       {createPortal(
         <div className="invoice-print-portal" ref={printPaperRef}>
-          <InvoicePaper profile={profile} booking={booking} peserta={peserta} payments={payments} totalDibayar={totalDibayar} sisa={sisa} />
+          <InvoicePaper profile={profile} booking={booking} peserta={peserta} payments={payments} bundlingItems={bundlingItems} totalDibayar={totalDibayar} sisa={sisa} />
         </div>,
         document.body
       )}
