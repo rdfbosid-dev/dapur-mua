@@ -172,15 +172,34 @@ export default function BookingModal({ onClose, onSaved }) {
   // Paket Bundling -- level BOOKING (bukan per klien kayak Add On),
   // buat kerjasama vendor luar. Sama persis konsepnya kayak yang udah
   // ada di BookingDetailModal.jsx, cuma di sini buat booking BARU.
+  // Tiap paket bisa punya "addOns" sendiri (misal paket Fotografer
+  // punya add on Strobist) -- disimpen sebagai array bersarang di sini,
+  // baru pas nyimpen ke database di-"ratain" jadi baris-baris terpisah
+  // yang saling terhubung lewat parent_id.
   const [bundlingList, setBundlingList] = useState([])
   function addBundling() {
-    setBundlingList((list) => [...list, { nama: '', biaya: '', untung: '' }])
+    setBundlingList((list) => [...list, { nama: '', biaya: '', untung: '', addOns: [] }])
   }
   function updateBundling(i, field, value) {
     setBundlingList((list) => list.map((b, idx) => (idx === i ? { ...b, [field]: value } : b)))
   }
   function removeBundling(i) {
     setBundlingList((list) => list.filter((_, idx) => idx !== i))
+  }
+  function addBundlingAddOn(bundlingIdx) {
+    setBundlingList((list) => list.map((b, idx) => (idx === bundlingIdx ? { ...b, addOns: [...b.addOns, { nama: '', biaya: '', untung: '' }] } : b)))
+  }
+  function updateBundlingAddOn(bundlingIdx, addOnIdx, field, value) {
+    setBundlingList((list) => list.map((b, idx) => {
+      if (idx !== bundlingIdx) return b
+      return { ...b, addOns: b.addOns.map((a, ai) => (ai === addOnIdx ? { ...a, [field]: value } : a)) }
+    }))
+  }
+  function removeBundlingAddOn(bundlingIdx, addOnIdx) {
+    setBundlingList((list) => list.map((b, idx) => {
+      if (idx !== bundlingIdx) return b
+      return { ...b, addOns: b.addOns.filter((_, ai) => ai !== addOnIdx) }
+    }))
   }
   function removeAddOn(pesertaIdx, addOnIdx) {
     setPesertaList((list) => list.map((p, idx) => {
@@ -285,9 +304,10 @@ export default function BookingModal({ onClose, onSaved }) {
     // Baris yang nama-nya masih kosong (user klik "+ Tambah Paket
     // Bundling" tapi nggak jadi diisi) SENGAJA di-skip, nggak dikirim
     // ke database -- sama persis filosofinya kayak Add On Item.
-    const bundlingRows = bundlingList
-      .filter((b) => b.nama.trim())
-      .map((b) => ({
+    const filledBundling = bundlingList.filter((b) => b.nama.trim())
+
+    if (filledBundling.length > 0) {
+      const bundlingParentRows = filledBundling.map((b) => ({
         booking_id: booking.id,
         user_id: user.id,
         nama: b.nama.trim(),
@@ -295,12 +315,51 @@ export default function BookingModal({ onClose, onSaved }) {
         keuntungan: Number(b.untung) || 0,
       }))
 
-    if (bundlingRows.length > 0) {
-      const { error: bundlingError } = await supabase.from('bundling_items').insert(bundlingRows)
+      // Insert paket dulu (tanpa parent_id, ini level teratas), pake
+      // .select() biar dapet balik ID masing-masing baris yang baru
+      // ke-insert -- ID itu WAJIB buat nyambungin add on di bawahnya
+      // lewat parent_id, jadi ini nggak bisa digabung jadi 1 insert
+      // doang kayak peserta.
+      const { data: insertedBundling, error: bundlingError } = await supabase
+        .from('bundling_items')
+        .insert(bundlingParentRows)
+        .select()
+
       if (bundlingError) {
         setSaving(false)
         setError('Booking, peserta, & DP tersimpan, tapi gagal simpan paket bundling: ' + bundlingError.message)
         return
+      }
+
+      // Supabase ngebalikin baris hasil insert PERSIS sesuai urutan
+      // yang dikirim (1 statement INSERT ... RETURNING), jadi index
+      // ke-i di filledBundling itu pasangannya index ke-i di
+      // insertedBundling.
+      const addOnRows = []
+      filledBundling.forEach((b, idx) => {
+        const parentId = insertedBundling[idx]?.id
+        if (!parentId) return
+        b.addOns.forEach((a) => {
+          if (a.nama.trim()) {
+            addOnRows.push({
+              booking_id: booking.id,
+              user_id: user.id,
+              parent_id: parentId,
+              nama: a.nama.trim(),
+              biaya: Number(a.biaya) || 0,
+              keuntungan: Number(a.untung) || 0,
+            })
+          }
+        })
+      })
+
+      if (addOnRows.length > 0) {
+        const { error: addOnError } = await supabase.from('bundling_items').insert(addOnRows)
+        if (addOnError) {
+          setSaving(false)
+          setError('Booking, peserta, DP, & paket bundling tersimpan, tapi gagal simpan add on paket: ' + addOnError.message)
+          return
+        }
       }
     }
 
@@ -620,6 +679,26 @@ export default function BookingModal({ onClose, onSaved }) {
                       <div className="field"><label>Biaya Ditagih ke Klien</label><input type="text" inputMode="numeric" placeholder="Rp0" value={b.biaya ? `Rp${formatAngkaInput(b.biaya)}` : ''} onChange={(e) => updateBundling(i, 'biaya', parseAngkaInput(e.target.value))} /></div>
                       <div className="field"><label>Untung/Komisi MUA</label><input type="text" inputMode="numeric" placeholder="Rp0" value={b.untung ? `Rp${formatAngkaInput(b.untung)}` : ''} onChange={(e) => updateBundling(i, 'untung', parseAngkaInput(e.target.value))} /></div>
                     </div>
+
+                    {/* Add On DI DALAM paket ini (misal paket Fotografer
+                        punya tambahan Strobist) -- nempel ke paket ini
+                        lewat parent_id pas disimpen, ikut kehitung
+                        terpisah ke Tagihan/Omzet/Penghasilan sama
+                        persis aturannya kayak paket induknya. */}
+                    <div className="sb-label">Add On di Paket Ini</div>
+                    {b.addOns.map((a, ai) => (
+                      <div key={ai}>
+                        <div className="addon-remove-row">
+                          <button type="button" className="peserta-remove" onClick={() => removeBundlingAddOn(i, ai)}>Hapus Add On {ai + 1}</button>
+                        </div>
+                        <div className="field-grid-bundling">
+                          <div className="field"><label>Nama Add On</label><input type="text" placeholder="contoh: Strobist" value={a.nama} onChange={(e) => updateBundlingAddOn(i, ai, 'nama', e.target.value)} /></div>
+                          <div className="field"><label>Biaya Ditagih ke Klien</label><input type="text" inputMode="numeric" placeholder="Rp0" value={a.biaya ? `Rp${formatAngkaInput(a.biaya)}` : ''} onChange={(e) => updateBundlingAddOn(i, ai, 'biaya', parseAngkaInput(e.target.value))} /></div>
+                          <div className="field"><label>Untung/Komisi MUA</label><input type="text" inputMode="numeric" placeholder="Rp0" value={a.untung ? `Rp${formatAngkaInput(a.untung)}` : ''} onChange={(e) => updateBundlingAddOn(i, ai, 'untung', parseAngkaInput(e.target.value))} /></div>
+                        </div>
+                      </div>
+                    ))}
+                    <button type="button" className="add-peserta" onClick={() => addBundlingAddOn(i)}>+ Tambah Add On Paket Ini</button>
                   </div>
                 </div>
               ))}

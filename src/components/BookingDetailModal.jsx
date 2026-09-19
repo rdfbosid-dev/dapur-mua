@@ -138,6 +138,16 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
   const [editBundlingBiaya, setEditBundlingBiaya] = useState('')
   const [editBundlingUntung, setEditBundlingUntung] = useState('')
 
+  // Add On DI DALAM 1 paket yang UDAH ADA (beda sama form "Tambah Paket
+  // Bundling" di atas, yang itu buat paket BARU level teratas). Ini
+  // nempel ke 1 paket spesifik lewat parent_id -- ID asli paketnya
+  // udah pasti ada (paketnya udah tersimpan), jadi nggak perlu trik
+  // 2 tahap insert kayak di BookingModal.jsx (booking baru).
+  const [addingAddOnForParentId, setAddingAddOnForParentId] = useState(null)
+  const [bundlingAddOnNama, setBundlingAddOnNama] = useState('')
+  const [bundlingAddOnBiaya, setBundlingAddOnBiaya] = useState('')
+  const [bundlingAddOnUntung, setBundlingAddOnUntung] = useState('')
+
   // edit pembayaran yang udah ada
   const [editingPaymentId, setEditingPaymentId] = useState(null)
   const [editPayAmount, setEditPayAmount] = useState('')
@@ -415,6 +425,30 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
     onChanged()
   }
 
+  async function handleAddBundlingAddOn(e, parentId) {
+    e.preventDefault()
+    if (!bundlingAddOnNama.trim()) { setError('Nama add on harus diisi.'); return }
+
+    setSaving(true)
+    setError('')
+    const { error: err } = await supabase.from('bundling_items').insert({
+      booking_id: booking.id,
+      user_id: user.id,
+      parent_id: parentId,
+      nama: bundlingAddOnNama.trim(),
+      biaya: Number(bundlingAddOnBiaya) || 0,
+      keuntungan: Number(bundlingAddOnUntung) || 0,
+    })
+    setSaving(false)
+
+    if (err) { setError(err.message); return }
+
+    setAddingAddOnForParentId(null)
+    setBundlingAddOnNama(''); setBundlingAddOnBiaya(''); setBundlingAddOnUntung('')
+    await loadDetail()
+    onChanged()
+  }
+
   async function handleSaveEditBundling(itemId) {
     if (!editBundlingNama.trim()) { setError('Nama paket bundling harus diisi.'); return }
     setSaving(true)
@@ -606,44 +640,104 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                   cuma bagian UNTUNG-nya yang masuk Omzet/Penghasilan --
                   liat penjelasan lengkap di RincianKeuanganModal.jsx. */}
               <div className="detail-label-history">Paket Bundling</div>
-              {bundlingItems.length > 0 && (
+              {bundlingItems.filter((b) => !b.parent_id).length > 0 && (
                 <div className="pay-history">
-                  {bundlingItems.map((item) => (
-                    editingBundlingId === item.id ? (
-                      <div className="pay-edit-row" key={item.id}>
-                        <div className="field-grid-detail add-edit-pay-cols-3">
-                          <div className="field"><label>Nama Paket</label><input type="text" placeholder="contoh: Fotografer @fourgrads" value={editBundlingNama} onChange={(e) => setEditBundlingNama(e.target.value)} /></div>
-                          <div className="field"><label>Biaya Ditagih ke Klien</label><input type="text" inputMode="numeric" placeholder="Rp0" value={editBundlingBiaya ? `Rp${formatAngkaInput(editBundlingBiaya)}` : ''} onChange={(e) => setEditBundlingBiaya(parseAngkaInput(e.target.value))} /></div>
-                          <div className="field"><label>Untung/Komisi MUA</label><input type="text" inputMode="numeric" placeholder="Rp0" value={editBundlingUntung ? `Rp${formatAngkaInput(editBundlingUntung)}` : ''} onChange={(e) => setEditBundlingUntung(parseAngkaInput(e.target.value))} /></div>
+                  {bundlingItems.filter((b) => !b.parent_id).map((item) => (
+                    <div key={item.id}>
+                      {editingBundlingId === item.id ? (
+                        <div className="pay-edit-row">
+                          <div className="field-grid-detail add-edit-pay-cols-3">
+                            <div className="field"><label>Nama Paket</label><input type="text" placeholder="contoh: Fotografer @fourgrads" value={editBundlingNama} onChange={(e) => setEditBundlingNama(e.target.value)} /></div>
+                            <div className="field"><label>Biaya Ditagih ke Klien</label><input type="text" inputMode="numeric" placeholder="Rp0" value={editBundlingBiaya ? `Rp${formatAngkaInput(editBundlingBiaya)}` : ''} onChange={(e) => setEditBundlingBiaya(parseAngkaInput(e.target.value))} /></div>
+                            <div className="field"><label>Untung/Komisi MUA</label><input type="text" inputMode="numeric" placeholder="Rp0" value={editBundlingUntung ? `Rp${formatAngkaInput(editBundlingUntung)}` : ''} onChange={(e) => setEditBundlingUntung(parseAngkaInput(e.target.value))} /></div>
+                          </div>
+                          <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                            <button type="button" className="btn-payment" onClick={() => setEditingBundlingId(null)}>Batal</button>
+                            <button type="button" className="btn-payment" onClick={() => handleSaveEditBundling(item.id)} disabled={saving}>Simpan</button>
+                          </div>
                         </div>
-                        <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-                          <button type="button" className="btn-payment" onClick={() => setEditingBundlingId(null)}>Batal</button>
-                          <button type="button" className="btn-payment" onClick={() => handleSaveEditBundling(item.id)} disabled={saving}>Simpan</button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="pay-row" key={item.id}>
-                        <span>{item.nama}</span>
-                        <span>Ditagih {formatRupiah(item.biaya)}</span>
-                        <span className="pay-amount">Untung {formatRupiah(item.keuntungan)}</span>
-                        <span className="pay-note"></span>
-                        <div className="pay-actions">
-                          <button type="button" onClick={() => startEditBundling(item)}>Edit</button>
-                          <button type="button" onClick={() => setConfirmDeleteBundlingId(item.id)}>Hapus</button>
-                          {confirmDeleteBundlingId === item.id && (
-                            <div className="pay-confirm-popup">
-                              <p>Yakin mau hapus paket bundling ini?</p>
-                              <div className="pay-confirm-popup-actions">
-                                <button type="button" className="pay-confirm-cancel" onClick={() => setConfirmDeleteBundlingId(null)}>Batal</button>
-                                <button type="button" className="pay-confirm-yes" onClick={() => handleDeleteBundling(item.id)} disabled={saving}>
-                                  {saving ? '...' : 'Ya, hapus'}
-                                </button>
+                      ) : (
+                        <div className="pay-row">
+                          <span>{item.nama}</span>
+                          <span>Ditagih {formatRupiah(item.biaya)}</span>
+                          <span className="pay-amount">Untung {formatRupiah(item.keuntungan)}</span>
+                          <span className="pay-note"></span>
+                          <div className="pay-actions">
+                            <button type="button" onClick={() => startEditBundling(item)}>Edit</button>
+                            <button type="button" onClick={() => setConfirmDeleteBundlingId(item.id)}>Hapus</button>
+                            {confirmDeleteBundlingId === item.id && (
+                              <div className="pay-confirm-popup">
+                                <p>Yakin mau hapus paket bundling ini? Add on di dalamnya ikut kehapus.</p>
+                                <div className="pay-confirm-popup-actions">
+                                  <button type="button" className="pay-confirm-cancel" onClick={() => setConfirmDeleteBundlingId(null)}>Batal</button>
+                                  <button type="button" className="pay-confirm-yes" onClick={() => handleDeleteBundling(item.id)} disabled={saving}>
+                                    {saving ? '...' : 'Ya, hapus'}
+                                  </button>
+                                </div>
                               </div>
-                            </div>
-                          )}
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    )
+                      )}
+
+                      {/* Add On di dalam paket ini -- di-indent dikit
+                          (↳) biar keliatan jelas ini "anak" dari paket
+                          di atasnya, bukan paket baru yang berdiri
+                          sendiri. */}
+                      {bundlingItems.filter((c) => c.parent_id === item.id).map((child) => (
+                        editingBundlingId === child.id ? (
+                          <div className="pay-edit-row" key={child.id} style={{ marginLeft: 20 }}>
+                            <div className="field-grid-detail add-edit-pay-cols-3">
+                              <div className="field"><label>Nama Add On</label><input type="text" placeholder="contoh: Strobist" value={editBundlingNama} onChange={(e) => setEditBundlingNama(e.target.value)} /></div>
+                              <div className="field"><label>Biaya Ditagih ke Klien</label><input type="text" inputMode="numeric" placeholder="Rp0" value={editBundlingBiaya ? `Rp${formatAngkaInput(editBundlingBiaya)}` : ''} onChange={(e) => setEditBundlingBiaya(parseAngkaInput(e.target.value))} /></div>
+                              <div className="field"><label>Untung/Komisi MUA</label><input type="text" inputMode="numeric" placeholder="Rp0" value={editBundlingUntung ? `Rp${formatAngkaInput(editBundlingUntung)}` : ''} onChange={(e) => setEditBundlingUntung(parseAngkaInput(e.target.value))} /></div>
+                            </div>
+                            <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                              <button type="button" className="btn-payment" onClick={() => setEditingBundlingId(null)}>Batal</button>
+                              <button type="button" className="btn-payment" onClick={() => handleSaveEditBundling(child.id)} disabled={saving}>Simpan</button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="pay-row" key={child.id} style={{ marginLeft: 20 }}>
+                            <span>↳ {child.nama}</span>
+                            <span>Ditagih {formatRupiah(child.biaya)}</span>
+                            <span className="pay-amount">Untung {formatRupiah(child.keuntungan)}</span>
+                            <span className="pay-note"></span>
+                            <div className="pay-actions">
+                              <button type="button" onClick={() => startEditBundling(child)}>Edit</button>
+                              <button type="button" onClick={() => setConfirmDeleteBundlingId(child.id)}>Hapus</button>
+                              {confirmDeleteBundlingId === child.id && (
+                                <div className="pay-confirm-popup">
+                                  <p>Yakin mau hapus add on ini?</p>
+                                  <div className="pay-confirm-popup-actions">
+                                    <button type="button" className="pay-confirm-cancel" onClick={() => setConfirmDeleteBundlingId(null)}>Batal</button>
+                                    <button type="button" className="pay-confirm-yes" onClick={() => handleDeleteBundling(child.id)} disabled={saving}>
+                                      {saving ? '...' : 'Ya, hapus'}
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )
+                      ))}
+
+                      {addingAddOnForParentId === item.id ? (
+                        <form onSubmit={(e) => handleAddBundlingAddOn(e, item.id)} className="add-payment-card" style={{ marginTop: 8, marginLeft: 20 }}>
+                          <div className="field-grid-detail add-edit-pay-cols-3">
+                            <div className="field"><label>Nama Add On</label><input type="text" placeholder="contoh: Strobist" value={bundlingAddOnNama} onChange={(e) => setBundlingAddOnNama(e.target.value)} /></div>
+                            <div className="field"><label>Biaya Ditagih ke Klien</label><input type="text" inputMode="numeric" placeholder="Rp0" value={bundlingAddOnBiaya ? `Rp${formatAngkaInput(bundlingAddOnBiaya)}` : ''} onChange={(e) => setBundlingAddOnBiaya(parseAngkaInput(e.target.value))} /></div>
+                            <div className="field"><label>Untung/Komisi MUA</label><input type="text" inputMode="numeric" placeholder="Rp0" value={bundlingAddOnUntung ? `Rp${formatAngkaInput(bundlingAddOnUntung)}` : ''} onChange={(e) => setBundlingAddOnUntung(parseAngkaInput(e.target.value))} /></div>
+                          </div>
+                          <div style={{ display: 'flex', gap: 5, marginTop: 4 }}>
+                            <button type="button" className="btn-payment" onClick={() => setAddingAddOnForParentId(null)}>Batal</button>
+                            <button type="submit" className="btn-payment" disabled={saving}>{saving ? 'Menyimpan...' : 'Tambah Add On'}</button>
+                          </div>
+                        </form>
+                      ) : (
+                        <button type="button" className="add-payment" style={{ marginLeft: 20, marginTop: 4, marginBottom: 10 }} onClick={() => setAddingAddOnForParentId(item.id)}>+ Tambah Add On Paket Ini</button>
+                      )}
+                    </div>
                   ))}
                 </div>
               )}
