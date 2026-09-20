@@ -203,7 +203,15 @@
 .booking-detail-overlay .field-grid-booking.cols-lokasi-sumber { grid-template-columns: 2fr 1fr; }
 .booking-detail-overlay .field-grid-booking.cols-transport-catatan { grid-template-columns: 1fr 2fr; }
 
-.booking-detail-overlay .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+/* min-width:0 -- WAJIB buat elemen yang jadi kolom grid kayak gini.
+   Defaultnya grid item itu min-width:auto, artinya nggak bisa nyusut
+   di bawah lebar "alami" konten di dalemnya (si <input>) -- begitu
+   kolomnya kepepet sempit (apalagi kalau field ini ke-nest di dalem
+   beberapa lapis kotak/padding, kayak form "Tambah Add On Paket Ini"),
+   field-nya maksa tetep lebar minimalnya sendiri, nembus keluar
+   pembungkusnya. min-width:0 ngebolehin dia nyusut ngikutin kolom
+   yang beneran tersedia. */
+.booking-detail-overlay .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; min-width: 0; }
 .booking-detail-overlay .field label { font-size: 12px; font-weight: 600; color: var(--ink-soft); margin-bottom: 5px; }
 .booking-detail-overlay .field input,
 .booking-detail-overlay .field select,
