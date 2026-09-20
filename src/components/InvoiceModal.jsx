@@ -88,7 +88,7 @@ function InvoicePaper({ profile, booking, peserta, payments, bundlingItems = [],
             const rows = [
               <tr key={p.id + '-mkp'}>
                 <td>{p.nama_anggota}{p.peran ? ` (${p.peran})` : ''}</td>
-                <td>Makeup {p.jenis_paket || p.kategori_makeup}</td>
+                <td>Makeup {p.jenis_paket || p.kategori_makeup}{p.dikerjakan_oleh_makeup === 'Tim' ? ' (Tim)' : ''}</td>
                 <td className="right">{formatRupiah(p.biaya_makeup)}</td>
               </tr>,
             ]
@@ -96,7 +96,7 @@ function InvoicePaper({ profile, booking, peserta, payments, bundlingItems = [],
               rows.push(
                 <tr key={p.id + '-tmb'}>
                   <td></td>
-                  <td>{p.layanan_tambahan}</td>
+                  <td>{p.layanan_tambahan}{p.dikerjakan_oleh_tambahan === 'Tim' ? ' (Tim)' : ''}</td>
                   <td className="right">{formatRupiah(p.biaya_tambahan)}</td>
                 </tr>
               )
