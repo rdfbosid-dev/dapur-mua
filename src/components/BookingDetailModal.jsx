@@ -663,7 +663,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                       {editingBundlingId === item.id ? (
                         <div className="pay-edit-row">
                           <div className="field-grid-detail add-edit-pay-cols-3">
-                            <div className="field"><label>Nama Paket</label><input type="text" placeholder="contoh: Fotografer @fourgrads" value={editBundlingNama} onChange={(e) => setEditBundlingNama(e.target.value)} /></div>
+                            <div className="field"><label>Nama Paket</label><input type="text" placeholder="contoh: Fotografer/Attire" value={editBundlingNama} onChange={(e) => setEditBundlingNama(e.target.value)} /></div>
                             <div className="field"><label>Biaya Ditagih ke Klien</label><input type="text" inputMode="numeric" placeholder="Rp0" value={editBundlingBiaya ? `Rp${formatAngkaInput(editBundlingBiaya)}` : ''} onChange={(e) => setEditBundlingBiaya(parseAngkaInput(e.target.value))} /></div>
                             <div className="field"><label>Untung/Komisi MUA</label><input type="text" inputMode="numeric" placeholder="Rp0" value={editBundlingUntung ? `Rp${formatAngkaInput(editBundlingUntung)}` : ''} onChange={(e) => setEditBundlingUntung(parseAngkaInput(e.target.value))} /></div>
                           </div>
@@ -763,9 +763,9 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
               ) : (
                 <form onSubmit={handleAddBundling} className="add-payment-card" style={{ marginTop: 8 }}>
                   <div className="field-grid-detail add-edit-pay-cols-3">
-                    <div className="field"><label>Nama Paket</label><input type="text" placeholder="contoh: Fotografer @fourgrads" value={bundlingNama} onChange={(e) => setBundlingNama(e.target.value)} /></div>
-                    <div className="field"><label>Biaya Ditagih ke Klien</label><input type="text" inputMode="numeric" placeholder="Rp0" value={bundlingBiaya ? `Rp${formatAngkaInput(bundlingBiaya)}` : ''} onChange={(e) => setBundlingBiaya(parseAngkaInput(e.target.value))} /></div>
-                    <div className="field"><label>Untung/Komisi MUA</label><input type="text" inputMode="numeric" placeholder="Rp0" value={bundlingUntung ? `Rp${formatAngkaInput(bundlingUntung)}` : ''} onChange={(e) => setBundlingUntung(parseAngkaInput(e.target.value))} /></div>
+                    <div className="field"><label>Nama Paket</label><input type="text" placeholder="contoh: Fotografer/Attire" value={bundlingNama} onChange={(e) => setBundlingNama(e.target.value)} /></div>
+                    <div className="field"><label>Biaya (ditagih ke klien)</label><input type="text" inputMode="numeric" placeholder="Rp0" value={bundlingBiaya ? `Rp${formatAngkaInput(bundlingBiaya)}` : ''} onChange={(e) => setBundlingBiaya(parseAngkaInput(e.target.value))} /></div>
+                    <div className="field"><label>Untung untuk MUA (jika ada)</label><input type="text" inputMode="numeric" placeholder="Rp0" value={bundlingUntung ? `Rp${formatAngkaInput(bundlingUntung)}` : ''} onChange={(e) => setBundlingUntung(parseAngkaInput(e.target.value))} /></div>
                   </div>
                   <div style={{ display: 'flex', gap: 5, marginTop: 4 }}>
                     <button type="button" className="btn-payment" onClick={() => setShowAddBundling(false)}>Batal</button>
