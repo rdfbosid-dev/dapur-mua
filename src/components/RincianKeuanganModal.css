@@ -92,6 +92,11 @@
   border-bottom: 1px solid color-mix(in srgb, var(--button-border) 30%, transparent);
 }
 .rincian-row b { color: var(--ink-soft); font-weight: 700; }
+/* Angka + keterangan komisi/untung ditumpuk vertikal, rata kanan --
+   sama pola-nya kayak yang dulu dipake buat biaya/untung Add On,
+   sebelum diganti jadi 1 angka doang per kartu aktif. */
+.rincian-nilai-wrap { display: flex; flex-direction: column; align-items: flex-end; gap: 1px; }
+.rincian-keterangan { font-size: 10px; font-weight: 500; color: var(--ink-soft); opacity: 0.6; }
 
 .rincian-rumus { font-size: 12px; color: var(--ink-soft); line-height: 1.6; }
 .rincian-rumus b { font-size: 12px; color: var(--h5); }
@@ -99,7 +104,7 @@
 
 .rincian-note {
   font-size: 11.5px; color: var(--ink-soft); opacity: 0.75; line-height: 1.5;
-  margin-top: 4px; padding-top: 10px; border-top: 1px solid color-mix(in srgb, var(--button-border) 30%, transparent);
+  margin-top: 10px; padding-top: 10px;
 }
 /* "Penjelasan" & "Rumus" -- label kecil pemisah antar 2 kelompok,
    gaya-nya SENGAJA disamain kayak .rincian-section-title di atas biar

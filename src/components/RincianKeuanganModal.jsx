@@ -126,6 +126,23 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
     return item.keuntungan // Omzet & Penghasilan: cuma untungnya
   }
 
+  // Keterangan kecil di bawah angka -- CUMA muncul kalau angka yang lagi
+  // ditampilin itu BUKAN biaya penuh (jadi nunjukkin komisi/untung).
+  // Makeup/Tambahan: cuma baris Tim yang dapet keterangan (baris Me
+  // selalu nampilin biaya penuh apapun kartunya, jadi nggak butuh
+  // keterangan). Add On: cuma pas kartu Penghasilan (Omzet masih pake
+  // biaya penuh buat Add On). Bundling: pas Omzet ATAU Penghasilan
+  // (dua-duanya sama-sama nampilin untung doang).
+  function keteranganTim(r) {
+    return (r.tim && activeCard !== 'belanja') ? 'Komisi dari tim' : null
+  }
+  function keteranganAddOn() {
+    return activeCard === 'penghasilan' ? 'Keuntungan' : null
+  }
+  function keteranganBundling() {
+    return activeCard !== 'belanja' ? 'Keuntungan' : null
+  }
+
   const judulCard = { belanja: 'Belanja Klien', omzet: 'Omzet', penghasilan: 'Penghasilan' }
 
   return (
@@ -164,7 +181,10 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
               {makeupRows.map((r, idx) => (
                 <div className="rincian-row" key={idx}>
                   <span>{r.nama} ({r.tim ? 'Tim' : 'Me'})</span>
-                  <b>{formatRupiah(nilaiMakeupTambahan(r))}</b>
+                  <div className="rincian-nilai-wrap">
+                    <b>{formatRupiah(nilaiMakeupTambahan(r))}</b>
+                    {keteranganTim(r) && <span className="rincian-keterangan">{keteranganTim(r)}</span>}
+                  </div>
                 </div>
               ))}
             </div>
@@ -176,7 +196,10 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
               {tambahanRows.map((r, idx) => (
                 <div className="rincian-row" key={idx}>
                   <span>{r.nama} ({r.jenis} | {r.tim ? 'Tim' : 'Me'})</span>
-                  <b>{formatRupiah(nilaiMakeupTambahan(r))}</b>
+                  <div className="rincian-nilai-wrap">
+                    <b>{formatRupiah(nilaiMakeupTambahan(r))}</b>
+                    {keteranganTim(r) && <span className="rincian-keterangan">{keteranganTim(r)}</span>}
+                  </div>
                 </div>
               ))}
             </div>
@@ -184,11 +207,14 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
 
           {addOnItems.length > 0 && (
             <div className="rincian-section">
-              <div className="rincian-section-title">Add On Lainnya</div>
+              <div className="rincian-section-title">Add On</div>
               {addOnItems.map((item, idx) => (
                 <div className="rincian-row" key={idx}>
                   <span>{item.nama}{peserta.length > 1 ? ` (${item.pesertaNama})` : ''}</span>
-                  <b>{formatRupiah(nilaiAddOn(item))}</b>
+                  <div className="rincian-nilai-wrap">
+                    <b>{formatRupiah(nilaiAddOn(item))}</b>
+                    {keteranganAddOn() && <span className="rincian-keterangan">{keteranganAddOn()}</span>}
+                  </div>
                 </div>
               ))}
             </div>
@@ -201,12 +227,18 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
                 <div key={item.id}>
                   <div className="rincian-row">
                     <span>{item.nama}</span>
-                    <b>{formatRupiah(nilaiBundling(item))}</b>
+                    <div className="rincian-nilai-wrap">
+                      <b>{formatRupiah(nilaiBundling(item))}</b>
+                      {keteranganBundling() && <span className="rincian-keterangan">{keteranganBundling()}</span>}
+                    </div>
                   </div>
                   {bundlingItems.filter((c) => c.parent_id === item.id).map((child) => (
                     <div className="rincian-row" key={child.id} style={{ paddingLeft: 20 }}>
                       <span>↳ {child.nama}</span>
-                      <b>{formatRupiah(nilaiBundling(child))}</b>
+                      <div className="rincian-nilai-wrap">
+                        <b>{formatRupiah(nilaiBundling(child))}</b>
+                        {keteranganBundling() && <span className="rincian-keterangan">{keteranganBundling()}</span>}
+                      </div>
                     </div>
                   ))}
                 </div>
