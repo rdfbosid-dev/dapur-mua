@@ -94,7 +94,7 @@
 .rincian-row b { color: var(--ink-soft); font-weight: 700; }
 
 .rincian-rumus { font-size: 12px; color: var(--ink-soft); line-height: 1.6; }
-.rincian-rumus b { font-size: 13px; color: var(--h5); }
+.rincian-rumus b { font-size: 12px; color: var(--h5); }
 .rincian-rumus + .rincian-rumus { margin-top: 4px; }
 
 .rincian-note {

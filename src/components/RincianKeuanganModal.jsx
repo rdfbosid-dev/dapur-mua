@@ -229,9 +229,9 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
 
           <div className="rincian-note">
             <div className="rincian-note-title">Penjelasan</div>
-            <div className="rincian-penjelasan"><b>Belanja Klien</b> = total semua yang ditagihkan ke klien untuk booking ini, apapun kategorinya dan siapapun yang mengerjakan (Me atau Tim, dua-duanya dihitung penuh).</div>
-            <div className="rincian-penjelasan"><b>Omzet</b> = total pemasukan bisnis dari booking ini -- bagian yang dikerjain sendiri (Me) dihitung penuh, yang dikerjain Tim cuma dihitung komisinya, ditambah untung dari Add On & Paket Bundling, plus Transport.</div>
-            <div className="rincian-penjelasan"><b>Penghasilan</b> = bagian yang beneran jadi keuntungan bersih MUA -- sama kayak Omzet, tapi Add On cuma dihitung untungnya (bukan biaya penuh), dan Transport nggak dihitung sama sekali (itu ongkos, bukan keuntungan).</div>
+            <div className="rincian-penjelasan"><b>Belanja Klien</b> = total semua yang ditagihkan ke klien dalam sebuah booking. Apapun jenisnya dan siapapun yang mengerjakan. Termasuk seluruh biaya Add On, jika ada.</div>
+            <div className="rincian-penjelasan"><b>Omzet</b> = total pemasukan dalam sebuah booking yang terdiri dari biaya jasa/layanan yang dikerjain sendiri (Me) (dihitung penuh), yang dikerjain Tim cuma dihitung komisinya (jika ada), ditambah untung dari Add On, komisi/untung dari Paket Bundling dan Add On Paket Bundling (jika ada), dan biaya transport.</div>
+            <div className="rincian-penjelasan"><b>Penghasilan</b> = bagian yang beneran jadi keuntungan bagi MUA. Sama kayak Omzet, tapi Add On cuma dihitung untungnya (bukan biaya penuh), Paket Bundling dan Add On Paket Bundling cuma dihitung untung/komisinya, dan biaya transport nggak dihitung sama sekali (itu ongkos, bukan keuntungan).</div>
 
             <div className="rincian-note-title">Rumus</div>
             <div className="rincian-rumus"><b>Belanja Klien</b> = {rumusBelanja}</div>
