@@ -46,6 +46,7 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
     const tim = p.dikerjakan_oleh_tambahan === 'Tim'
     return {
       nama: p.nama_anggota,
+      jenis: p.layanan_tambahan,
       tim,
       biaya: Number(p.biaya_tambahan) || 0,
       komisi: Number(p.komisi_tambahan) || 0,
@@ -174,7 +175,7 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
               <div className="rincian-section-title">Layanan Tambahan (Hairdo/Hijabdo+)</div>
               {tambahanRows.map((r, idx) => (
                 <div className="rincian-row" key={idx}>
-                  <span>{r.nama} ({r.tim ? 'Tim' : 'Me'})</span>
+                  <span>{r.nama} ({r.jenis} | {r.tim ? 'Tim' : 'Me'})</span>
                   <b>{formatRupiah(nilaiMakeupTambahan(r))}</b>
                 </div>
               ))}
