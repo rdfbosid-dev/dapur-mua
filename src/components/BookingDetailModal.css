@@ -127,7 +127,7 @@
   text-align: left;
 }
 .booking-detail-overlay .pay-row > span:nth-child(1) { text-align: left; }
-.booking-detail-overlay .pay-row > span:nth-child(2) { text-align: left; }
+.booking-detail-overlay .pay-row > span:nth-child(2) { text-align: right; }
 /* Paket Bundling numpang grid ".pay-row" yang SAMA kayak Riwayat
    Pembayaran, tapi kolom ke-2 & ke-3 isinya ANGKA (Ditagih/Untung),
    bukan teks kayak "Transfer Bank" -- jadi perlu rata kanan biar
