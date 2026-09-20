@@ -109,6 +109,6 @@
   .rincian-overlay .modal-foot { padding: 12px 18px 18px; }
   .rincian-summary { grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
   .rincian-summary-item { padding: 10px 10px; }
-  .rincian-summary-value-omzet, .rincian-summary-value-penghasilan, .rincian-summary-value-pembayaran { font-size: 14.5px; }
-  .rincian-summary-label-omzet, .rincian-summary-label-penghasilan, .rincian-summary-label-pembayaran { font-size: 10.5px; }
+  .rincian-summary-value-omzet, .rincian-summary-value-penghasilan, .rincian-summary-value-belanja { font-size: 14.5px; }
+  .rincian-summary-label-omzet, .rincian-summary-label-penghasilan, .rincian-summary-label-belanja { font-size: 10.5px; }
 }
