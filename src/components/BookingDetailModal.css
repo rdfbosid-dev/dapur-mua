@@ -105,7 +105,7 @@
 }
 .booking-detail-overlay .detail-grid > div { font-size: 12px; font-weight: 600; color: var(--h5); }
 
-.booking-detail-overlay .status-pill { font-size: 11px; font-weight: 600; padding: 5px 10px; border-radius: 8px; white-space: nowrap; margin-bottom: 10px; }
+.booking-detail-overlay .status-pill { font-size: 11px; font-weight: 600; padding: 5px 10px; border-radius: 8px; white-space: nowrap; margin-bottom: 5px; }
 .booking-detail-overlay .status-pill.belum { background: var(--pill); color: var(--h8); }
 .booking-detail-overlay .status-pill.lunas { background: var(--pill-alt); color: var(--h7); }
 
