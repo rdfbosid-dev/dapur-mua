@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import './RincianKeuanganModal.css'
 
 function formatRupiah(n) {
@@ -18,24 +19,26 @@ function formatRupiah(n) {
 // on, per paket bundling) -- BUKAN digabung/dijumlahin -- biar user
 // bisa liat & cocokin manual satu-satu, dari mana asal tiap rupiah-nya.
 export default function RincianKeuanganModal({ booking, peserta, bundlingItems = [], onClose }) {
+  // Kartu mana yang lagi aktif -- nentuin ANGKA MANA yang ditampilin di
+  // tiap baris rincian di bawah. Defaultnya "belanja" (kartu paling
+  // kiri) biar modal nggak kosong pas pertama dibuka.
+  const [activeCard, setActiveCard] = useState('belanja')
+
   const transport = booking.biaya_transport || 0
   const punyaTambahan = (p) => p.layanan_tambahan && p.layanan_tambahan !== 'Tidak Ada'
 
   // Makeup & Tambahan -- PER KLIEN, bukan digabung jadi 1 baris "Me · N
-  // klien" kayak sebelumnya. Kalau dikerjain Tim: "biaya" itu yang
-  // DITAGIH ke klien (biaya_makeup/biaya_tambahan, jumlah PENUH),
-  // "untung" itu bagian yang beneran masuk kantong Me (komisi dari
-  // studio) -- 2 angka yang beda, makanya ditampilin terpisah. Kalau
-  // dikerjain Me sendiri: nggak ada pemisahan itu, semua yang ditagih
-  // ITU JUGA penghasilan Me, jadi biaya = untung (untung-nya nggak usah
-  // ditampilin dobel, sama kayak pola di Add On).
+  // klien". "biaya" = jumlah PENUH yang ditagih ke klien (dipake pas
+  // kartu Belanja Klien aktif). "komisi" = bagian yang MASUK ke Me
+  // kalau dikerjain Tim (dipake pas kartu Omzet/Penghasilan aktif,
+  // liat pickNilai di bawah).
   const makeupRows = peserta.map((p) => {
     const tim = p.dikerjakan_oleh_makeup === 'Tim'
     return {
       nama: p.nama_anggota,
       tim,
       biaya: Number(p.biaya_makeup) || 0,
-      untung: tim ? Number(p.komisi_makeup_tim) || 0 : Number(p.biaya_makeup) || 0,
+      komisi: Number(p.komisi_makeup_tim) || 0,
     }
   })
 
@@ -45,7 +48,7 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
       nama: p.nama_anggota,
       tim,
       biaya: Number(p.biaya_tambahan) || 0,
-      untung: tim ? Number(p.komisi_tambahan) || 0 : Number(p.biaya_tambahan) || 0,
+      komisi: Number(p.komisi_tambahan) || 0,
     }
   })
 
@@ -95,14 +98,26 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
     bundlingTop.length > 0 && 'Untung Bundling',
   ].filter(Boolean).join(' + ')
 
-  function BiayaUntung({ biaya, untung }) {
-    return (
-      <div className="rincian-addon-nilai">
-        <b>{formatRupiah(biaya)}</b>
-        {untung !== biaya && <span className="rincian-addon-untung">Untung {formatRupiah(untung)}</span>}
-      </div>
-    )
+  // Inti dari fitur klik-kartu ini: 1 baris peserta/add-on/bundling itu
+  // punya lebih dari 1 "arti angka" tergantung lagi ngeliat sisi Belanja
+  // Klien, Omzet, atau Penghasilan. Fungsi-fungsi ini yang mutusin ANGKA
+  // MANA yang dipake dari 1 baris yang sama, sesuai activeCard -- bukan
+  // bikin 3 daftar data terpisah, biar SATU sumber data ini nggak bisa
+  // "kelewat sinkron" antar 3 tampilan.
+  function nilaiMakeupTambahan(r) {
+    if (activeCard === 'belanja') return r.biaya
+    return r.tim ? r.komisi : r.biaya // Omzet & Penghasilan: logikanya sama
   }
+  function nilaiAddOn(item) {
+    if (activeCard === 'penghasilan') return item.untung
+    return item.biaya // Belanja Klien & Omzet: pake biaya PENUH
+  }
+  function nilaiBundling(item) {
+    if (activeCard === 'belanja') return item.biaya
+    return item.keuntungan // Omzet & Penghasilan: cuma untungnya
+  }
+
+  const judulCard = { belanja: 'Belanja Klien', omzet: 'Omzet', penghasilan: 'Penghasilan' }
 
   return (
     <div className="rincian-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose() }}>
@@ -113,20 +128,25 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
         </div>
 
         <div className="modal-body">
+          <div className="modal-info">
+            <h3>Ini adalah data rincian keuangan dalam booking ini</h3>
+          </div>
           <div className="rincian-summary">
-            <div className="rincian-summary-item pembayaran">
-              <div className="rincian-summary-label-pembayaran">Pembayaran</div>
-              <div className="rincian-summary-value-pembayaran">{formatRupiah(booking.belanja_klien)}</div>
-            </div>
-            <div className="rincian-summary-item omzet">
+            <button type="button" className={`rincian-summary-item belanja${activeCard === 'belanja' ? ' active' : ''}`} onClick={() => setActiveCard('belanja')}>
+              <div className="rincian-summary-label-belanja">Belanja Klien</div>
+              <div className="rincian-summary-value-belanja">{formatRupiah(booking.belanja_klien)}</div>
+            </button>
+            <button type="button" className={`rincian-summary-item omzet${activeCard === 'omzet' ? ' active' : ''}`} onClick={() => setActiveCard('omzet')}>
               <div className="rincian-summary-label-omzet">Omzet</div>
               <div className="rincian-summary-value-omzet">{formatRupiah(booking.omzet)}</div>
-            </div>
-            <div className="rincian-summary-item penghasilan">
+            </button>
+            <button type="button" className={`rincian-summary-item penghasilan${activeCard === 'penghasilan' ? ' active' : ''}`} onClick={() => setActiveCard('penghasilan')}>
               <div className="rincian-summary-label-penghasilan">Penghasilan</div>
               <div className="rincian-summary-value-penghasilan">{formatRupiah(booking.penghasilan)}</div>
-            </div>
+            </button>
           </div>
+
+          <div className="rincian-aktif-label">Rincian {judulCard[activeCard]}</div>
 
           {makeupRows.length > 0 && (
             <div className="rincian-section">
@@ -134,7 +154,7 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
               {makeupRows.map((r, idx) => (
                 <div className="rincian-row" key={idx}>
                   <span>{r.nama} ({r.tim ? 'Tim' : 'Me'})</span>
-                  <BiayaUntung biaya={r.biaya} untung={r.untung} />
+                  <b>{formatRupiah(nilaiMakeupTambahan(r))}</b>
                 </div>
               ))}
             </div>
@@ -146,7 +166,7 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
               {tambahanRows.map((r, idx) => (
                 <div className="rincian-row" key={idx}>
                   <span>{r.nama} ({r.tim ? 'Tim' : 'Me'})</span>
-                  <BiayaUntung biaya={r.biaya} untung={r.untung} />
+                  <b>{formatRupiah(nilaiMakeupTambahan(r))}</b>
                 </div>
               ))}
             </div>
@@ -158,7 +178,7 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
               {addOnItems.map((item, idx) => (
                 <div className="rincian-row" key={idx}>
                   <span>{item.nama}{peserta.length > 1 ? ` (${item.pesertaNama})` : ''}</span>
-                  <BiayaUntung biaya={item.biaya} untung={item.untung} />
+                  <b>{formatRupiah(nilaiAddOn(item))}</b>
                 </div>
               ))}
             </div>
@@ -171,12 +191,12 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
                 <div key={item.id}>
                   <div className="rincian-row">
                     <span>{item.nama}</span>
-                    <BiayaUntung biaya={item.biaya} untung={item.keuntungan} />
+                    <b>{formatRupiah(nilaiBundling(item))}</b>
                   </div>
                   {bundlingItems.filter((c) => c.parent_id === item.id).map((child) => (
                     <div className="rincian-row" key={child.id} style={{ paddingLeft: 20 }}>
                       <span>↳ {child.nama}</span>
-                      <BiayaUntung biaya={child.biaya} untung={child.keuntungan} />
+                      <b>{formatRupiah(nilaiBundling(child))}</b>
                     </div>
                   ))}
                 </div>
@@ -184,7 +204,11 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
             </div>
           )}
 
-          {transport > 0 && (
+          {/* Transport CUMA nampil pas kartu Belanja Klien/Omzet aktif --
+              Penghasilan emang nggak masukin Transport sama sekali
+              (bukan Rp0, tapi beneran nggak dihitung), jadi baris ini
+              disembunyiin total biar nggak nyesatin. */}
+          {transport > 0 && activeCard !== 'penghasilan' && (
             <div className="rincian-section">
               <div className="rincian-section-title">Transport</div>
               <div className="rincian-row">
