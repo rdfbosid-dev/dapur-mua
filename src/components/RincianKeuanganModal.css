@@ -7,7 +7,7 @@
   z-index: 95;
 }
 .rincian-overlay .modal {
-  background: var(--table-body); border: 1.5px solid var(--line-box); border-radius: 24px; width: 100%; max-width: 460px;
+  background: var(--table-body); border: 1.5px solid var(--line-box); border-radius: 24px; width: 100%; max-width: 600px;
   max-height: 88vh; display: flex; flex-direction: column; overflow: hidden;
   box-shadow: var(--shadow-card);
 }
@@ -34,15 +34,16 @@
 /* 2 kartu besar Omzet & Penghasilan -- Penghasilan dikasih aksen warna
    beda (var(--h7), hijau -- sama kayak warna "Sudah Dibayar" di section
    PEMBAYARAN) biar keliatan itu "angka final yang paling penting". */
-.rincian-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px; }
-.rincian-summary-item {
-  background: var(--grad1); border: 3px solid var(--border1); border-radius: 14px; padding: 14px 16px;
-}
-.rincian-summary-item.penghasilan { background: var(--grad2); border: 3px solid var(--border2) }
-.rincian-summary-label-omzet { font-size: 12px; font-weight: 600; color: var(--label1); margin-bottom: 4px; }
-.rincian-summary-label-penghasilan { font-size: 12px; font-weight: 600; color: var(--label2); margin-bottom: 4px; }
-.rincian-summary-value-omzet { font-family: 'Poppins', sans-serif; font-size: 19px; font-weight: 700; color: var(--label1); }
-.rincian-summary-value-penghasilan { font-family: 'Poppins', sans-serif; font-size: 19px; font-weight: 700; color: var(--label2); }
+.rincian-summary { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 18px; }
+.rincian-summary-item.pembayaran { background: var(--grad1); border: 3px solid var(--border1); border-radius: 14px; padding: 14px 16px; }
+.rincian-summary-item.omzet { background: var(--grad2); border: 3px solid var(--border2); border-radius: 14px; padding: 14px 16px; }
+.rincian-summary-item.penghasilan { background: var(--grad3); border: 3px solid var(--border3); border-radius: 14px; padding: 14px 16px; }
+.rincian-summary-label-pembayaran { font-size: 12px; font-weight: 600; color: var(--label1); margin-bottom: 4px; }
+.rincian-summary-label-omzet { font-size: 12px; font-weight: 600; color: var(--label2); margin-bottom: 4px; }
+.rincian-summary-label-penghasilan { font-size: 12px; font-weight: 600; color: var(--label3); margin-bottom: 4px; }
+.rincian-summary-value-pembayaran { font-family: 'Poppins', sans-serif; font-size: 19px; font-weight: 700; color: var(--label1); }
+.rincian-summary-value-omzet { font-family: 'Poppins', sans-serif; font-size: 19px; font-weight: 700; color: var(--label2); }
+.rincian-summary-value-penghasilan { font-family: 'Poppins', sans-serif; font-size: 19px; font-weight: 700; color: var(--label3); }
 .rincian-summary-item.penghasilan .rincian-summary-value { color: var(--h7); }
 
 .rincian-section { margin-bottom: 16px; }
@@ -78,5 +79,8 @@
   .rincian-overlay .modal-head { padding: 16px 18px; }
   .rincian-overlay .modal-body { padding: 4px 18px 18px; }
   .rincian-overlay .modal-foot { padding: 12px 18px 18px; }
-  .rincian-summary { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .rincian-summary { grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+  .rincian-summary-item { padding: 10px 10px; }
+  .rincian-summary-value-omzet, .rincian-summary-value-penghasilan, .rincian-summary-value-pembayaran { font-size: 14.5px; }
+  .rincian-summary-label-omzet, .rincian-summary-label-penghasilan, .rincian-summary-label-pembayaran { font-size: 10.5px; }
 }

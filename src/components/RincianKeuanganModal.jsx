@@ -114,7 +114,11 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
 
         <div className="modal-body">
           <div className="rincian-summary">
-            <div className="rincian-summary-item">
+            <div className="rincian-summary-item pembayaran">
+              <div className="rincian-summary-label-pembayaran">Pembayaran</div>
+              <div className="rincian-summary-value-pembayaran">{formatRupiah(booking.belanja_klien)}</div>
+            </div>
+            <div className="rincian-summary-item omzet">
               <div className="rincian-summary-label-omzet">Omzet</div>
               <div className="rincian-summary-value-omzet">{formatRupiah(booking.omzet)}</div>
             </div>
