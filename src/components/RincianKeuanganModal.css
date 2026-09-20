@@ -35,9 +35,9 @@
    beda (var(--h7), hijau -- sama kayak warna "Sudah Dibayar" di section
    PEMBAYARAN) biar keliatan itu "angka final yang paling penting". */
 .rincian-summary { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 18px; }
-.rincian-summary-item.pembayaran { background: var(--grad1); border: 3px solid var(--border1); border-radius: 14px; padding: 14px 16px; }
-.rincian-summary-item.omzet { background: var(--grad2); border: 3px solid var(--border2); border-radius: 14px; padding: 14px 16px; }
-.rincian-summary-item.penghasilan { background: var(--grad3); border: 3px solid var(--border3); border-radius: 14px; padding: 14px 16px; }
+.rincian-summary-item.pembayaran { background: none; border: 3px solid var(--border1); border-radius: 14px; padding: 14px 16px; }
+.rincian-summary-item.omzet { background: none; border: 3px solid var(--border2); border-radius: 14px; padding: 14px 16px; }
+.rincian-summary-item.penghasilan { background: none; border: 3px solid var(--border3); border-radius: 14px; padding: 14px 16px; }
 .rincian-summary-label-pembayaran { font-size: 12px; font-weight: 600; color: var(--label1); margin-bottom: 4px; }
 .rincian-summary-label-omzet { font-size: 12px; font-weight: 600; color: var(--label2); margin-bottom: 4px; }
 .rincian-summary-label-penghasilan { font-size: 12px; font-weight: 600; color: var(--label3); margin-bottom: 4px; }
