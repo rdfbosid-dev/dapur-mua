@@ -180,7 +180,7 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
               <div className="rincian-section-title">Layanan Makeup</div>
               {makeupRows.map((r, idx) => (
                 <div className="rincian-row" key={idx}>
-                  <span>{r.nama} ({r.tim ? 'Tim' : 'Me'})</span>
+                  <span>{r.nama} (<span className="rincian-metim">{r.tim ? 'Tim' : 'Me'}</span>)</span>
                   <div className="rincian-nilai-wrap">
                     <b>{formatRupiah(nilaiMakeupTambahan(r))}</b>
                     {keteranganTim(r) && <span className="rincian-keterangan">{keteranganTim(r)}</span>}
@@ -195,7 +195,7 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
               <div className="rincian-section-title">Layanan Tambahan (Hairdo/Hijabdo+)</div>
               {tambahanRows.map((r, idx) => (
                 <div className="rincian-row" key={idx}>
-                  <span>{r.nama} ({r.jenis} | {r.tim ? 'Tim' : 'Me'})</span>
+                  <span>{r.nama} ({r.jenis} | <span className="rincian-metim">{r.tim ? 'Tim' : 'Me'}</span>)</span>
                   <div className="rincian-nilai-wrap">
                     <b>{formatRupiah(nilaiMakeupTambahan(r))}</b>
                     {keteranganTim(r) && <span className="rincian-keterangan">{keteranganTim(r)}</span>}

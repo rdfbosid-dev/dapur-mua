@@ -79,7 +79,7 @@ function InvoicePaper({ profile, booking, peserta, payments, bundlingItems = [],
         <thead>
           <tr>
             <th>Peserta</th>
-            <th>Layanan</th>
+            <th>Layanan/Add On</th>
             <th className="right">Biaya</th>
           </tr>
         </thead>
