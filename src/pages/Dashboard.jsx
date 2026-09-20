@@ -41,7 +41,7 @@ function dayLabel(tanggalAcara, jamStartMakeup) {
       const mulai = new Date(tanggalAcara)
       mulai.setHours(jam, menit || 0, 0, 0)
       const jamBerlalu = (new Date() - mulai) / 3600000
-      if (jamBerlalu >= 4) return { text: 'Selesai', cls: 'selesai' }
+      if (jamBerlalu >= 3) return { text: 'Selesai', cls: 'selesai' }
     }
     return { text: 'Hari ini', cls: 'today' }
   }
