@@ -654,7 +654,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                   <div className="pay-row pay-row-header pay-row-bundling">
                     <span></span>
                     <span>Biaya</span>
-                    <span className="pay-amount">Keuntungan</span>
+                    <span>Keuntungan</span>
                     <span></span>
                     <span></span>
                   </div>
