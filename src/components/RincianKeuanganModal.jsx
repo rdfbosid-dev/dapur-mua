@@ -81,29 +81,29 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
   // Penghasilan & baris-baris rincian di atas.
   const rumusBelanja = [
     makeupRows.length > 0 && 'Biaya Makeup',
-    tambahanRows.length > 0 && 'Biaya Tambahan',
+    tambahanRows.length > 0 && 'Biaya Layanan Tambahan',
     addOnItems.length > 0 && 'Biaya Add On',
-    bundlingTop.length > 0 && 'Biaya Bundling',
-    transport > 0 && 'Transport',
+    bundlingTop.length > 0 && 'Biaya Paket Bundling',
+    transport > 0 && 'Biaya Transport',
   ].filter(Boolean).join(' + ')
 
   const rumusOmzet = [
     makeupMeAda && 'Biaya Makeup (Me)',
     makeupTimAda && 'Komisi Makeup (Tim)',
-    tambahanMeAda && 'Biaya Tambahan (Me)',
-    tambahanTimAda && 'Komisi Tambahan (Tim)',
+    tambahanMeAda && 'Biaya Layanan Tambahan (Me)',
+    tambahanTimAda && 'Komisi Layanan Tambahan (Tim)',
     addOnItems.length > 0 && 'Biaya Add On',
-    bundlingTop.length > 0 && 'Untung Bundling',
-    transport > 0 && 'Transport',
+    bundlingTop.length > 0 && 'Untung Paket Bundling',
+    transport > 0 && 'Biaya Transport',
   ].filter(Boolean).join(' + ')
 
   const rumusPenghasilan = [
     makeupMeAda && 'Biaya Makeup (Me)',
     makeupTimAda && 'Komisi Makeup (Tim)',
-    tambahanMeAda && 'Biaya Tambahan (Me)',
-    tambahanTimAda && 'Komisi Tambahan (Tim)',
+    tambahanMeAda && 'Biaya LayananTambahan (Me)',
+    tambahanTimAda && 'Komisi Layanan Tambahan (Tim)',
     addOnItems.length > 0 && 'Untung Add On',
-    bundlingTop.length > 0 && 'Untung Bundling',
+    bundlingTop.length > 0 && 'Untung Paket Bundling',
   ].filter(Boolean).join(' + ')
 
   // Inti dari fitur klik-kartu ini: 1 baris peserta/add-on/bundling itu
