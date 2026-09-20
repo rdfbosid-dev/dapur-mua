@@ -31,7 +31,7 @@ function formatRupiah(n) {
 
 // Sama persis logikanya kayak di Kalender.jsx/BookingList.jsx -- booking
 // dianggap "selesai" kalau tanggalnya udah lewat, ATAU hari ini tapi
-// udah lewat 4 jam dari jam mulai makeup. Dipakai buat nentuin warna
+// udah lewat 3 jam dari jam mulai makeup. Dipakai buat nentuin warna
 // avatar di list Klien (b-avatar.selesai).
 function isSelesai(dateStr, jamStartMakeup) {
   const today = new Date()
@@ -46,7 +46,7 @@ function isSelesai(dateStr, jamStartMakeup) {
   const [jam, menit] = jamStartMakeup.split(':').map(Number)
   const mulai = new Date(dateStr)
   mulai.setHours(jam, menit || 0, 0, 0)
-  return (new Date() - mulai) / 3600000 >= 4
+  return (new Date() - mulai) / 3600000 >= 3
 }
 
 // Sama persis kayak di BookingModal.jsx -- cuma nyentuh huruf PERTAMA tiap

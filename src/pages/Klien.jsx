@@ -34,7 +34,7 @@ function studioFilePrefix(name) {
 
 // Sama persis rumus "Selesai" yang udah dipakai di Dashboard & BookingList --
 // booking dianggap Selesai kalau tanggalnya udah lewat, atau kalau hari ini
-// tapi udah lebih dari 4 jam dari jam mulai makeup.
+// tapi udah lebih dari 3 jam dari jam mulai makeup.
 function isBookingSelesai(tanggalAcara, jamStartMakeup) {
   if (!tanggalAcara) return false
   const now = new Date()
@@ -45,7 +45,7 @@ function isBookingSelesai(tanggalAcara, jamStartMakeup) {
   const [h, m] = jamStartMakeup.slice(0, 5).split(':').map(Number)
   const start = new Date(now)
   start.setHours(h, m, 0, 0)
-  const cutoff = new Date(start.getTime() + 4 * 60 * 60 * 1000)
+  const cutoff = new Date(start.getTime() + 3 * 60 * 60 * 1000)
   return now >= cutoff
 }
 

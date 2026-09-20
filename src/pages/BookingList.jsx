@@ -31,13 +31,13 @@ function isSelesai(dateStr, jamStartMakeup) {
   if (target < today) return true
   if (target > today) return false
 
-  // Booking hari ini -- baru dianggap selesai kalau udah lewat 4 jam dari
+  // Booking hari ini -- baru dianggap selesai kalau udah lewat 3 jam dari
   // jam mulai makeup (sama persis kayak logika di Dashboard).
   if (!jamStartMakeup) return false
   const [jam, menit] = jamStartMakeup.split(':').map(Number)
   const mulai = new Date(dateStr)
   mulai.setHours(jam, menit || 0, 0, 0)
-  return (new Date() - mulai) / 3600000 >= 4
+  return (new Date() - mulai) / 3600000 >= 3
 }
 
 export default function BookingList() {

@@ -32,7 +32,7 @@ function dayLabel(tanggalAcara, jamStartMakeup) {
   const diffDays = Math.round((target - today) / 86400000)
 
   if (diffDays === 0) {
-    // Booking hari ini -- kalau udah lewat 4 jam dari jam mulai makeup,
+    // Booking hari ini -- kalau udah lewat 3 jam dari jam mulai makeup,
     // kemungkinan besar sesi makeup-nya udah kelar, jadi badge-nya diganti
     // "Selesai" (netral) daripada tetap nampilin "Hari ini" (merah/mendesak)
     // sepanjang hari.
