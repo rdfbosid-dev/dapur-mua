@@ -79,6 +79,14 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
   // biar rumus ini jelasin KONSEPNYA ("dari mana asalnya Omzet"),
   // bukan sekadar ngulang angka yang udah keliatan di kartu Omzet/
   // Penghasilan & baris-baris rincian di atas.
+  const rumusBelanja = [
+    makeupRows.length > 0 && 'Biaya Makeup',
+    tambahanRows.length > 0 && 'Biaya Tambahan',
+    addOnItems.length > 0 && 'Biaya Add On',
+    bundlingTop.length > 0 && 'Biaya Bundling',
+    transport > 0 && 'Transport',
+  ].filter(Boolean).join(' + ')
+
   const rumusOmzet = [
     makeupMeAda && 'Biaya Makeup (Me)',
     makeupTimAda && 'Komisi Makeup (Tim)',
@@ -129,7 +137,8 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
 
         <div className="modal-body">
           <div className="modal-info">
-            <h3>Ini adalah data rincian keuangan dalam booking ini</h3>
+            <div className="modal-info-text">Ini adalah data rincian keuangan dalam booking ini</div>
+            <div className="modal-info-hint">Ketuk kotak ringkasan untuk lihat rincian data</div>
           </div>
           <div className="rincian-summary">
             <button type="button" className={`rincian-summary-item belanja${activeCard === 'belanja' ? ' active' : ''}`} onClick={() => setActiveCard('belanja')}>
@@ -219,6 +228,13 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
           )}
 
           <div className="rincian-note">
+            <div className="rincian-note-title">Penjelasan</div>
+            <div className="rincian-penjelasan"><b>Belanja Klien</b> = total semua yang ditagihkan ke klien untuk booking ini, apapun kategorinya dan siapapun yang mengerjakan (Me atau Tim, dua-duanya dihitung penuh).</div>
+            <div className="rincian-penjelasan"><b>Omzet</b> = total pemasukan bisnis dari booking ini -- bagian yang dikerjain sendiri (Me) dihitung penuh, yang dikerjain Tim cuma dihitung komisinya, ditambah untung dari Add On & Paket Bundling, plus Transport.</div>
+            <div className="rincian-penjelasan"><b>Penghasilan</b> = bagian yang beneran jadi keuntungan bersih MUA -- sama kayak Omzet, tapi Add On cuma dihitung untungnya (bukan biaya penuh), dan Transport nggak dihitung sama sekali (itu ongkos, bukan keuntungan).</div>
+
+            <div className="rincian-note-title">Rumus</div>
+            <div className="rincian-rumus"><b>Belanja Klien</b> = {rumusBelanja}</div>
             <div className="rincian-rumus"><b>Omzet</b> = {rumusOmzet}</div>
             <div className="rincian-rumus"><b>Penghasilan</b> = {rumusPenghasilan}</div>
           </div>

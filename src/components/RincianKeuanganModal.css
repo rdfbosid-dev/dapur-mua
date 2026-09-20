@@ -23,7 +23,8 @@
 }
 .rincian-overlay .modal-close:hover { background: color-mix(in srgb, var(--h3) 50%, transparent); }
 .rincian-overlay .modal-body { padding: 5px 20px 10px; overflow-y: auto; flex: 1; -webkit-overflow-scrolling: touch; }
-.rincian-overlay .modal-info h3 { padding: 0 0 10px; font-size: 14px; color: var(--ink-soft); }
+.rincian-overlay .modal-info-text { padding: 0 0 4px; font-size: 14px; color: var(--ink-soft); }
+.rincian-overlay .modal-info-hint { padding: 0 0 10px; font-size: 11.5px; color: var(--ink-soft); opacity: 0.65; }
 .rincian-overlay .modal-foot { display: flex; justify-content: flex-end; padding: 14px 20px; flex-shrink: 0; }
 .rincian-overlay .btn-ghost {
   padding: 5px 10px; border-radius: 8px; border: 1.5px solid var(--button-border); background: var(--table-body);
@@ -92,19 +93,29 @@
 }
 .rincian-row b { color: var(--ink-soft); font-weight: 700; }
 
-.rincian-rumus { font-size: 11.5px; color: var(--ink-soft); opacity: 0.85; line-height: 1.6; }
-.rincian-rumus b { color: var(--ink-soft); opacity: 1; }
+.rincian-rumus { font-size: 12px; color: var(--ink-soft); line-height: 1.6; }
+.rincian-rumus b { font-size: 13px; color: var(--h5); }
 .rincian-rumus + .rincian-rumus { margin-top: 4px; }
 
 .rincian-note {
   font-size: 11.5px; color: var(--ink-soft); opacity: 0.75; line-height: 1.5;
   margin-top: 4px; padding-top: 10px; border-top: 1px solid color-mix(in srgb, var(--button-border) 30%, transparent);
 }
+/* "Penjelasan" & "Rumus" -- label kecil pemisah antar 2 kelompok,
+   gaya-nya SENGAJA disamain kayak .rincian-section-title di atas biar
+   konsisten sama section lain di modal ini. */
+.rincian-note-title {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+  color: var(--ink-soft); opacity: 1; margin-bottom: 6px;
+}
+.rincian-note-title:not(:first-child) { margin-top: 14px; }
+.rincian-penjelasan { margin-bottom: 6px; }
+.rincian-penjelasan b { color: var(--h5); opacity: 1; }
 
 @media (max-width: 640px) {
   .rincian-overlay { padding: 0; align-items: flex-end; }
   .rincian-overlay .modal { max-width: 100%; max-height: 92vh; border-radius: 22px 22px 0 0; }
-  .rincian-overlay .modal-head { padding: 16px 18px; }
+  .rincian-overlay .modal-head { padding: 16px 18px 5px; }
   .rincian-overlay .modal-body { padding: 4px 18px 18px; }
   .rincian-overlay .modal-foot { padding: 12px 18px 18px; }
   .rincian-summary { grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
