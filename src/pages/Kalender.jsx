@@ -23,7 +23,7 @@ function sameDate(a, b) {
 }
 
 // Sama persis logikanya kayak di BookingList.jsx -- booking dianggap
-// "selesai" kalau tanggalnya udah lewat, ATAU hari ini tapi udah lewat 4
+// "selesai" kalau tanggalnya udah lewat, ATAU hari ini tapi udah lewat 3
 // jam dari jam mulai makeup.
 function isSelesai(dateStr, jamStartMakeup) {
   const today = new Date()
@@ -38,7 +38,7 @@ function isSelesai(dateStr, jamStartMakeup) {
   const [jam, menit] = jamStartMakeup.split(':').map(Number)
   const mulai = new Date(dateStr)
   mulai.setHours(jam, menit || 0, 0, 0)
-  return (new Date() - mulai) / 3600000 >= 4
+  return (new Date() - mulai) / 3600000 >= 3
 }
 
 // Bikin grid 6x7 (42 sel) buat 1 bulan, termasuk tanggal numpang dari

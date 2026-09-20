@@ -653,8 +653,8 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                       kepanjangan & numpuk ke bawah di kolom yang sempit. */}
                   <div className="pay-row pay-row-header pay-row-bundling">
                     <span></span>
-                    <span>Ditagih</span>
-                    <span className="pay-amount">Untung</span>
+                    <span>Biaya</span>
+                    <span className="pay-amount">Keuntungan</span>
                     <span></span>
                     <span></span>
                   </div>
