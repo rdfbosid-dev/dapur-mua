@@ -532,11 +532,11 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                 <span className={`status-pill ${liveBooking.status_pembayaran === 'Lunas' ? 'lunas' : 'belum'}`}>
                   {liveBooking.status_pembayaran}
                 </span>
-              </div>
-              <div className="detail-actions">
-                <button className="btn-ghost" onClick={() => setShowRincian(true)}>Rincian Keuangan</button>
-                <button className="btn-ghost" onClick={() => setShowInvoice(true)}>Invoice</button>
-                <button className="btn-ghost" onClick={enterEditMode}>Edit Booking</button>
+                <div className="detail-actions">
+                  <button className="btn-ghost" onClick={() => setShowRincian(true)}>Rincian Keuangan</button>
+                  <button className="btn-ghost" onClick={() => setShowInvoice(true)}>Invoice</button>
+                  <button className="btn-ghost" onClick={enterEditMode}>Edit Booking</button>
+                </div>
               </div>
 
               <div className="detail-grid">

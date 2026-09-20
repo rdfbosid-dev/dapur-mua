@@ -105,8 +105,8 @@
    gaya-nya SENGAJA disamain kayak .rincian-section-title di atas biar
    konsisten sama section lain di modal ini. */
 .rincian-note-title {
-  font-size: 10px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
-  color: var(--ink-soft); opacity: 1; margin-bottom: 6px;
+  font-size: 12px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+  color: var(--h5); opacity: 1; margin-bottom: 6px;
 }
 .rincian-note-divider { height: 1px; background: color-mix(in srgb, var(--button-border) 40%, transparent); margin: 12px 0; }
 .rincian-penjelasan { margin-bottom: 6px; }

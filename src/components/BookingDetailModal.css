@@ -82,8 +82,8 @@
 .booking-detail-overlay .btn-primary-detail:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
 /* Titik A: jarak sebelum badge status (di bawah judul modal) */
-.booking-detail-overlay .detail-header { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 10px; margin-top: 0; margin-bottom: 5px; }
-.booking-detail-overlay .detail-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px 10px; margin-bottom: 10px; }
+.booking-detail-overlay .detail-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-top: 0; margin-bottom: 5px; }
+.booking-detail-overlay .detail-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px 10px; }
 
 /* Sumber jarak TUNGGAL sebelum tiap section-label (INFO BOOKING/PEMBAYARAN/PESERTA) --
    ini yang bikin titik B dan C otomatis seragam sama titik A di atas. Elemen
@@ -312,6 +312,10 @@
   .booking-detail-overlay .modal-head { padding: 16px 18px 5px; margin-bottom: 5px; }
   .booking-detail-overlay .modal-body { padding: 5px 18px 16px; }
   .booking-detail-overlay .modal-foot { padding: 12px 18px 18px; }
+  /* Pill & tombol dipaksa 2 baris terpisah CUMA di sini -- desktop
+     tetep 1 baris (diatur di rule dasarnya, bukan di media query ini). */
+  .booking-detail-overlay .detail-header { flex-direction: column; align-items: flex-start; }
+  .booking-detail-overlay .detail-actions { width: 100%; justify-content: flex-end; }
   .booking-detail-overlay .detail-grid { grid-template-columns: repeat(2, 1fr); }
   /* PEMBAYARAN (Total Tagihan/Sudah Dibayar/Sisa Tagihan) tetep 3 kolom
      1 baris di mobile -- cuma font & gap-nya yang dikompres, BUKAN
