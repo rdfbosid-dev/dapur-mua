@@ -940,7 +940,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                           <div className="toggle-row-rambut">
                           <div className={`toggle-opt-rambut${p.layanan_tambahan === 'Tidak Ada' ? ' sel' : ''}`} onClick={() => updateEditPeserta(i, 'layanan_tambahan', 'Tidak Ada')}>Tidak</div>
                           <div className={`toggle-opt-rambut${p.layanan_tambahan === 'Hairdo' ? ' sel' : ''}`} onClick={() => updateEditPeserta(i, 'layanan_tambahan', 'Hairdo')}>Hairdo</div>
-                          <div className={`toggle-opt-rambut${p.layanan_tambahan === 'Hijabdo Plus' ? ' sel' : ''}`} onClick={() => updateEditPeserta(i, 'layanan_tambahan', 'Hijabdo Plus')}>Hijabdo+</div>
+                          <div className={`toggle-opt-rambut${p.layanan_tambahan === 'Hijabdo+' ? ' sel' : ''}`} onClick={() => updateEditPeserta(i, 'layanan_tambahan', 'Hijabdo+')}>Hijabdo+</div>
                         </div>
                         </div>
 
