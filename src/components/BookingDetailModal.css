@@ -301,7 +301,7 @@
 @media (max-width: 640px) {
   .booking-detail-overlay { padding: 0; align-items: flex-end; }
   .booking-detail-overlay .modal { max-width: 100%; max-height: 92vh; border-radius: 22px 22px 0 0; }
-  .booking-detail-overlay .modal-head { padding: 16px 18px; margin-bottom: 5px; }
+  .booking-detail-overlay .modal-head { padding: 16px 18px 5px; margin-bottom: 5px; }
   .booking-detail-overlay .modal-body { padding: 16px 18px; }
   .booking-detail-overlay .modal-foot { padding: 12px 18px 18px; }
   .booking-detail-overlay .detail-grid { grid-template-columns: repeat(2, 1fr); }
