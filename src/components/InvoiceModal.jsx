@@ -153,7 +153,7 @@ function InvoicePaper({ profile, booking, peserta, payments, bundlingItems = [],
             {bundlingItems.filter((b) => !b.parent_id).flatMap((item) => {
               const rows = [
                 <tr key={item.id}>
-                  <td>{item.nama}</td>
+                  <td>{item.nama}{item.vendor ? ` (${item.vendor})` : ''}</td>
                   <td className="right">{formatRupiah(item.biaya)}</td>
                 </tr>,
               ]

@@ -707,7 +707,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                         </div>
                       ) : (
                         <div className="pay-row pay-row-bundling">
-                          <span>{item.nama}</span>
+                          <span>{item.nama}{item.vendor ? ` (${item.vendor})` : ''}</span>
                           <span>{formatRupiah(item.biaya)}</span>
                           <span className="pay-amount">{formatRupiah(item.keuntungan)}</span>
                           <span className="pay-note"></span>
