@@ -1048,7 +1048,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                             )}
                             <div className="field-grid-peserta cols-2">
                               <div className="field">
-                                <label>{n === 1 ? 'Add On Item Lainnya' : `Add On Item Lainnya ${n}`}</label>
+                                <label>{n === 1 ? 'Add On Item' : `Add On Item ${n}`}</label>
                                 <input type="text" placeholder="contoh: Softlens" value={p[namaField] || ''} onChange={(e) => updateEditPeserta(i, namaField, e.target.value)} />
                               </div>
                               {(p[namaField] || '').trim() && (
