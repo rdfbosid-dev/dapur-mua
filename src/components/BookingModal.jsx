@@ -718,8 +718,8 @@ export default function BookingModal({ onClose, onSaved }) {
                   <div className="peserta-body">
                     <div className="field-grid-bundling-utama">
                       <div className="field"><label>Nama Paket</label><input type="text" placeholder="contoh: Fotografer/Attire" value={b.nama} onChange={(e) => updateBundling(i, 'nama', e.target.value)} /></div>
-                      <div className="field"><label>Nama Vendor</label><input type="text" placeholder="contoh: @fourgrads" value={b.vendor} onChange={(e) => updateBundling(i, 'vendor', e.target.value)} /></div>
-                      <div className="field"><label>Biaya Paket (Ditagih ke Klien)</label><input type="text" inputMode="numeric" placeholder="Rp0" value={b.biaya ? `Rp${formatAngkaInput(b.biaya)}` : ''} onChange={(e) => updateBundling(i, 'biaya', parseAngkaInput(e.target.value))} /></div>
+                      <div className="field"><label>Nama Vendor</label><input type="text" placeholder="contoh: @attirebyjennie" value={b.vendor} onChange={(e) => updateBundling(i, 'vendor', e.target.value)} /></div>
+                      <div className="field"><label>Biaya Paket (untuk Klien)</label><input type="text" inputMode="numeric" placeholder="Rp0" value={b.biaya ? `Rp${formatAngkaInput(b.biaya)}` : ''} onChange={(e) => updateBundling(i, 'biaya', parseAngkaInput(e.target.value))} /></div>
                       <div className="field"><label>Untung untuk MUA (jika ada)</label><input type="text" inputMode="numeric" placeholder="Rp0" value={b.untung ? `Rp${formatAngkaInput(b.untung)}` : ''} onChange={(e) => updateBundling(i, 'untung', parseAngkaInput(e.target.value))} /></div>
                     </div>
 

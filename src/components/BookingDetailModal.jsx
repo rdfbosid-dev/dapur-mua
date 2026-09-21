@@ -695,7 +695,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                           <div className={`field-grid-detail ${editingBundlingIsChild ? 'add-edit-pay-cols-3' : 'bundling-cols-2'}`}>
                             <div className="field"><label>Nama Paket</label><input type="text" placeholder="contoh: Fotografer/Attire" value={editBundlingNama} onChange={(e) => setEditBundlingNama(e.target.value)} /></div>
                             {!editingBundlingIsChild && (
-                              <div className="field"><label>Nama Vendor</label><input type="text" placeholder="contoh: @fourgrads" value={editBundlingVendor} onChange={(e) => setEditBundlingVendor(e.target.value)} /></div>
+                              <div className="field"><label>Nama Vendor</label><input type="text" placeholder="contoh: @attirebyjennie" value={editBundlingVendor} onChange={(e) => setEditBundlingVendor(e.target.value)} /></div>
                             )}
                             <div className="field"><label>Biaya Ditagih ke Klien</label><input type="text" inputMode="numeric" placeholder="Rp0" value={editBundlingBiaya ? `Rp${formatAngkaInput(editBundlingBiaya)}` : ''} onChange={(e) => setEditBundlingBiaya(parseAngkaInput(e.target.value))} /></div>
                             <div className="field"><label>Untung/Komisi MUA</label><input type="text" inputMode="numeric" placeholder="Rp0" value={editBundlingUntung ? `Rp${formatAngkaInput(editBundlingUntung)}` : ''} onChange={(e) => setEditBundlingUntung(parseAngkaInput(e.target.value))} /></div>
@@ -797,7 +797,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                 <form onSubmit={handleAddBundling} className="add-payment-card" style={{ marginTop: 8 }}>
                   <div className="field-grid-detail bundling-cols-2">
                     <div className="field"><label>Nama Paket</label><input type="text" placeholder="contoh: Fotografer/Attire" value={bundlingNama} onChange={(e) => setBundlingNama(e.target.value)} /></div>
-                    <div className="field"><label>Nama Vendor</label><input type="text" placeholder="contoh: @fourgrads" value={bundlingVendor} onChange={(e) => setBundlingVendor(e.target.value)} /></div>
+                    <div className="field"><label>Nama Vendor</label><input type="text" placeholder="contoh: @attirebyjennie" value={bundlingVendor} onChange={(e) => setBundlingVendor(e.target.value)} /></div>
                     <div className="field"><label>Biaya (ditagih ke klien)</label><input type="text" inputMode="numeric" placeholder="Rp0" value={bundlingBiaya ? `Rp${formatAngkaInput(bundlingBiaya)}` : ''} onChange={(e) => setBundlingBiaya(parseAngkaInput(e.target.value))} /></div>
                     <div className="field"><label>Untung untuk MUA (jika ada)</label><input type="text" inputMode="numeric" placeholder="Rp0" value={bundlingUntung ? `Rp${formatAngkaInput(bundlingUntung)}` : ''} onChange={(e) => setBundlingUntung(parseAngkaInput(e.target.value))} /></div>
                   </div>
