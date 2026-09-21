@@ -50,6 +50,7 @@ function blankPeserta(nama = '') {
   return {
     nama, peran: '',
     kategoriMakeup: 'Regular', jenisPaket: '', dikerjakanOlehMakeup: 'Me',
+    pakaiPaketBundling: false,
     biayaMakeup: '', komisiMakeup: '', namaTimMakeup: '',
     layananTambahan: 'Tidak Ada', dikerjakanOlehTambahan: 'Me',
     biayaTambahan: '', komisiTambahan: '', namaTimTambahan: '',
@@ -301,6 +302,7 @@ export default function BookingModal({ onClose, onSaved }) {
       peran: p.peran.trim(),
       jenis_paket: p.jenisPaket.trim(),
       kategori_makeup: p.kategoriMakeup,
+      pakai_paket_bundling: p.pakaiPaketBundling,
       dikerjakan_oleh_makeup: p.dikerjakanOlehMakeup,
       biaya_makeup: Number(p.biayaMakeup) || 0,
       // Komisi & Nama Tim CUMA berlaku kalau beneran dikerjain Tim --
@@ -351,7 +353,7 @@ export default function BookingModal({ onClose, onSaved }) {
     // dipake buat nyambungin add on paket ke paket induknya.
     for (let i = 0; i < pesertaList.length; i++) {
       const p = pesertaList[i]
-      if (p.kategoriMakeup !== 'Paket Bundling') continue
+      if (!p.pakaiPaketBundling) continue
       const pesertaId = insertedPeserta[i]?.id
       if (!pesertaId) continue
 
@@ -586,29 +588,41 @@ export default function BookingModal({ onClose, onSaved }) {
                           <CustomSelect
                             options={KATEGORI_MAKEUP_OPTIONS}
                             value={p.kategoriMakeup}
-                            onChange={(v) => {
-                              updatePeserta(i, 'kategoriMakeup', v)
-                              if (v === 'Paket Bundling' && p.vendors.length === 0) addVendor(i)
-                            }}
+                            onChange={(v) => updatePeserta(i, 'kategoriMakeup', v)}
                             variant="modal"
                           />
                         </div>
-                        {p.kategoriMakeup !== 'Paket Bundling' && (
                         <div className="field">
                           <label>Jenis Makeup</label>
                           <input type="text" placeholder="Standar/VIP/Gold/Premium" value={p.jenisPaket} onChange={(e) => updatePeserta(i, 'jenisPaket', e.target.value)} />
                         </div>
-                        )}
                       </div>
 
-                      {/* Paket Bundling sejak awal booking -- tiap
-                          Vendor (Nama/Biaya/Untung/Add On) dapet blok
-                          sendiri di bawah Kategori (kanan Kategori
-                          dibiarin kosong). Biaya Makeup/Komisi/dkk di
-                          bawah TETEP jalan apa adanya, kedua-duanya
-                          BEDA hal (harga jasa vendor luar vs harga
-                          makeup MUA sendiri). */}
-                      {p.kategoriMakeup === 'Paket Bundling' && (
+                      {/* Paket Bundling -- SEKARANG toggle TERPISAH dari
+                          Kategori (bukan salah satu pilihan Kategori
+                          lagi), soalnya 2 hal ini beda dimensi: Kategori
+                          jawab "acara apa", Paket Bundling jawab "ada
+                          vendor luar tambahan apa nggak". Klien Wedding/
+                          Reguler/dst BISA juga sekalian pakai Paket
+                          Bundling -- makanya harus bisa nyala bareng,
+                          bukan saling gantiin. Biaya Makeup/Komisi/dkk
+                          di bawah TETEP jalan apa adanya, BEDA hal
+                          (harga jasa vendor luar vs harga makeup MUA
+                          sendiri). */}
+                      <div className="field-grid-peserta cols-2">
+                        <div className="field">
+                          <label>Sertakan Paket Bundling?</label>
+                          <div className="toggle-row">
+                            <div className={`toggle-opt${!p.pakaiPaketBundling ? ' sel' : ''}`} onClick={() => updatePeserta(i, 'pakaiPaketBundling', false)}>Tidak</div>
+                            <div className={`toggle-opt${p.pakaiPaketBundling ? ' sel' : ''}`} onClick={() => {
+                              updatePeserta(i, 'pakaiPaketBundling', true)
+                              if (p.vendors.length === 0) addVendor(i)
+                            }}>Ya</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {p.pakaiPaketBundling && (
                       <div>
                         {p.vendors.map((v, vi) => (
                           <div key={vi}>
@@ -620,7 +634,7 @@ export default function BookingModal({ onClose, onSaved }) {
                             </div>
                             <div className="field-grid-peserta cols-2">
                               <div className="field">
-                                <label>Biaya Vendor {vi + 1} (Ditagih ke Klien)</label>
+                                <label>Biaya Vendor {vi + 1}</label>
                                 <input type="text" inputMode="numeric" placeholder="Rp0" value={v.biaya ? `Rp${formatAngkaInput(v.biaya)}` : ''} onChange={(e) => updateVendor(i, vi, 'biaya', parseAngkaInput(e.target.value))} />
                               </div>
                               <div className="field">

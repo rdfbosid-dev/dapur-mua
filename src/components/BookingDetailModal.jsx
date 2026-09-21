@@ -250,11 +250,11 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
         updated.komisi_tambahan = 0
         updated.nama_tim_tambahan = ''
       }
-      // Ganti Kategori JAUH dari "Paket Bundling" -> vendor yang udah
+      // Toggle "Sertakan Paket Bundling?" dimatiin -> vendor yang udah
       // sempet keisi ikut ke-reset juga, biar nggak nyangkut diem-diem.
       // Vendor yang UDAH ADA di database (punya .id) dicatat dulu ke
       // removedVendorIds biar beneran ke-delete pas Simpan Booking.
-      if (field === 'kategori_makeup' && value !== 'Paket Bundling' && p.kategori_makeup === 'Paket Bundling') {
+      if (field === 'pakai_paket_bundling' && value === false) {
         const idsToRemove = (p.vendors || []).filter((v) => v.id).map((v) => v.id)
         if (idsToRemove.length > 0) setRemovedVendorIds((ids) => [...ids, ...idsToRemove])
         updated.vendors = []
@@ -308,6 +308,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
   function addEditPeserta() {
     setEditPeserta((list) => [...list, {
       nama_anggota: '', peran: '', kategori_makeup: 'Regular', jenis_paket: '', dikerjakan_oleh_makeup: 'Me',
+      pakai_paket_bundling: false,
       biaya_makeup: 0, komisi_makeup_tim: 0, nama_tim_makeup: '', layanan_tambahan: 'Tidak Ada',
       dikerjakan_oleh_tambahan: 'Me', biaya_tambahan: 0, komisi_tambahan: 0, nama_tim_tambahan: '',
       layanan_lainnya: '', biaya_lainnya: 0, keuntungan_lainnya: 0,
@@ -404,6 +405,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
         peran: p.peran?.trim() || '',
         jenis_paket: (p.jenis_paket || '').trim(),
         kategori_makeup: p.kategori_makeup,
+        pakai_paket_bundling: !!p.pakai_paket_bundling,
         dikerjakan_oleh_makeup: p.dikerjakan_oleh_makeup,
         biaya_makeup: Number(p.biaya_makeup) || 0,
         // Komisi & Nama Tim CUMA berlaku kalau beneran dikerjain Tim --
@@ -698,12 +700,13 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                   <div className="b-info">
                     <div className="b-name">{p.nama_anggota} {p.peran ? `— (${p.peran})` : ''}</div>
                     <div className="b-meta">
-                      {p.kategori_makeup === 'Paket Bundling'
+                      {`${p.jenis_paket || p.kategori_makeup} (${p.dikerjakan_oleh_makeup}) — ${formatRupiah(p.biaya_makeup)}`}
+                      {p.pakai_paket_bundling
                         ? bundlingItems.filter((b) => b.peserta_id === p.id && !b.parent_id).map((v) => {
                             const addOns = bundlingItems.filter((c) => c.parent_id === v.id)
                             return ` | ${v.nama} ${formatRupiah(v.biaya)}` + addOns.map((a) => ` | ↳ ${a.nama} ${formatRupiah(a.biaya)}`).join('')
                           }).join('')
-                        : `${p.jenis_paket || p.kategori_makeup} (${p.dikerjakan_oleh_makeup}) — ${formatRupiah(p.biaya_makeup)}`}
+                        : ''}
                       {p.layanan_tambahan !== 'Tidak Ada' ? ` | ${p.layanan_tambahan} (${p.dikerjakan_oleh_tambahan})` : ''}
                       {[1, 2, 3, 4, 5].map((n) => {
                         const suffix = n === 1 ? '' : `_${n}`
@@ -825,29 +828,40 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                           <CustomSelect
                             options={KATEGORI_MAKEUP_OPTIONS}
                             value={p.kategori_makeup || 'Regular'}
-                            onChange={(v) => {
-                              updateEditPeserta(i, 'kategori_makeup', v)
-                              if (v === 'Paket Bundling' && (p.vendors || []).length === 0) addVendor(i)
-                            }}
+                            onChange={(v) => updateEditPeserta(i, 'kategori_makeup', v)}
                             variant="modal"
                           />
                         </div>
-                        {p.kategori_makeup !== 'Paket Bundling' && (
                         <div className="field">
                           <label>Jenis Makeup</label>
                           <input type="text" placeholder="Standar/VIP/Gold/Premium" value={p.jenis_paket || ''} onChange={(e) => updateEditPeserta(i, 'jenis_paket', e.target.value)} />
                         </div>
-                        )}
                       </div>
 
-                      {/* Paket Bundling sejak awal booking -- tiap
-                          Vendor (Nama/Biaya/Untung/Add On) dapet blok
-                          sendiri di bawah Kategori (kanan Kategori
-                          dibiarin kosong). Biaya Makeup/Komisi/dkk di
-                          bawah TETEP jalan apa adanya, kedua-duanya
-                          BEDA hal (harga jasa vendor luar vs harga
-                          makeup MUA sendiri). */}
-                      {p.kategori_makeup === 'Paket Bundling' && (
+                      {/* Paket Bundling -- toggle TERPISAH dari Kategori
+                          (bukan salah satu pilihan Kategori lagi),
+                          soalnya 2 hal ini beda dimensi: Kategori jawab
+                          "acara apa", Paket Bundling jawab "ada vendor
+                          luar tambahan apa nggak". Klien Wedding/Reguler/
+                          dst BISA juga sekalian pakai Paket Bundling --
+                          makanya harus bisa nyala bareng, bukan saling
+                          gantiin. Biaya Makeup/Komisi/dkk di bawah TETEP
+                          jalan apa adanya, BEDA hal (harga jasa vendor
+                          luar vs harga makeup MUA sendiri). */}
+                      <div className="field-grid-peserta cols-2">
+                        <div className="field">
+                          <label>Sertakan Paket Bundling?</label>
+                          <div className="toggle-row">
+                            <div className={`toggle-opt${!p.pakai_paket_bundling ? ' sel' : ''}`} onClick={() => updateEditPeserta(i, 'pakai_paket_bundling', false)}>Tidak</div>
+                            <div className={`toggle-opt${p.pakai_paket_bundling ? ' sel' : ''}`} onClick={() => {
+                              updateEditPeserta(i, 'pakai_paket_bundling', true)
+                              if ((p.vendors || []).length === 0) addVendor(i)
+                            }}>Ya</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {p.pakai_paket_bundling && (
                       <div>
                         {(p.vendors || []).map((v, vi) => (
                           <div key={v.id || vi}>
