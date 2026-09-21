@@ -29,4 +29,4 @@ export const EVENT_CUSTOM_SENTINEL = 'Lainnya (ketik manual)'
 // beda kalau semua MUA nulis istilah sendiri-sendiri. Penamaan detail
 // (Gold Wedding, Premium, dll) tetep bebas lewat field teks "Jenis
 // Makeup" yang terpisah.
-export const KATEGORI_MAKEUP_OPTIONS = ['Wedding', 'Special Occasion', 'Regular']
+export const KATEGORI_MAKEUP_OPTIONS = ['Wedding', 'Special Occasion', 'Reguler', 'Paket Bundling']

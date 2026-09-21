@@ -147,12 +147,6 @@
 }
 .booking-modal-overlay .field-grid-peserta.cols-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 5px; }
 .booking-modal-overlay .field-grid-bundling { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-/* Khusus form Nama Paket/Nama Vendor/Biaya/Untung -- 4 field, 2 kolom,
-   otomatis "kepecah" jadi 2 baris (Nama Paket+Vendor di baris 1, Biaya+
-   Untung di baris 2). SENGAJA class TERPISAH dari .field-grid-bundling
-   di atas (yang tetep 3 kolom) -- itu masih dipake buat form "Add On di
-   Paket Ini" yang nggak diminta ikut berubah. */
-.booking-modal-overlay .field-grid-bundling-utama { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
 .booking-modal-overlay .addon-remove-row { display: flex; justify-content: flex-end; margin-bottom: 6px; }
 .booking-modal-overlay .peserta-remove {
   font-size: 12px; font-weight: 550; color: var(--h8); cursor: pointer; background: var(--notif); border: 1px solid var(--notif);

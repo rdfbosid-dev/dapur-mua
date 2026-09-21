@@ -54,6 +54,7 @@ function blankPeserta(nama = '') {
     layananTambahan: 'Tidak Ada', dikerjakanOlehTambahan: 'Me',
     biayaTambahan: '', komisiTambahan: '', namaTimTambahan: '',
     addOnLainnya: [{ nama: '', biaya: '', keuntungan: '' }],
+    vendors: [],
   }
 }
 
@@ -186,36 +187,51 @@ export default function BookingModal({ onClose, onSaved }) {
     }))
   }
 
-  // Paket Bundling -- level BOOKING (bukan per klien kayak Add On),
-  // buat kerjasama vendor luar. Sama persis konsepnya kayak yang udah
-  // ada di BookingDetailModal.jsx, cuma di sini buat booking BARU.
-  // Tiap paket bisa punya "addOns" sendiri (misal paket Fotografer
-  // punya add on Strobist) -- disimpen sebagai array bersarang di sini,
-  // baru pas nyimpen ke database di-"ratain" jadi baris-baris terpisah
-  // yang saling terhubung lewat parent_id.
-  const [bundlingList, setBundlingList] = useState([])
-  function addBundling() {
-    setBundlingList((list) => [...list, { nama: '', vendor: '', biaya: '', untung: '', addOns: [] }])
+  // Vendor Paket Bundling -- SEKARANG nempel per KLIEN (bukan level
+  // booking lagi kayak sebelumnya), aktif kalau Kategori klien itu =
+  // "Paket Bundling". Vendor 1 nama-nya ke-render numpang slot "Jenis
+  // Makeup" (lihat JSX), sisanya (Biaya/Untung/Add On, + Vendor 2 dst)
+  // di section sendiri di bawahnya. Tiap vendor bisa punya "addOns"
+  // sendiri (misal Vendor Fotografer punya add on Strobist) -- disimpen
+  // nested di sini, baru di-"ratain" jadi baris bundling_items yang
+  // saling terhubung lewat parent_id + peserta_id pas nyimpen.
+  function addVendor(pesertaIdx) {
+    setPesertaList((list) => list.map((p, idx) => (idx === pesertaIdx ? { ...p, vendors: [...p.vendors, { nama: '', biaya: '', untung: '', addOns: [] }] } : p)))
   }
-  function updateBundling(i, field, value) {
-    setBundlingList((list) => list.map((b, idx) => (idx === i ? { ...b, [field]: value } : b)))
-  }
-  function removeBundling(i) {
-    setBundlingList((list) => list.filter((_, idx) => idx !== i))
-  }
-  function addBundlingAddOn(bundlingIdx) {
-    setBundlingList((list) => list.map((b, idx) => (idx === bundlingIdx ? { ...b, addOns: [...b.addOns, { nama: '', biaya: '', untung: '' }] } : b)))
-  }
-  function updateBundlingAddOn(bundlingIdx, addOnIdx, field, value) {
-    setBundlingList((list) => list.map((b, idx) => {
-      if (idx !== bundlingIdx) return b
-      return { ...b, addOns: b.addOns.map((a, ai) => (ai === addOnIdx ? { ...a, [field]: value } : a)) }
+  function updateVendor(pesertaIdx, vendorIdx, field, value) {
+    setPesertaList((list) => list.map((p, idx) => {
+      if (idx !== pesertaIdx) return p
+      return { ...p, vendors: p.vendors.map((v, vi) => (vi === vendorIdx ? { ...v, [field]: value } : v)) }
     }))
   }
-  function removeBundlingAddOn(bundlingIdx, addOnIdx) {
-    setBundlingList((list) => list.map((b, idx) => {
-      if (idx !== bundlingIdx) return b
-      return { ...b, addOns: b.addOns.filter((_, ai) => ai !== addOnIdx) }
+  function removeVendor(pesertaIdx, vendorIdx) {
+    setPesertaList((list) => list.map((p, idx) => {
+      if (idx !== pesertaIdx) return p
+      return { ...p, vendors: p.vendors.filter((_, vi) => vi !== vendorIdx) }
+    }))
+  }
+  function addVendorAddOn(pesertaIdx, vendorIdx) {
+    setPesertaList((list) => list.map((p, idx) => {
+      if (idx !== pesertaIdx) return p
+      return { ...p, vendors: p.vendors.map((v, vi) => (vi === vendorIdx ? { ...v, addOns: [...v.addOns, { nama: '', biaya: '', untung: '' }] } : v)) }
+    }))
+  }
+  function updateVendorAddOn(pesertaIdx, vendorIdx, addOnIdx, field, value) {
+    setPesertaList((list) => list.map((p, idx) => {
+      if (idx !== pesertaIdx) return p
+      return { ...p, vendors: p.vendors.map((v, vi) => {
+        if (vi !== vendorIdx) return v
+        return { ...v, addOns: v.addOns.map((a, ai) => (ai === addOnIdx ? { ...a, [field]: value } : a)) }
+      }) }
+    }))
+  }
+  function removeVendorAddOn(pesertaIdx, vendorIdx, addOnIdx) {
+    setPesertaList((list) => list.map((p, idx) => {
+      if (idx !== pesertaIdx) return p
+      return { ...p, vendors: p.vendors.map((v, vi) => {
+        if (vi !== vendorIdx) return v
+        return { ...v, addOns: v.addOns.filter((_, ai) => ai !== addOnIdx) }
+      }) }
     }))
   }
   function removeAddOn(pesertaIdx, addOnIdx) {
@@ -303,7 +319,7 @@ export default function BookingModal({ onClose, onSaved }) {
       ...addOnsToRow(p.addOnLainnya),
     }))
 
-    const { error: pesertaError } = await supabase.from('peserta').insert(pesertaRows)
+    const { data: insertedPeserta, error: pesertaError } = await supabase.from('peserta').insert(pesertaRows).select()
 
     if (pesertaError) {
       setSaving(false)
@@ -326,50 +342,52 @@ export default function BookingModal({ onClose, onSaved }) {
       }
     }
 
-    // Baris yang nama-nya masih kosong (user klik "+ Tambah Paket
-    // Bundling" tapi nggak jadi diisi) SENGAJA di-skip, nggak dikirim
-    // ke database -- sama persis filosofinya kayak Add On Item.
-    const filledBundling = bundlingList.filter((b) => b.nama.trim())
+    // Vendor Paket Bundling -- SEKARANG nempel ke peserta tertentu lewat
+    // peserta_id (bukan cuma booking_id kayak sebelumnya), soalnya
+    // Vendor Kategori itu dipilih PER KLIEN. insertedPeserta balik
+    // PERSIS sesuai urutan pesertaRows yang dikirim (1 statement INSERT
+    // ... RETURNING), jadi index ke-i di pesertaList itu pasangannya
+    // index ke-i di insertedPeserta -- sama pola-nya kayak yang dulu
+    // dipake buat nyambungin add on paket ke paket induknya.
+    for (let i = 0; i < pesertaList.length; i++) {
+      const p = pesertaList[i]
+      if (p.kategoriMakeup !== 'Paket Bundling') continue
+      const pesertaId = insertedPeserta[i]?.id
+      if (!pesertaId) continue
 
-    if (filledBundling.length > 0) {
-      const bundlingParentRows = filledBundling.map((b) => ({
+      const filledVendors = p.vendors.filter((v) => v.nama.trim())
+      if (filledVendors.length === 0) continue
+
+      const vendorRows = filledVendors.map((v) => ({
         booking_id: booking.id,
         user_id: user.id,
-        nama: b.nama.trim(),
-        vendor: b.vendor.trim() || null,
-        biaya: Number(b.biaya) || 0,
-        keuntungan: Number(b.untung) || 0,
+        peserta_id: pesertaId,
+        nama: v.nama.trim(),
+        biaya: Number(v.biaya) || 0,
+        keuntungan: Number(v.untung) || 0,
       }))
 
-      // Insert paket dulu (tanpa parent_id, ini level teratas), pake
-      // .select() biar dapet balik ID masing-masing baris yang baru
-      // ke-insert -- ID itu WAJIB buat nyambungin add on di bawahnya
-      // lewat parent_id, jadi ini nggak bisa digabung jadi 1 insert
-      // doang kayak peserta.
-      const { data: insertedBundling, error: bundlingError } = await supabase
+      const { data: insertedVendors, error: vendorError } = await supabase
         .from('bundling_items')
-        .insert(bundlingParentRows)
+        .insert(vendorRows)
         .select()
 
-      if (bundlingError) {
+      if (vendorError) {
         setSaving(false)
-        setError('Booking, peserta, & DP tersimpan, tapi gagal simpan paket bundling: ' + bundlingError.message)
+        setError('Booking & peserta tersimpan, tapi gagal simpan vendor paket bundling: ' + vendorError.message)
         return
       }
 
-      // Supabase ngebalikin baris hasil insert PERSIS sesuai urutan
-      // yang dikirim (1 statement INSERT ... RETURNING), jadi index
-      // ke-i di filledBundling itu pasangannya index ke-i di
-      // insertedBundling.
       const addOnRows = []
-      filledBundling.forEach((b, idx) => {
-        const parentId = insertedBundling[idx]?.id
+      filledVendors.forEach((v, vi) => {
+        const parentId = insertedVendors[vi]?.id
         if (!parentId) return
-        b.addOns.forEach((a) => {
+        v.addOns.forEach((a) => {
           if (a.nama.trim()) {
             addOnRows.push({
               booking_id: booking.id,
               user_id: user.id,
+              peserta_id: pesertaId,
               parent_id: parentId,
               nama: a.nama.trim(),
               biaya: Number(a.biaya) || 0,
@@ -383,7 +401,7 @@ export default function BookingModal({ onClose, onSaved }) {
         const { error: addOnError } = await supabase.from('bundling_items').insert(addOnRows)
         if (addOnError) {
           setSaving(false)
-          setError('Booking, peserta, DP, & paket bundling tersimpan, tapi gagal simpan add on paket: ' + addOnError.message)
+          setError('Booking, peserta, & vendor tersimpan, tapi gagal simpan add on vendor: ' + addOnError.message)
           return
         }
       }
@@ -568,15 +586,80 @@ export default function BookingModal({ onClose, onSaved }) {
                           <CustomSelect
                             options={KATEGORI_MAKEUP_OPTIONS}
                             value={p.kategoriMakeup}
-                            onChange={(v) => updatePeserta(i, 'kategoriMakeup', v)}
+                            onChange={(v) => {
+                              updatePeserta(i, 'kategoriMakeup', v)
+                              if (v === 'Paket Bundling' && p.vendors.length === 0) addVendor(i)
+                            }}
                             variant="modal"
                           />
                         </div>
+                        {p.kategoriMakeup !== 'Paket Bundling' ? (
                         <div className="field">
                           <label>Jenis Makeup</label>
                           <input type="text" placeholder="Standar/VIP/Gold/Premium" value={p.jenisPaket} onChange={(e) => updatePeserta(i, 'jenisPaket', e.target.value)} />
                         </div>
+                        ) : (
+                        <div className="field">
+                          <label>Vendor 1</label>
+                          <input type="text" placeholder="contoh: @fourgrads" value={p.vendors[0]?.nama || ''} onChange={(e) => updateVendor(i, 0, 'nama', e.target.value)} />
+                        </div>
+                        )}
                       </div>
+
+                      {/* Paket Bundling sejak awal booking -- Vendor 1
+                          nama-nya numpang slot Jenis Makeup di atas,
+                          sisanya (Biaya/Untung/Add On per vendor, +
+                          Vendor 2 dst) di sini. Biaya Makeup/Komisi/dkk
+                          di bawah TETEP jalan apa adanya, kedua-duanya
+                          BEDA hal (harga jasa vendor luar vs harga
+                          makeup MUA sendiri). */}
+                      {p.kategoriMakeup === 'Paket Bundling' && (
+                      <div>
+                        {p.vendors.map((v, vi) => (
+                          <div key={vi}>
+                            {vi > 0 && (
+                            <div className="field-grid-peserta cols-2">
+                              <div className="field">
+                                <label>Vendor {vi + 1}</label>
+                                <input type="text" placeholder="contoh: @fourgrads" value={v.nama} onChange={(e) => updateVendor(i, vi, 'nama', e.target.value)} />
+                              </div>
+                            </div>
+                            )}
+                            <div className="field-grid-peserta cols-2">
+                              <div className="field">
+                                <label>Biaya Vendor {vi + 1}</label>
+                                <input type="text" inputMode="numeric" placeholder="Rp0" value={v.biaya ? `Rp${formatAngkaInput(v.biaya)}` : ''} onChange={(e) => updateVendor(i, vi, 'biaya', parseAngkaInput(e.target.value))} />
+                              </div>
+                              <div className="field">
+                                <label>Untung untuk MUA (jika ada)</label>
+                                <input type="text" inputMode="numeric" placeholder="Rp0" value={v.untung ? `Rp${formatAngkaInput(v.untung)}` : ''} onChange={(e) => updateVendor(i, vi, 'untung', parseAngkaInput(e.target.value))} />
+                              </div>
+                            </div>
+
+                            {v.addOns.map((a, ai) => (
+                              <div key={ai}>
+                                <div className="addon-remove-row">
+                                  <button type="button" className="peserta-remove" onClick={() => removeVendorAddOn(i, vi, ai)}>Hapus Add On {ai + 1}</button>
+                                </div>
+                                <div className="field-grid-bundling">
+                                  <div className="field"><label>Nama Add On</label><input type="text" placeholder="contoh: Lighting" value={a.nama} onChange={(e) => updateVendorAddOn(i, vi, ai, 'nama', e.target.value)} /></div>
+                                  <div className="field"><label>Biaya (Ditagih ke Klien)</label><input type="text" inputMode="numeric" placeholder="Rp0" value={a.biaya ? `Rp${formatAngkaInput(a.biaya)}` : ''} onChange={(e) => updateVendorAddOn(i, vi, ai, 'biaya', parseAngkaInput(e.target.value))} /></div>
+                                  <div className="field"><label>Untung untuk MUA (jika ada)</label><input type="text" inputMode="numeric" placeholder="Rp0" value={a.untung ? `Rp${formatAngkaInput(a.untung)}` : ''} onChange={(e) => updateVendorAddOn(i, vi, ai, 'untung', parseAngkaInput(e.target.value))} /></div>
+                                </div>
+                              </div>
+                            ))}
+                            <button type="button" className="add-peserta" onClick={() => addVendorAddOn(i, vi)}>+ Tambah Add On Vendor {vi + 1}</button>
+
+                            {vi > 0 && (
+                            <div className="addon-remove-row">
+                              <button type="button" className="peserta-remove" onClick={() => removeVendor(i, vi)}>Hapus Vendor {vi + 1}</button>
+                            </div>
+                            )}
+                          </div>
+                        ))}
+                        <button type="button" className="add-peserta" onClick={() => addVendor(i)}>+ Tambah Vendor</button>
+                      </div>
+                      )}
 
                       <div className="field-grid-peserta cols-2">
                         <div className="field">
@@ -703,49 +786,6 @@ export default function BookingModal({ onClose, onSaved }) {
                 )
               })}
               <button type="button" className="add-peserta" onClick={addPeserta}>+ Tambah Klien</button>
-            </div>
-
-            {/* Paket Bundling -- level BOOKING, di LUAR loop peserta di
-                atas (beda sama Add On yang nempel per klien). */}
-            <div className="section-label">PAKET BUNDLING</div>
-            <div>
-              {bundlingList.map((b, i) => (
-                <div className="peserta-card" key={i}>
-                  <div className="peserta-head">
-                    <div className="peserta-title"><span className="peserta-num">{i + 1}</span>Paket {i + 1}</div>
-                    <button type="button" className="peserta-remove" onClick={() => removeBundling(i)}>Hapus</button>
-                  </div>
-                  <div className="peserta-body">
-                    <div className="field-grid-bundling-utama">
-                      <div className="field"><label>Nama Paket</label><input type="text" placeholder="contoh: Fotografer/Attire" value={b.nama} onChange={(e) => updateBundling(i, 'nama', e.target.value)} /></div>
-                      <div className="field"><label>Nama Vendor</label><input type="text" placeholder="contoh: @attirebyjennie" value={b.vendor} onChange={(e) => updateBundling(i, 'vendor', e.target.value)} /></div>
-                      <div className="field"><label>Biaya Paket (untuk Klien)</label><input type="text" inputMode="numeric" placeholder="Rp0" value={b.biaya ? `Rp${formatAngkaInput(b.biaya)}` : ''} onChange={(e) => updateBundling(i, 'biaya', parseAngkaInput(e.target.value))} /></div>
-                      <div className="field"><label>Untung untuk MUA (jika ada)</label><input type="text" inputMode="numeric" placeholder="Rp0" value={b.untung ? `Rp${formatAngkaInput(b.untung)}` : ''} onChange={(e) => updateBundling(i, 'untung', parseAngkaInput(e.target.value))} /></div>
-                    </div>
-
-                    {/* Add On DI DALAM paket ini (misal paket Fotografer
-                        punya tambahan Strobist) -- nempel ke paket ini
-                        lewat parent_id pas disimpen, ikut kehitung
-                        terpisah ke Tagihan/Omzet/Penghasilan sama
-                        persis aturannya kayak paket induknya. */}
-                    <div className="sb-label">Add On di Paket Ini</div>
-                    {b.addOns.map((a, ai) => (
-                      <div key={ai}>
-                        <div className="addon-remove-row">
-                          <button type="button" className="peserta-remove" onClick={() => removeBundlingAddOn(i, ai)}>Hapus Add On {ai + 1}</button>
-                        </div>
-                        <div className="field-grid-bundling">
-                          <div className="field"><label>Nama Add On</label><input type="text" placeholder="contoh: Lighting" value={a.nama} onChange={(e) => updateBundlingAddOn(i, ai, 'nama', e.target.value)} /></div>
-                          <div className="field"><label>Biaya (Ditagih ke Klien)</label><input type="text" inputMode="numeric" placeholder="Rp0" value={a.biaya ? `Rp${formatAngkaInput(a.biaya)}` : ''} onChange={(e) => updateBundlingAddOn(i, ai, 'biaya', parseAngkaInput(e.target.value))} /></div>
-                          <div className="field"><label>Untung untuk MUA (jika ada)</label><input type="text" inputMode="numeric" placeholder="Rp0" value={a.untung ? `Rp${formatAngkaInput(a.untung)}` : ''} onChange={(e) => updateBundlingAddOn(i, ai, 'untung', parseAngkaInput(e.target.value))} /></div>
-                        </div>
-                      </div>
-                    ))}
-                    <button type="button" className="add-peserta" onClick={() => addBundlingAddOn(i)}>+ Tambah Add On Paket Ini</button>
-                  </div>
-                </div>
-              ))}
-              <button type="button" className="add-peserta" onClick={addBundling}>+ Tambah Paket Bundling</button>
             </div>
           </div>
 
