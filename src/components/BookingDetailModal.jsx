@@ -868,7 +868,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                             <div className="field-grid-peserta cols-2">
                               <div className="field">
                                 <label>Vendor {vi + 1}</label>
-                                <input type="text" placeholder="contoh: @fourgrads" value={v.nama} onChange={(e) => updateVendor(i, vi, 'nama', e.target.value)} />
+                                <input type="text" placeholder="contoh: @attirebyjennie" value={v.nama} onChange={(e) => updateVendor(i, vi, 'nama', e.target.value)} />
                               </div>
                             </div>
                             <div className="field-grid-peserta cols-2">
