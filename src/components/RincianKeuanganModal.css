@@ -61,9 +61,9 @@
   transform: scale(1.045); filter: saturate(1.25) brightness(1.04); opacity: 1;
 }
 .rincian-summary-item.active:hover { transform: translateY(-2px) scale(1.06); }
-.rincian-summary-item.belanja { background: var(--grad1); border: none; border-radius: 14px; padding: 10px; }
-.rincian-summary-item.omzet { background: var(--grad2); border: none; border-radius: 14px; padding: 10px; }
-.rincian-summary-item.penghasilan { background: var(--grad3); border: none; border-radius: 14px; padding: 10px; }
+.rincian-summary-item.belanja { background: var(--grad1); border: 1.5px solid var(--border1); border-radius: 14px; padding: 10px; }
+.rincian-summary-item.omzet { background: var(--grad2); border: 1.5px solid var(--border2); border-radius: 14px; padding: 10px; }
+.rincian-summary-item.penghasilan { background: var(--grad3); border: 1.5px solid var(--border3); border-radius: 14px; padding: 10px; }
 /* Glow-nya per warna kartu masing-masing, bukan 1 warna generik buat
    ketiganya -- biar kerasa "nyambung" sama identitas kartu itu. */
 .rincian-summary-item.belanja.active { box-shadow: 0 6px 18px -4px color-mix(in srgb, var(--border1) 65%, transparent); }
