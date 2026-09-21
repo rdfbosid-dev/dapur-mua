@@ -832,38 +832,31 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                             variant="modal"
                           />
                         </div>
-                        {p.kategori_makeup !== 'Paket Bundling' ? (
+                        {p.kategori_makeup !== 'Paket Bundling' && (
                         <div className="field">
                           <label>Jenis Makeup</label>
                           <input type="text" placeholder="Standar/VIP/Gold/Premium" value={p.jenis_paket || ''} onChange={(e) => updateEditPeserta(i, 'jenis_paket', e.target.value)} />
                         </div>
-                        ) : (
-                        <div className="field">
-                          <label>Vendor 1</label>
-                          <input type="text" placeholder="contoh: @fourgrads" value={p.vendors?.[0]?.nama || ''} onChange={(e) => updateVendor(i, 0, 'nama', e.target.value)} />
-                        </div>
                         )}
                       </div>
 
-                      {/* Paket Bundling sejak awal booking -- Vendor 1
-                          nama-nya numpang slot Jenis Makeup di atas,
-                          sisanya (Biaya/Untung/Add On per vendor, +
-                          Vendor 2 dst) di sini. Biaya Makeup/Komisi/dkk
-                          di bawah TETEP jalan apa adanya, kedua-duanya
+                      {/* Paket Bundling sejak awal booking -- tiap
+                          Vendor (Nama/Biaya/Untung/Add On) dapet blok
+                          sendiri di bawah Kategori (kanan Kategori
+                          dibiarin kosong). Biaya Makeup/Komisi/dkk di
+                          bawah TETEP jalan apa adanya, kedua-duanya
                           BEDA hal (harga jasa vendor luar vs harga
                           makeup MUA sendiri). */}
                       {p.kategori_makeup === 'Paket Bundling' && (
                       <div>
                         {(p.vendors || []).map((v, vi) => (
                           <div key={v.id || vi}>
-                            {vi > 0 && (
                             <div className="field-grid-peserta cols-2">
                               <div className="field">
                                 <label>Vendor {vi + 1}</label>
                                 <input type="text" placeholder="contoh: @fourgrads" value={v.nama} onChange={(e) => updateVendor(i, vi, 'nama', e.target.value)} />
                               </div>
                             </div>
-                            )}
                             <div className="field-grid-peserta cols-2">
                               <div className="field">
                                 <label>Biaya Vendor {vi + 1}</label>
