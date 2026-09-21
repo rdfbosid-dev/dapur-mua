@@ -86,37 +86,33 @@ function InvoicePaper({ profile, booking, peserta, payments, bundlingItems = [],
         <tbody>
           {peserta.flatMap((p) => {
             const labelMakeup = ['Makeup', p.jenis_paket || p.kategori_makeup, p.dikerjakan_oleh_makeup === 'Tim' ? '(Tim)' : ''].filter(Boolean).join(' ')
-            const rows = [
-              <tr key={p.id + '-mkp'}>
-                <td>{p.nama_anggota}{p.peran ? ` (${p.peran})` : ''}</td>
-                <td>{labelMakeup}</td>
-                <td className="right">{formatRupiah(p.biaya_makeup)}</td>
-              </tr>,
-            ]
-            // Vendor Paket Bundling nempel per klien (bukan tabel
-            // terpisah lagi) -- baris klien ini SENGAJA render vendor
-            // langsung di sini, ikut nempel di bawah baris Makeup-nya,
-            // biar keliatan jelas itu 1 paket dari klien yang sama.
-            // Add On di dalam vendor (misal Strobist) di-indent (↳).
-            if (p.pakai_paket_bundling) {
-              bundlingItems.filter((v) => v.peserta_id === p.id && !v.parent_id).forEach((v) => {
-                rows.push(
-                  <tr key={v.id}>
-                    <td></td>
-                    <td>{v.nama}</td>
-                    <td className="right">{formatRupiah(v.biaya)}</td>
-                  </tr>
-                )
-                bundlingItems.filter((c) => c.parent_id === v.id).forEach((c) => {
-                  rows.push(
-                    <tr key={c.id}>
-                      <td></td>
-                      <td style={{ paddingLeft: 20 }}>↳ {c.nama}</td>
-                      <td className="right">{formatRupiah(c.biaya)}</td>
-                    </tr>
-                  )
-                })
-              })
+            // Kalau peserta ini pakai Paket Bundling, klien HARUSNYA cuma
+            // liat 1 baris "Paket Bundling <vendor>..." yang udah nyatuin
+            // Biaya Makeup + semua vendor level-atas jadi 1 harga paket --
+            // rincian siapa dapat berapa itu data INTERNAL, cuma ada di
+            // Rincian Keuangan, JANGAN bocor ke invoice klien.
+            const vendorsPeserta = p.pakai_paket_bundling
+              ? bundlingItems.filter((v) => v.peserta_id === p.id && !v.parent_id)
+              : []
+            const rows = []
+            if (vendorsPeserta.length > 0) {
+              const totalPaket = Number(p.biaya_makeup || 0) + vendorsPeserta.reduce((sum, v) => sum + Number(v.biaya || 0), 0)
+              const labelVendor = vendorsPeserta.map((v) => v.nama).join(' & ')
+              rows.push(
+                <tr key={p.id + '-mkp'}>
+                  <td>{p.nama_anggota}{p.peran ? ` (${p.peran})` : ''}</td>
+                  <td>Paket Bundling {labelVendor}</td>
+                  <td className="right">{formatRupiah(totalPaket)}</td>
+                </tr>
+              )
+            } else {
+              rows.push(
+                <tr key={p.id + '-mkp'}>
+                  <td>{p.nama_anggota}{p.peran ? ` (${p.peran})` : ''}</td>
+                  <td>{labelMakeup}</td>
+                  <td className="right">{formatRupiah(p.biaya_makeup)}</td>
+                </tr>
+              )
             }
             if (p.layanan_tambahan !== 'Tidak Ada') {
               rows.push(
@@ -127,6 +123,25 @@ function InvoicePaper({ profile, booking, peserta, payments, bundlingItems = [],
                 </tr>
               )
             }
+            // Add On susulan yang nempel ke vendor tertentu (misal
+            // Strobist ke Fotografer) -- itu BUKAN bagian dari harga
+            // Paket Bundling awal, jadi tetep tampil sebagai baris
+            // terpisah (bukan nempel/indent di bawah vendornya lagi),
+            // dikasih tau "by <vendor>" biar klien tau itu tambahan
+            // dari vendor yang mana.
+            vendorsPeserta.forEach((v) => {
+              const handleMatch = v.nama.match(/\(([^)]+)\)/)
+              const labelVendorSingkat = handleMatch ? handleMatch[1] : v.nama
+              bundlingItems.filter((c) => c.parent_id === v.id).forEach((c) => {
+                rows.push(
+                  <tr key={c.id}>
+                    <td></td>
+                    <td>{c.nama} by {labelVendorSingkat}</td>
+                    <td className="right">{formatRupiah(c.biaya)}</td>
+                  </tr>
+                )
+              })
+            })
             if (p.layanan_lainnya) {
               rows.push(
                 <tr key={p.id + '-lain'}>
