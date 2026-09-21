@@ -600,7 +600,7 @@ export default function BookingModal({ onClose, onSaved }) {
                       </div>
                       {p.dikerjakanOlehMakeup === 'Tim' && (
                       <div className="field-grid-peserta cols-2">
-                        <div className="field">
+                        <div className="field" style={{ gridColumn: 2 }}>
                           <label>Nama Tim</label>
                           <input type="text" placeholder="contoh: Salsa" value={p.namaTimMakeup} onChange={(e) => updatePeserta(i, 'namaTimMakeup', e.target.value)} />
                         </div>
@@ -646,7 +646,7 @@ export default function BookingModal({ onClose, onSaved }) {
                       )}
                       {p.layananTambahan !== 'Tidak Ada' && p.dikerjakanOlehTambahan === 'Tim' && (
                       <div className="field-grid-peserta cols-2">
-                        <div className="field">
+                        <div className="field" style={{ gridColumn: 2 }}>
                           <label>Nama Tim</label>
                           <input type="text" placeholder="contoh: Salsa" value={p.namaTimTambahan} onChange={(e) => updatePeserta(i, 'namaTimTambahan', e.target.value)} />
                         </div>
