@@ -131,10 +131,18 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
   // CRUD-nya niru persis "Riwayat Pembayaran" di atas.
   const [showAddBundling, setShowAddBundling] = useState(false)
   const [bundlingNama, setBundlingNama] = useState('')
+  const [bundlingVendor, setBundlingVendor] = useState('')
   const [bundlingBiaya, setBundlingBiaya] = useState('')
   const [bundlingUntung, setBundlingUntung] = useState('')
   const [editingBundlingId, setEditingBundlingId] = useState(null)
   const [editBundlingNama, setEditBundlingNama] = useState('')
+  const [editBundlingVendor, setEditBundlingVendor] = useState('')
+  // Vendor CUMA relevan buat paket level ATAS -- add on di dalam
+  // paket (misal Strobist) nggak punya vendor sendiri (dianggap dari
+  // vendor yang sama kayak paket induknya). Flag ini nentuin apa field
+  // Vendor perlu ditampilin di form edit yang lagi kebuka (form-nya
+  // SHARED buat edit paket maupun edit add on di dalamnya).
+  const [editingBundlingIsChild, setEditingBundlingIsChild] = useState(false)
   const [editBundlingBiaya, setEditBundlingBiaya] = useState('')
   const [editBundlingUntung, setEditBundlingUntung] = useState('')
 
@@ -414,11 +422,13 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
     onChanged()
   }
 
-  function startEditBundling(item) {
+  function startEditBundling(item, isChild = false) {
     setEditingBundlingId(item.id)
     setEditBundlingNama(item.nama)
+    setEditBundlingVendor(item.vendor || '')
     setEditBundlingBiaya(item.biaya)
     setEditBundlingUntung(item.keuntungan)
+    setEditingBundlingIsChild(isChild)
   }
 
   async function handleAddBundling(e) {
@@ -431,6 +441,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
       booking_id: booking.id,
       user_id: user.id,
       nama: bundlingNama.trim(),
+      vendor: bundlingVendor.trim() || null,
       biaya: Number(bundlingBiaya) || 0,
       keuntungan: Number(bundlingUntung) || 0,
     })
@@ -439,7 +450,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
     if (err) { setError(err.message); return }
 
     setShowAddBundling(false)
-    setBundlingNama(''); setBundlingBiaya(''); setBundlingUntung('')
+    setBundlingNama(''); setBundlingVendor(''); setBundlingBiaya(''); setBundlingUntung('')
     await loadDetail()
     onChanged()
   }
@@ -474,7 +485,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
     setError('')
     const { error: err } = await supabase
       .from('bundling_items')
-      .update({ nama: editBundlingNama.trim(), biaya: Number(editBundlingBiaya) || 0, keuntungan: Number(editBundlingUntung) || 0 })
+      .update({ nama: editBundlingNama.trim(), vendor: editBundlingVendor.trim() || null, biaya: Number(editBundlingBiaya) || 0, keuntungan: Number(editBundlingUntung) || 0 })
       .eq('id', itemId)
     setSaving(false)
     if (err) { setError(err.message); return }
@@ -681,8 +692,11 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                     <div key={item.id}>
                       {editingBundlingId === item.id ? (
                         <div className="pay-edit-row">
-                          <div className="field-grid-detail add-edit-pay-cols-3">
+                          <div className={`field-grid-detail ${editingBundlingIsChild ? 'add-edit-pay-cols-3' : 'bundling-cols-2'}`}>
                             <div className="field"><label>Nama Paket</label><input type="text" placeholder="contoh: Fotografer/Attire" value={editBundlingNama} onChange={(e) => setEditBundlingNama(e.target.value)} /></div>
+                            {!editingBundlingIsChild && (
+                              <div className="field"><label>Nama Vendor</label><input type="text" placeholder="contoh: @fourgrads" value={editBundlingVendor} onChange={(e) => setEditBundlingVendor(e.target.value)} /></div>
+                            )}
                             <div className="field"><label>Biaya Ditagih ke Klien</label><input type="text" inputMode="numeric" placeholder="Rp0" value={editBundlingBiaya ? `Rp${formatAngkaInput(editBundlingBiaya)}` : ''} onChange={(e) => setEditBundlingBiaya(parseAngkaInput(e.target.value))} /></div>
                             <div className="field"><label>Untung/Komisi MUA</label><input type="text" inputMode="numeric" placeholder="Rp0" value={editBundlingUntung ? `Rp${formatAngkaInput(editBundlingUntung)}` : ''} onChange={(e) => setEditBundlingUntung(parseAngkaInput(e.target.value))} /></div>
                           </div>
@@ -739,7 +753,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                             <span className="pay-amount">{formatRupiah(child.keuntungan)}</span>
                             <span className="pay-note"></span>
                             <div className="pay-actions">
-                              <button type="button" onClick={() => startEditBundling(child)}>Edit</button>
+                              <button type="button" onClick={() => startEditBundling(child, true)}>Edit</button>
                               <button type="button" onClick={() => setConfirmDeleteBundlingId(child.id)}>Hapus</button>
                               {confirmDeleteBundlingId === child.id && (
                                 <div className="pay-confirm-popup">
@@ -781,8 +795,9 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                 <button type="button" className="add-payment" onClick={() => setShowAddBundling(true)}>+ Tambah Paket Bundling</button>
               ) : (
                 <form onSubmit={handleAddBundling} className="add-payment-card" style={{ marginTop: 8 }}>
-                  <div className="field-grid-detail add-edit-pay-cols-3">
+                  <div className="field-grid-detail bundling-cols-2">
                     <div className="field"><label>Nama Paket</label><input type="text" placeholder="contoh: Fotografer/Attire" value={bundlingNama} onChange={(e) => setBundlingNama(e.target.value)} /></div>
+                    <div className="field"><label>Nama Vendor</label><input type="text" placeholder="contoh: @fourgrads" value={bundlingVendor} onChange={(e) => setBundlingVendor(e.target.value)} /></div>
                     <div className="field"><label>Biaya (ditagih ke klien)</label><input type="text" inputMode="numeric" placeholder="Rp0" value={bundlingBiaya ? `Rp${formatAngkaInput(bundlingBiaya)}` : ''} onChange={(e) => setBundlingBiaya(parseAngkaInput(e.target.value))} /></div>
                     <div className="field"><label>Untung untuk MUA (jika ada)</label><input type="text" inputMode="numeric" placeholder="Rp0" value={bundlingUntung ? `Rp${formatAngkaInput(bundlingUntung)}` : ''} onChange={(e) => setBundlingUntung(parseAngkaInput(e.target.value))} /></div>
                   </div>

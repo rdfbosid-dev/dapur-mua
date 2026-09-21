@@ -195,7 +195,7 @@ export default function BookingModal({ onClose, onSaved }) {
   // yang saling terhubung lewat parent_id.
   const [bundlingList, setBundlingList] = useState([])
   function addBundling() {
-    setBundlingList((list) => [...list, { nama: '', biaya: '', untung: '', addOns: [] }])
+    setBundlingList((list) => [...list, { nama: '', vendor: '', biaya: '', untung: '', addOns: [] }])
   }
   function updateBundling(i, field, value) {
     setBundlingList((list) => list.map((b, idx) => (idx === i ? { ...b, [field]: value } : b)))
@@ -336,6 +336,7 @@ export default function BookingModal({ onClose, onSaved }) {
         booking_id: booking.id,
         user_id: user.id,
         nama: b.nama.trim(),
+        vendor: b.vendor.trim() || null,
         biaya: Number(b.biaya) || 0,
         keuntungan: Number(b.untung) || 0,
       }))
@@ -715,8 +716,9 @@ export default function BookingModal({ onClose, onSaved }) {
                     <button type="button" className="peserta-remove" onClick={() => removeBundling(i)}>Hapus</button>
                   </div>
                   <div className="peserta-body">
-                    <div className="field-grid-bundling">
+                    <div className="field-grid-bundling-utama">
                       <div className="field"><label>Nama Paket</label><input type="text" placeholder="contoh: Fotografer/Attire" value={b.nama} onChange={(e) => updateBundling(i, 'nama', e.target.value)} /></div>
+                      <div className="field"><label>Nama Vendor</label><input type="text" placeholder="contoh: @fourgrads" value={b.vendor} onChange={(e) => updateBundling(i, 'vendor', e.target.value)} /></div>
                       <div className="field"><label>Biaya Paket (Ditagih ke Klien)</label><input type="text" inputMode="numeric" placeholder="Rp0" value={b.biaya ? `Rp${formatAngkaInput(b.biaya)}` : ''} onChange={(e) => updateBundling(i, 'biaya', parseAngkaInput(e.target.value))} /></div>
                       <div className="field"><label>Untung untuk MUA (jika ada)</label><input type="text" inputMode="numeric" placeholder="Rp0" value={b.untung ? `Rp${formatAngkaInput(b.untung)}` : ''} onChange={(e) => updateBundling(i, 'untung', parseAngkaInput(e.target.value))} /></div>
                     </div>

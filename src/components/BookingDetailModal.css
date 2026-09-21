@@ -194,6 +194,11 @@
 .booking-detail-overlay .field-grid-detail { display: grid; gap: 12px; margin-bottom: 5px; }
 
 .booking-detail-overlay .field-grid-detail.add-edit-pay-cols-3 { display: grid; grid-template-columns: 1.2fr 0.8fr 1fr; }
+/* Khusus form Paket Bundling (Nama Paket/Vendor/Biaya/Untung) -- 4
+   field, 2 kolom, otomatis "kepecah" jadi 2 baris. Class TERPISAH dari
+   .add-edit-pay-cols-3 di atas (yang masih dipake Riwayat Pembayaran &
+   form "Add On di Paket Ini", nggak ikut berubah). */
+.booking-detail-overlay .field-grid-detail.bundling-cols-2 { display: grid; grid-template-columns: 1fr 1fr; }
 .booking-detail-overlay .field-grid-detail.add-edit-pay-cols-1 { display: grid; grid-template-columns: 1fr; }
 
 .booking-detail-overlay .field-grid-booking { display: grid; gap: 8px; margin-bottom: 5px; }
