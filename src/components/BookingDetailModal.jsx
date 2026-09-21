@@ -956,7 +956,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                       <div className="field-grid-peserta cols-2">
                         <div className="field" style={{ gridColumn: 2 }}>
                           <label>Nama Tim</label>
-                          <input type="text" placeholder="contoh: Salsa" value={p.nama_tim_makeup || ''} onChange={(e) => updateEditPeserta(i, 'nama_tim_makeup', e.target.value)} />
+                          <input type="text" placeholder="contoh: makeupbyjennie" value={p.nama_tim_makeup || ''} onChange={(e) => updateEditPeserta(i, 'nama_tim_makeup', e.target.value)} />
                         </div>
                       </div>
                       )}
@@ -1002,7 +1002,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                       <div className="field-grid-peserta cols-2">
                         <div className="field" style={{ gridColumn: 2 }}>
                           <label>Nama Tim</label>
-                          <input type="text" placeholder="contoh: Salsa" value={p.nama_tim_tambahan || ''} onChange={(e) => updateEditPeserta(i, 'nama_tim_tambahan', e.target.value)} />
+                          <input type="text" placeholder="contoh: hairdobycarmen" value={p.nama_tim_tambahan || ''} onChange={(e) => updateEditPeserta(i, 'nama_tim_tambahan', e.target.value)} />
                         </div>
                       </div>
                       )}

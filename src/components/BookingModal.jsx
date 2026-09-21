@@ -602,7 +602,7 @@ export default function BookingModal({ onClose, onSaved }) {
                       <div className="field-grid-peserta cols-2">
                         <div className="field" style={{ gridColumn: 2 }}>
                           <label>Nama Tim</label>
-                          <input type="text" placeholder="contoh: Salsa" value={p.namaTimMakeup} onChange={(e) => updatePeserta(i, 'namaTimMakeup', e.target.value)} />
+                          <input type="text" placeholder="contoh: makeupbyjennie" value={p.namaTimMakeup} onChange={(e) => updatePeserta(i, 'namaTimMakeup', e.target.value)} />
                         </div>
                       </div>
                       )}
@@ -648,7 +648,7 @@ export default function BookingModal({ onClose, onSaved }) {
                       <div className="field-grid-peserta cols-2">
                         <div className="field" style={{ gridColumn: 2 }}>
                           <label>Nama Tim</label>
-                          <input type="text" placeholder="contoh: Salsa" value={p.namaTimTambahan} onChange={(e) => updatePeserta(i, 'namaTimTambahan', e.target.value)} />
+                          <input type="text" placeholder="contoh: hairdobycarmen" value={p.namaTimTambahan} onChange={(e) => updatePeserta(i, 'namaTimTambahan', e.target.value)} />
                         </div>
                       </div>
                       )}
