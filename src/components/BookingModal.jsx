@@ -620,7 +620,7 @@ export default function BookingModal({ onClose, onSaved }) {
                             </div>
                             <div className="field-grid-peserta cols-2">
                               <div className="field">
-                                <label>Biaya Vendor {vi + 1}</label>
+                                <label>Biaya Vendor {vi + 1} (Ditagih ke Klien)</label>
                                 <input type="text" inputMode="numeric" placeholder="Rp0" value={v.biaya ? `Rp${formatAngkaInput(v.biaya)}` : ''} onChange={(e) => updateVendor(i, vi, 'biaya', parseAngkaInput(e.target.value))} />
                               </div>
                               <div className="field">

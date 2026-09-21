@@ -85,13 +85,39 @@ function InvoicePaper({ profile, booking, peserta, payments, bundlingItems = [],
         </thead>
         <tbody>
           {peserta.flatMap((p) => {
+            const labelMakeup = ['Makeup', p.kategori_makeup === 'Paket Bundling' ? '' : (p.jenis_paket || p.kategori_makeup), p.dikerjakan_oleh_makeup === 'Tim' ? '(Tim)' : ''].filter(Boolean).join(' ')
             const rows = [
               <tr key={p.id + '-mkp'}>
                 <td>{p.nama_anggota}{p.peran ? ` (${p.peran})` : ''}</td>
-                <td>Makeup {p.jenis_paket || p.kategori_makeup}{p.dikerjakan_oleh_makeup === 'Tim' ? ' (Tim)' : ''}</td>
+                <td>{labelMakeup}</td>
                 <td className="right">{formatRupiah(p.biaya_makeup)}</td>
               </tr>,
             ]
+            // Vendor Paket Bundling nempel per klien (bukan tabel
+            // terpisah lagi) -- baris klien ini SENGAJA render vendor
+            // langsung di sini, ikut nempel di bawah baris Makeup-nya,
+            // biar keliatan jelas itu 1 paket dari klien yang sama.
+            // Add On di dalam vendor (misal Strobist) di-indent (↳).
+            if (p.kategori_makeup === 'Paket Bundling') {
+              bundlingItems.filter((v) => v.peserta_id === p.id && !v.parent_id).forEach((v) => {
+                rows.push(
+                  <tr key={v.id}>
+                    <td></td>
+                    <td>{v.nama}</td>
+                    <td className="right">{formatRupiah(v.biaya)}</td>
+                  </tr>
+                )
+                bundlingItems.filter((c) => c.parent_id === v.id).forEach((c) => {
+                  rows.push(
+                    <tr key={c.id}>
+                      <td></td>
+                      <td style={{ paddingLeft: 20 }}>↳ {c.nama}</td>
+                      <td className="right">{formatRupiah(c.biaya)}</td>
+                    </tr>
+                  )
+                })
+              })
+            }
             if (p.layanan_tambahan !== 'Tidak Ada') {
               rows.push(
                 <tr key={p.id + '-tmb'}>
@@ -136,12 +162,15 @@ function InvoicePaper({ profile, booking, peserta, payments, bundlingItems = [],
         </tbody>
       </table>
 
-      {/* Tabel TERPISAH dari LAYANAN di atas -- ini kerjasama vendor
-          luar (fotografer, attire, dll), bukan layanan makeup langsung.
+      {/* Tabel TERPISAH ini SEKARANG cuma buat data Paket Bundling LAMA
+          yang belum nempel ke klien manapun (peserta_id kosong, dari
+          sebelum sistem Vendor per-klien ada) -- yang BARU (udah nempel
+          ke peserta_id) udah render nempel di baris klien-nya masing-
+          masing di tabel Layanan di atas, nggak dobel ditampilin di sini.
           Yang ditampilin cuma BIAYA PENUH yang ditagih ke klien -- untung/
           komisi MUA itu data INTERNAL, nggak pernah ditampilin di sini
           (liat RincianKeuanganModal.jsx buat versi internalnya). */}
-      {bundlingItems.filter((b) => !b.parent_id).length > 0 && (
+      {bundlingItems.filter((b) => !b.parent_id && !b.peserta_id).length > 0 && (
         <table className="inv-table">
           <thead>
             <tr>
@@ -150,7 +179,7 @@ function InvoicePaper({ profile, booking, peserta, payments, bundlingItems = [],
             </tr>
           </thead>
           <tbody>
-            {bundlingItems.filter((b) => !b.parent_id).flatMap((item) => {
+            {bundlingItems.filter((b) => !b.parent_id && !b.peserta_id).flatMap((item) => {
               const rows = [
                 <tr key={item.id}>
                   <td>{item.nama}{item.vendor ? ` (${item.vendor})` : ''}</td>
