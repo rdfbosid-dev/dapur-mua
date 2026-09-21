@@ -233,14 +233,26 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
         updated[`biaya_lainnya${suffix}`] = 0
         updated[`keuntungan_lainnya${suffix}`] = 0
       }
+      // Sama persis alasannya kayak Add On di atas -- begitu di-toggle
+      // BALIK ke "Me", Komisi & Nama Tim langsung ke-reset di form-nya
+      // juga, biar nggak ada data nyangkut diem-diem nempel ke baris
+      // yang harusnya Me.
+      if (field === 'dikerjakan_oleh_makeup' && value === 'Me') {
+        updated.komisi_makeup_tim = 0
+        updated.nama_tim_makeup = ''
+      }
+      if (field === 'dikerjakan_oleh_tambahan' && value === 'Me') {
+        updated.komisi_tambahan = 0
+        updated.nama_tim_tambahan = ''
+      }
       return updated
     }))
   }
   function addEditPeserta() {
     setEditPeserta((list) => [...list, {
       nama_anggota: '', peran: '', kategori_makeup: 'Regular', jenis_paket: '', dikerjakan_oleh_makeup: 'Me',
-      biaya_makeup: 0, komisi_makeup_tim: 0, layanan_tambahan: 'Tidak Ada',
-      dikerjakan_oleh_tambahan: 'Me', biaya_tambahan: 0, komisi_tambahan: 0,
+      biaya_makeup: 0, komisi_makeup_tim: 0, nama_tim_makeup: '', layanan_tambahan: 'Tidak Ada',
+      dikerjakan_oleh_tambahan: 'Me', biaya_tambahan: 0, komisi_tambahan: 0, nama_tim_tambahan: '',
       layanan_lainnya: '', biaya_lainnya: 0, keuntungan_lainnya: 0,
       layanan_lainnya_2: '', biaya_lainnya_2: 0, keuntungan_lainnya_2: 0,
       layanan_lainnya_3: '', biaya_lainnya_3: 0, keuntungan_lainnya_3: 0,
@@ -327,11 +339,18 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
         kategori_makeup: p.kategori_makeup,
         dikerjakan_oleh_makeup: p.dikerjakan_oleh_makeup,
         biaya_makeup: Number(p.biaya_makeup) || 0,
-        komisi_makeup_tim: Number(p.komisi_makeup_tim) || 0,
+        // Komisi & Nama Tim CUMA berlaku kalau beneran dikerjain Tim --
+        // apapun yang kebetulan masih nyangkut di field itu, dipaksa
+        // kosong/0 kalau statusnya "Me". Nutup bug LAMA yang udah ada
+        // dari dulu (komisi nggak pernah di-cek gini) sekalian nyegah
+        // Nama Tim yang baru kena masalah sama.
+        komisi_makeup_tim: p.dikerjakan_oleh_makeup === 'Tim' ? (Number(p.komisi_makeup_tim) || 0) : 0,
+        nama_tim_makeup: p.dikerjakan_oleh_makeup === 'Tim' ? ((p.nama_tim_makeup || '').trim() || null) : null,
         layanan_tambahan: p.layanan_tambahan,
         dikerjakan_oleh_tambahan: p.dikerjakan_oleh_tambahan,
         biaya_tambahan: Number(p.biaya_tambahan) || 0,
-        komisi_tambahan: Number(p.komisi_tambahan) || 0,
+        komisi_tambahan: p.dikerjakan_oleh_tambahan === 'Tim' ? (Number(p.komisi_tambahan) || 0) : 0,
+        nama_tim_tambahan: p.dikerjakan_oleh_tambahan === 'Tim' ? ((p.nama_tim_tambahan || '').trim() || null) : null,
       }
       for (let n = 1; n <= 5; n++) {
         const suffix = n === 1 ? '' : `_${n}`
@@ -933,6 +952,14 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                         </div>
                         )}
                       </div>
+                      {p.dikerjakan_oleh_makeup === 'Tim' && (
+                      <div className="field-grid-peserta cols-2">
+                        <div className="field">
+                          <label>Nama Tim</label>
+                          <input type="text" placeholder="contoh: Salsa" value={p.nama_tim_makeup || ''} onChange={(e) => updateEditPeserta(i, 'nama_tim_makeup', e.target.value)} />
+                        </div>
+                      </div>
+                      )}
 
                       <div className="field-grid-peserta cols-2">
                         <div className="field">
@@ -969,6 +996,14 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                           <input type="text" inputMode="numeric" placeholder="Rp0" value={p.komisi_tambahan ? `Rp${formatAngkaInput(p.komisi_tambahan)}` : ''} onChange={(e) => updateEditPeserta(i, 'komisi_tambahan', parseAngkaInput(e.target.value))} />
                         </div>
                           )}
+                      </div>
+                      )}
+                      {p.layanan_tambahan !== 'Tidak Ada' && p.dikerjakan_oleh_tambahan === 'Tim' && (
+                      <div className="field-grid-peserta cols-2">
+                        <div className="field">
+                          <label>Nama Tim</label>
+                          <input type="text" placeholder="contoh: Salsa" value={p.nama_tim_tambahan || ''} onChange={(e) => updateEditPeserta(i, 'nama_tim_tambahan', e.target.value)} />
+                        </div>
                       </div>
                       )}
 
