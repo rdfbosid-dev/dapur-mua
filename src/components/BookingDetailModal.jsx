@@ -700,14 +700,14 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                   <div className="b-info">
                     <div className="b-name">{p.nama_anggota} {p.peran ? `— (${p.peran})` : ''}</div>
                     <div className="b-meta">
-                      {`${p.jenis_paket || p.kategori_makeup} (${p.dikerjakan_oleh_makeup}) — ${formatRupiah(p.biaya_makeup)}`}
+                      {`${p.jenis_paket || p.kategori_makeup} (${p.dikerjakan_oleh_makeup}${p.dikerjakan_oleh_makeup === 'Tim' && p.nama_tim_makeup ? ' - ' + p.nama_tim_makeup : ''}) — ${formatRupiah(p.biaya_makeup)}`}
                       {p.pakai_paket_bundling
                         ? bundlingItems.filter((b) => b.peserta_id === p.id && !b.parent_id).map((v) => {
                             const addOns = bundlingItems.filter((c) => c.parent_id === v.id)
                             return ` | ${v.nama} ${formatRupiah(v.biaya)}` + addOns.map((a) => ` | ↳ ${a.nama} ${formatRupiah(a.biaya)}`).join('')
                           }).join('')
                         : ''}
-                      {p.layanan_tambahan !== 'Tidak Ada' ? ` | ${p.layanan_tambahan} (${p.dikerjakan_oleh_tambahan})` : ''}
+                      {p.layanan_tambahan !== 'Tidak Ada' ? ` | ${p.layanan_tambahan} (${p.dikerjakan_oleh_tambahan}${p.dikerjakan_oleh_tambahan === 'Tim' && p.nama_tim_tambahan ? ' - ' + p.nama_tim_tambahan : ''})` : ''}
                       {[1, 2, 3, 4, 5].map((n) => {
                         const suffix = n === 1 ? '' : `_${n}`
                         const nama = p[`layanan_lainnya${suffix}`]

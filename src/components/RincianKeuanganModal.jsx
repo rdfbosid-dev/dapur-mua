@@ -37,6 +37,7 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
     return {
       nama: p.nama_anggota,
       tim,
+      namaTim: p.nama_tim_makeup,
       biaya: Number(p.biaya_makeup) || 0,
       komisi: Number(p.komisi_makeup_tim) || 0,
     }
@@ -48,6 +49,7 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
       nama: p.nama_anggota,
       jenis: p.layanan_tambahan,
       tim,
+      namaTim: p.nama_tim_tambahan,
       biaya: Number(p.biaya_tambahan) || 0,
       komisi: Number(p.komisi_tambahan) || 0,
     }
@@ -180,7 +182,7 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
               <div className="rincian-section-title">Layanan Makeup</div>
               {makeupRows.map((r, idx) => (
                 <div className="rincian-row" key={idx}>
-                  <span>{r.nama} (<span className="rincian-metim">{r.tim ? 'Tim' : 'Me'}</span>)</span>
+                  <span>{r.nama} (<span className="rincian-metim">{r.tim ? `Tim${r.namaTim ? ' - ' + r.namaTim : ''}` : 'Me'}</span>)</span>
                   <div className="rincian-nilai-wrap">
                     <b>{formatRupiah(nilaiMakeupTambahan(r))}</b>
                     {keteranganTim(r) && <span className="rincian-keterangan">{keteranganTim(r)}</span>}
@@ -195,7 +197,7 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
               <div className="rincian-section-title">Layanan Tambahan (Hairdo/Hijabdo+)</div>
               {tambahanRows.map((r, idx) => (
                 <div className="rincian-row" key={idx}>
-                  <span>{r.nama} ({r.jenis} | <span className="rincian-metim">{r.tim ? 'Tim' : 'Me'}</span>)</span>
+                  <span>{r.nama} ({r.jenis} | <span className="rincian-metim">{r.tim ? `Tim${r.namaTim ? ' - ' + r.namaTim : ''}` : 'Me'}</span>)</span>
                   <div className="rincian-nilai-wrap">
                     <b>{formatRupiah(nilaiMakeupTambahan(r))}</b>
                     {keteranganTim(r) && <span className="rincian-keterangan">{keteranganTim(r)}</span>}
