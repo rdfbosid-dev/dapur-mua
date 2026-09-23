@@ -107,6 +107,24 @@ export default async function handler(req, res) {
     return
   }
 
+  // Jumlah peserta per booking -- query kedua yang KHUSUS ngitung
+  // (bukan pake nested select/aggregate PostgREST) biar lebih gampang
+  // di-debug, sama pola manual-count-nya sama kayak kalkulasi lain di
+  // project ini. Fail-open kalau query-nya somehow gagal: kalender
+  // tetep jalan, cuma baris "Jumlah Peserta"-nya nggak nongol (bukan
+  // bikin seluruh .ics gagal ke-generate).
+  const { data: pesertaRows, error: pesertaError } = await supabaseAdmin
+    .from('peserta')
+    .select('booking_id')
+    .eq('user_id', profile.id)
+
+  const jumlahPesertaMap = {}
+  if (!pesertaError) {
+    for (const row of pesertaRows || []) {
+      jumlahPesertaMap[row.booking_id] = (jumlahPesertaMap[row.booking_id] || 0) + 1
+    }
+  }
+
   // Ini SATU-SATUNYA sinyal yang kita punya buat tau app Kalender di HP
   // user beneran "narik" link ini (bukan cuma di-copy doang) -- link .ics
   // itu pasif, nggak ada notifikasi balik dari Google Calendar/Kalender
@@ -161,7 +179,11 @@ export default async function handler(req, res) {
 
     const summary = escapeICS(`${b.event || 'Booking'} - ${b.nama_klien || ''}`)
     const location = escapeICS(b.lokasi || '')
-    const description = escapeICS(b.nomor_whatsapp ? `No. WhatsApp: ${b.nomor_whatsapp}` : '')
+    const jumlahPeserta = jumlahPesertaMap[b.id] || 0
+    const descLines = []
+    if (b.nomor_whatsapp) descLines.push(`No. WhatsApp: ${b.nomor_whatsapp}`)
+    if (jumlahPeserta > 0) descLines.push(`Jumlah Peserta: ${jumlahPeserta} orang`)
+    const description = escapeICS(descLines.join('\n'))
 
     return [
       'BEGIN:VEVENT',
