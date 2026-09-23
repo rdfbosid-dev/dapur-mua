@@ -638,7 +638,7 @@ export default function BookingModal({ onClose, onSaved }) {
                                 <input type="text" inputMode="numeric" placeholder="Rp0" value={v.biaya ? `Rp${formatAngkaInput(v.biaya)}` : ''} onChange={(e) => updateVendor(i, vi, 'biaya', parseAngkaInput(e.target.value))} />
                               </div>
                               <div className="field">
-                                <label>Untung untuk MUA (jika ada)</label>
+                                <label>Untung untuk MUA</label>
                                 <input type="text" inputMode="numeric" placeholder="Rp0" value={v.untung ? `Rp${formatAngkaInput(v.untung)}` : ''} onChange={(e) => updateVendor(i, vi, 'untung', parseAngkaInput(e.target.value))} />
                               </div>
                             </div>
@@ -651,7 +651,7 @@ export default function BookingModal({ onClose, onSaved }) {
                                 <div className="field-grid-bundling">
                                   <div className="field"><label>Nama Add On</label><input type="text" placeholder="contoh: Lighting" value={a.nama} onChange={(e) => updateVendorAddOn(i, vi, ai, 'nama', e.target.value)} /></div>
                                   <div className="field"><label>Biaya (Ditagih ke Klien)</label><input type="text" inputMode="numeric" placeholder="Rp0" value={a.biaya ? `Rp${formatAngkaInput(a.biaya)}` : ''} onChange={(e) => updateVendorAddOn(i, vi, ai, 'biaya', parseAngkaInput(e.target.value))} /></div>
-                                  <div className="field"><label>Untung untuk MUA (jika ada)</label><input type="text" inputMode="numeric" placeholder="Rp0" value={a.untung ? `Rp${formatAngkaInput(a.untung)}` : ''} onChange={(e) => updateVendorAddOn(i, vi, ai, 'untung', parseAngkaInput(e.target.value))} /></div>
+                                  <div className="field"><label>Untung untuk MUA</label><input type="text" inputMode="numeric" placeholder="Rp0" value={a.untung ? `Rp${formatAngkaInput(a.untung)}` : ''} onChange={(e) => updateVendorAddOn(i, vi, ai, 'untung', parseAngkaInput(e.target.value))} /></div>
                                 </div>
                               </div>
                             ))}
