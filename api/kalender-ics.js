@@ -98,7 +98,7 @@ export default async function handler(req, res) {
 
   const { data: bookings, error: bookingError } = await supabaseAdmin
     .from('bookings')
-    .select('id, nama_klien, event, tanggal_acara, jam_start_makeup, lokasi')
+    .select('id, nama_klien, event, tanggal_acara, jam_start_makeup, lokasi, nomor_whatsapp')
     .eq('user_id', profile.id)
     .order('tanggal_acara', { ascending: true })
 
@@ -161,6 +161,7 @@ export default async function handler(req, res) {
 
     const summary = escapeICS(`${b.event || 'Booking'} - ${b.nama_klien || ''}`)
     const location = escapeICS(b.lokasi || '')
+    const description = escapeICS(b.nomor_whatsapp ? `No. WhatsApp: ${b.nomor_whatsapp}` : '')
 
     return [
       'BEGIN:VEVENT',
@@ -170,6 +171,7 @@ export default async function handler(req, res) {
       allDay ? `DTEND;VALUE=DATE:${dtEnd}` : `DTEND;TZID=Asia/Jakarta:${dtEnd}`,
       `SUMMARY:${summary}`,
       location ? `LOCATION:${location}` : null,
+      description ? `DESCRIPTION:${description}` : null,
       'END:VEVENT',
     ].filter(Boolean).join('\r\n')
   })
