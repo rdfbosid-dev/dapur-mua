@@ -26,6 +26,17 @@ const navUtamaAdmin = [
   { to: '/admin/users', label: 'Kelola User', icon: 'shield' },
 ]
 
+// Sisa hari sampai trial/langganan habis -- pola & pembulatan (Math.ceil)
+// SAMA PERSIS kayak sisaHari() di AdminUsers.jsx, biar angka yang
+// keliatan di sisi user selalu konsisten sama yang keliatan di sisi
+// admin buat akun yang sama.
+function sisaHariLangganan(dateStr) {
+  if (!dateStr) return null
+  const target = new Date(dateStr)
+  const now = new Date()
+  return Math.ceil((target - now) / (1000 * 60 * 60 * 24))
+}
+
 function Icon({ name }) {
   const common = { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.8 }
   switch (name) {
@@ -66,6 +77,12 @@ export default function Sidebar({ headerAction = null }) {
   const navUtama = isAdmin ? navUtamaAdmin : navUtamaMUA
   const [mobileOpen, setMobileOpen] = useState(false)
   const location = useLocation()
+
+  // Badge status trial/aktif -- CUMA buat user MUA biasa, admin nggak
+  // punya konsep langganan buat dirinya sendiri jadi nggak ditampilin.
+  const tanggalLangganan = profile?.subscription_status === 'active' ? profile?.subscription_ends_at : profile?.trial_ends_at
+  const sisaLangganan = sisaHariLangganan(tanggalLangganan)
+  const urgensiLangganan = sisaLangganan === null ? '' : sisaLangganan <= 3 ? 'urgent' : sisaLangganan <= 7 ? 'waspada' : ''
 
   // otomatis nutup drawer tiap kali pindah halaman
   // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -197,6 +214,12 @@ export default function Sidebar({ headerAction = null }) {
           <div>
             <div className="profile-name">{isAdmin ? 'Admin' : (studioName || 'Studio Saya')}</div>
             <div className="profile-role">{user?.email}</div>
+            {!isAdmin && profile && (
+              <div className={`sidebar-status-pill ${profile.subscription_status === 'active' ? 'aktif' : 'trial'} ${urgensiLangganan}`}>
+                {profile.subscription_status === 'active' ? 'Aktif' : 'Trial'}
+                {sisaLangganan !== null && (sisaLangganan >= 0 ? ` · ${sisaLangganan} hari lagi` : ' · Berakhir')}
+              </div>
+            )}
           </div>
         </div>
         </div>

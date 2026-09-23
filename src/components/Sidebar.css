@@ -170,3 +170,16 @@
 }
 .profile-name { font-size: 13.5px; font-weight: 600; color: var(--ink-soft); }
 .profile-role { font-size: 11px; color: var(--ink-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 150px; }
+/* Badge status trial/aktif -- token warna SAMA persis kayak .status-pill
+   yang dipake di halaman lain (Klien/BookingList/dll), biar bahasa
+   visual "hijau = aman, kuning = waspada, merah = mendesak" konsisten
+   di seluruh app. Dibikin lebih kecil & tanpa border-radius pill penuh
+   (beda dari .status-pill) soalnya ruang di sidebar sempit. */
+.sidebar-status-pill {
+  display: inline-block; margin-top: 4px; font-size: 10px; font-weight: 700;
+  padding: 2px 8px; border-radius: 20px; white-space: nowrap;
+}
+.sidebar-status-pill.trial { background: var(--pill); color: var(--h8); }
+.sidebar-status-pill.aktif { background: var(--pill-alt); color: var(--h7); }
+.sidebar-status-pill.urgent { background: var(--pill); color: var(--h8); font-weight: 800; }
+.sidebar-status-pill.waspada { background: var(--pill-later); color: var(--h5); }
