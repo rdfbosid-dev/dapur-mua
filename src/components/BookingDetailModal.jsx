@@ -822,22 +822,6 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                         </div>
                       </div>
 
-                      <div className="field-grid-peserta cols-2">
-                        <div className="field">
-                          <label>Kategori</label>
-                          <CustomSelect
-                            options={KATEGORI_MAKEUP_OPTIONS}
-                            value={p.kategori_makeup || 'Regular'}
-                            onChange={(v) => updateEditPeserta(i, 'kategori_makeup', v)}
-                            variant="modal"
-                          />
-                        </div>
-                        <div className="field">
-                          <label>Jenis Makeup</label>
-                          <input type="text" placeholder="Standar/VIP/Gold/Premium" value={p.jenis_paket || ''} onChange={(e) => updateEditPeserta(i, 'jenis_paket', e.target.value)} />
-                        </div>
-                      </div>
-
                       {/* Paket Bundling -- toggle TERPISAH dari Kategori
                           (bukan salah satu pilihan Kategori lagi),
                           soalnya 2 hal ini beda dimensi: Kategori jawab
@@ -847,7 +831,11 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                           makanya harus bisa nyala bareng, bukan saling
                           gantiin. Biaya Makeup/Komisi/dkk di bawah TETEP
                           jalan apa adanya, BEDA hal (harga jasa vendor
-                          luar vs harga makeup MUA sendiri). */}
+                          luar vs harga makeup MUA sendiri). Diposisikan
+                          di ATAS Kategori/Jenis Makeup biar field Vendor
+                          yang muncul pas "Ya" nempel langsung di bawah
+                          toggle-nya, bukan nyempil di tengah-tengah
+                          form. */}
                       <div className="field-grid-peserta cols-2">
                         <div className="field">
                           <label>Sertakan Paket Bundling?</label>
@@ -906,6 +894,22 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                         <button type="button" className="add-peserta" onClick={() => addVendor(i)}>+ Tambah Vendor</button>
                       </div>
                       )}
+
+                      <div className="field-grid-peserta cols-2">
+                        <div className="field">
+                          <label>Kategori</label>
+                          <CustomSelect
+                            options={KATEGORI_MAKEUP_OPTIONS}
+                            value={p.kategori_makeup || 'Regular'}
+                            onChange={(v) => updateEditPeserta(i, 'kategori_makeup', v)}
+                            variant="modal"
+                          />
+                        </div>
+                        <div className="field">
+                          <label>Jenis Makeup</label>
+                          <input type="text" placeholder="Standar/VIP/Gold/Premium" value={p.jenis_paket || ''} onChange={(e) => updateEditPeserta(i, 'jenis_paket', e.target.value)} />
+                        </div>
+                      </div>
                       <div className="field-grid-peserta cols-2">
                         <div className="field">
                           <label>Dikerjakan oleh</label>
