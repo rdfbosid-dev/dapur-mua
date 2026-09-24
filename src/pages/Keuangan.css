@@ -91,13 +91,10 @@
   word-break: break-word;
   overflow: hidden;
 }
-.keuangan-table thead th.right,
-.keuangan-table thead th.center {
-  /* SENGAJA dikosongin -- header SEMUANYA rata tengah sekarang (lihat
-     rule dasar .keuangan-table thead th di atas), class .right/.center
-     di <th> cuma kepake buat align badan tabel (.keuangan-table td),
-     bukan buat header lagi. */
-}
+/* .right/.center di <th> (kelas yang sama dipakai di <td>) SENGAJA
+   nggak override apa-apa di sini -- header SEMUANYA rata tengah
+   (lihat rule di atas), .right/.center cuma kepake buat align badan
+   tabel (.keuangan-table td), bukan buat header lagi. */
 .keuangan-table tbody tr {
   background: var(--table-body);
   border-bottom: 1px solid color-mix(in srgb, var(--ink-soft) 50%, transparent);
