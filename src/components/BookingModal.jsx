@@ -49,13 +49,16 @@ function addOnsToRow(addOns) {
 function blankPeserta(nama = '') {
   return {
     nama, peran: '',
-    // jumlahSesi: berapa kali sesi makeup (+Layanan Tambahan) buat
-    // klien yang SAMA di booking yang SAMA -- misal 1 orang di-makeup
-    // 2x (sesi pagi & sore). Defaultnya 1 (kasus normal, nggak perlu
-    // diapa-apain). Biaya yang diisi TETAP harga PER-SESI, bukan udah
-    // dikali -- perkaliannya kejadian di VIEW `booking_summary` &
-    // ditampilin di Invoice/Rincian Keuangan, BUKAN di sini.
-    jumlahSesi: 1,
+    // jumlahSesiMakeup / jumlahSesiTambahan: berapa kali klien yang
+    // SAMA di-makeup / di-hairdo di booking yang sama (misal sesi pagi
+    // & sore). DIPISAH SENGAJA -- nggak selalu makeup 2x otomatis
+    // berarti hairdo-nya ikut 2x juga (bisa aja makeup 2x tapi hairdo
+    // cuma sekali, atau sebaliknya). Defaultnya 1 (kasus normal).
+    // Biaya yang diisi TETAP harga PER-SESI, bukan udah dikali --
+    // perkaliannya kejadian di VIEW `booking_summary` & ditampilin di
+    // Invoice/Rincian Keuangan, BUKAN di sini.
+    jumlahSesiMakeup: 1,
+    jumlahSesiTambahan: 1,
     kategoriMakeup: 'Regular', jenisPaket: '', dikerjakanOlehMakeup: 'Me',
     pakaiPaketBundling: false,
     biayaMakeup: '', komisiMakeup: '', namaTimMakeup: '',
@@ -167,6 +170,7 @@ export default function BookingModal({ onClose, onSaved }) {
         updated.biayaTambahan = ''
         updated.komisiTambahan = ''
         updated.namaTimTambahan = ''
+        updated.jumlahSesiTambahan = 1
       }
       return updated
     }))
@@ -318,7 +322,8 @@ export default function BookingModal({ onClose, onSaved }) {
       urutan: i,
       nama_anggota: p.nama.trim(),
       peran: p.peran.trim(),
-      jumlah_sesi: Math.max(1, Number(p.jumlahSesi) || 1),
+      jumlah_sesi_makeup: Math.max(1, Number(p.jumlahSesiMakeup) || 1),
+      jumlah_sesi_tambahan: p.layananTambahan !== 'Tidak Ada' ? Math.max(1, Number(p.jumlahSesiTambahan) || 1) : 1,
       jenis_paket: p.jenisPaket.trim(),
       kategori_makeup: p.kategoriMakeup,
       pakai_paket_bundling: p.pakaiPaketBundling,
@@ -605,29 +610,33 @@ export default function BookingModal({ onClose, onSaved }) {
                         </div>
                       </div>
 
-                      {/* Jumlah Sesi -- buat kasus klien yang SAMA
-                          di-makeup lebih dari 1x di booking yang sama
-                          (misal sesi pagi & sore), tanpa perlu dobelin
-                          jadi 2 baris peserta terpisah. Berlaku buat
-                          Biaya Makeup & Layanan Tambahan doang (Add On
-                          & Paket Bundling TETAP dihitung 1x apa
+                      {/* Jumlah Sesi Makeup -- buat kasus klien yang
+                          SAMA di-makeup lebih dari 1x di booking yang
+                          sama (misal sesi pagi & sore), tanpa perlu
+                          dobelin jadi 2 baris peserta terpisah. Field
+                          ini KHUSUS Biaya Makeup -- Jumlah Sesi buat
+                          Layanan Tambahan (Hairdo/Hijabdo+) TERPISAH,
+                          ada di section-nya sendiri di bawah, soalnya
+                          2 hal ini nggak selalu sama (bisa aja makeup
+                          2x tapi hairdo cuma sekali, atau sebaliknya).
+                          Add On & Paket Bundling TETAP dihitung 1x apa
                           adanya, itu barang/jasa luar, bukan sesi
-                          makeup). Angka yang diisi di bawah TETAP
-                          harga PER-SESI -- perkaliannya otomatis
-                          kejadian di Invoice/Rincian Keuangan. */}
+                          makeup. Angka Biaya Makeup TETAP harga
+                          PER-SESI -- perkaliannya otomatis kejadian di
+                          Invoice/Rincian Keuangan. */}
                       <div className="field-grid-peserta cols-2">
                         <div className="field">
-                          <label>Jumlah Sesi</label>
+                          <label>Jumlah Sesi Makeup</label>
                           <input
                             type="text"
                             inputMode="numeric"
                             placeholder="1"
-                            value={p.jumlahSesi}
+                            value={p.jumlahSesiMakeup}
                             onChange={(e) => {
                               const digits = e.target.value.replace(/[^0-9]/g, '')
-                              updatePeserta(i, 'jumlahSesi', digits === '' ? '' : Math.max(1, parseInt(digits, 10)))
+                              updatePeserta(i, 'jumlahSesiMakeup', digits === '' ? '' : Math.max(1, parseInt(digits, 10)))
                             }}
-                            onBlur={(e) => { if (!e.target.value) updatePeserta(i, 'jumlahSesi', 1) }}
+                            onBlur={(e) => { if (!e.target.value) updatePeserta(i, 'jumlahSesiMakeup', 1) }}
                           />
                         </div>
                       </div>
@@ -787,6 +796,28 @@ export default function BookingModal({ onClose, onSaved }) {
                           <input type="text" inputMode="numeric" placeholder="Rp0" value={p.komisiTambahan ? `Rp${formatAngkaInput(p.komisiTambahan)}` : ''} onChange={(e) => updatePeserta(i, 'komisiTambahan', parseAngkaInput(e.target.value))} />
                         </div>
                           )}
+                      </div>
+                      )}
+                      {/* Jumlah Sesi buat Layanan Tambahan -- TERPISAH
+                          dari Jumlah Sesi Makeup di atas. Nggak selalu
+                          makeup 2x otomatis berarti hairdo-nya ikut 2x
+                          juga. */}
+                      {p.layananTambahan !== 'Tidak Ada' && (
+                      <div className="field-grid-peserta cols-2">
+                        <div className="field">
+                          <label>Jumlah Sesi Layanan Tambahan</label>
+                          <input
+                            type="text"
+                            inputMode="numeric"
+                            placeholder="1"
+                            value={p.jumlahSesiTambahan}
+                            onChange={(e) => {
+                              const digits = e.target.value.replace(/[^0-9]/g, '')
+                              updatePeserta(i, 'jumlahSesiTambahan', digits === '' ? '' : Math.max(1, parseInt(digits, 10)))
+                            }}
+                            onBlur={(e) => { if (!e.target.value) updatePeserta(i, 'jumlahSesiTambahan', 1) }}
+                          />
+                        </div>
                       </div>
                       )}
                       {p.layananTambahan !== 'Tidak Ada' && p.dikerjakanOlehTambahan === 'Tim' && (

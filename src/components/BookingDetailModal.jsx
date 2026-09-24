@@ -263,6 +263,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
         updated.biaya_tambahan = 0
         updated.komisi_tambahan = 0
         updated.nama_tim_tambahan = ''
+        updated.jumlah_sesi_tambahan = 1
       }
       // Toggle "Sertakan Paket Bundling?" dimatiin -> vendor yang udah
       // sempet keisi ikut ke-reset juga, biar nggak nyangkut diem-diem.
@@ -321,7 +322,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
   }
   function addEditPeserta() {
     setEditPeserta((list) => [...list, {
-      nama_anggota: '', peran: '', jumlah_sesi: 1, kategori_makeup: 'Regular', jenis_paket: '', dikerjakan_oleh_makeup: 'Me',
+      nama_anggota: '', peran: '', jumlah_sesi_makeup: 1, jumlah_sesi_tambahan: 1, kategori_makeup: 'Regular', jenis_paket: '', dikerjakan_oleh_makeup: 'Me',
       pakai_paket_bundling: false,
       biaya_makeup: 0, komisi_makeup_tim: 0, nama_tim_makeup: '', layanan_tambahan: 'Tidak Ada',
       dikerjakan_oleh_tambahan: 'Me', biaya_tambahan: 0, komisi_tambahan: 0, nama_tim_tambahan: '',
@@ -417,7 +418,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
         urutan: i,
         nama_anggota: p.nama_anggota?.trim() || '',
         peran: p.peran?.trim() || '',
-        jumlah_sesi: Math.max(1, Number(p.jumlah_sesi) || 1),
+        jumlah_sesi_makeup: Math.max(1, Number(p.jumlah_sesi_makeup) || 1),
         jenis_paket: (p.jenis_paket || '').trim(),
         kategori_makeup: p.kategori_makeup,
         pakai_paket_bundling: !!p.pakai_paket_bundling,
@@ -441,6 +442,9 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
         biaya_tambahan: p.layanan_tambahan !== 'Tidak Ada' ? (Number(p.biaya_tambahan) || 0) : 0,
         komisi_tambahan: (p.layanan_tambahan !== 'Tidak Ada' && p.dikerjakan_oleh_tambahan === 'Tim') ? (Number(p.komisi_tambahan) || 0) : 0,
         nama_tim_tambahan: (p.layanan_tambahan !== 'Tidak Ada' && p.dikerjakan_oleh_tambahan === 'Tim') ? ((p.nama_tim_tambahan || '').trim() || null) : null,
+        // Jumlah Sesi Layanan Tambahan -- TERPISAH dari Jumlah Sesi
+        // Makeup di atas, sama alasannya kayak biaya_tambahan.
+        jumlah_sesi_tambahan: p.layanan_tambahan !== 'Tidak Ada' ? Math.max(1, Number(p.jumlah_sesi_tambahan) || 1) : 1,
       }
       for (let n = 1; n <= 5; n++) {
         const suffix = n === 1 ? '' : `_${n}`
@@ -721,14 +725,14 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                   <div className="b-info">
                     <div className="b-name">{p.nama_anggota} {p.peran ? `— (${p.peran})` : ''}</div>
                     <div className="b-meta">
-                      {`${p.jenis_paket || p.kategori_makeup} (${p.dikerjakan_oleh_makeup}${p.dikerjakan_oleh_makeup === 'Tim' && p.nama_tim_makeup ? ' - ' + p.nama_tim_makeup : ''})${p.jumlah_sesi > 1 ? ` (${p.jumlah_sesi}x sesi)` : ''} — ${formatRupiah(Number(p.biaya_makeup) * (p.jumlah_sesi || 1))}`}
+                      {`${p.jenis_paket || p.kategori_makeup} (${p.dikerjakan_oleh_makeup}${p.dikerjakan_oleh_makeup === 'Tim' && p.nama_tim_makeup ? ' - ' + p.nama_tim_makeup : ''})${p.jumlah_sesi_makeup > 1 ? ` (${p.jumlah_sesi_makeup}x sesi)` : ''} — ${formatRupiah(Number(p.biaya_makeup) * (p.jumlah_sesi_makeup || 1))}`}
                       {p.pakai_paket_bundling
                         ? bundlingItems.filter((b) => b.peserta_id === p.id && !b.parent_id).map((v) => {
                             const addOns = bundlingItems.filter((c) => c.parent_id === v.id)
                             return ` | ${v.nama} ${formatRupiah(v.biaya)}` + addOns.map((a) => ` | ↳ ${a.nama} ${formatRupiah(a.biaya)}`).join('')
                           }).join('')
                         : ''}
-                      {p.layanan_tambahan !== 'Tidak Ada' ? ` | ${p.layanan_tambahan} (${p.dikerjakan_oleh_tambahan}${p.dikerjakan_oleh_tambahan === 'Tim' && p.nama_tim_tambahan ? ' - ' + p.nama_tim_tambahan : ''})${p.jumlah_sesi > 1 ? ` (${p.jumlah_sesi}x sesi)` : ''} ${formatRupiah(Number(p.biaya_tambahan) * (p.jumlah_sesi || 1))}` : ''}
+                      {p.layanan_tambahan !== 'Tidak Ada' ? ` | ${p.layanan_tambahan} (${p.dikerjakan_oleh_tambahan}${p.dikerjakan_oleh_tambahan === 'Tim' && p.nama_tim_tambahan ? ' - ' + p.nama_tim_tambahan : ''})${p.jumlah_sesi_tambahan > 1 ? ` (${p.jumlah_sesi_tambahan}x sesi)` : ''} ${formatRupiah(Number(p.biaya_tambahan) * (p.jumlah_sesi_tambahan || 1))}` : ''}
                       {[1, 2, 3, 4, 5].map((n) => {
                         const suffix = n === 1 ? '' : `_${n}`
                         const nama = p[`layanan_lainnya${suffix}`]
@@ -843,29 +847,30 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                         </div>
                       </div>
 
-                      {/* Jumlah Sesi -- buat kasus klien yang SAMA
-                          di-makeup lebih dari 1x di booking yang sama
-                          (misal sesi pagi & sore), tanpa perlu dobelin
-                          jadi 2 baris peserta terpisah. Berlaku buat
-                          Biaya Makeup & Layanan Tambahan doang (Add On
-                          & Paket Bundling TETAP 1x, itu barang/jasa
-                          luar, bukan sesi makeup). Angka yang diisi di
-                          bawah TETAP harga PER-SESI -- perkaliannya
-                          kejadian otomatis di Invoice/Rincian
-                          Keuangan.*/}
+                      {/* Jumlah Sesi Makeup -- buat kasus klien yang
+                          SAMA di-makeup lebih dari 1x di booking yang
+                          sama (misal sesi pagi & sore), tanpa perlu
+                          dobelin jadi 2 baris peserta terpisah. Field
+                          ini KHUSUS Biaya Makeup -- Jumlah Sesi buat
+                          Layanan Tambahan TERPISAH, ada di section-nya
+                          sendiri di bawah. Add On & Paket Bundling
+                          TETAP 1x, itu barang/jasa luar, bukan sesi
+                          makeup. Angka Biaya Makeup TETAP harga
+                          PER-SESI -- perkaliannya otomatis kejadian di
+                          Invoice/Rincian Keuangan.*/}
                       <div className="field-grid-peserta cols-2">
                         <div className="field">
-                          <label>Jumlah Sesi</label>
+                          <label>Jumlah Sesi Makeup</label>
                           <input
                             type="text"
                             inputMode="numeric"
                             placeholder="1"
-                            value={p.jumlah_sesi ?? 1}
+                            value={p.jumlah_sesi_makeup ?? 1}
                             onChange={(e) => {
                               const digits = e.target.value.replace(/[^0-9]/g, '')
-                              updateEditPeserta(i, 'jumlah_sesi', digits === '' ? '' : Math.max(1, parseInt(digits, 10)))
+                              updateEditPeserta(i, 'jumlah_sesi_makeup', digits === '' ? '' : Math.max(1, parseInt(digits, 10)))
                             }}
-                            onBlur={(e) => { if (!e.target.value) updateEditPeserta(i, 'jumlah_sesi', 1) }}
+                            onBlur={(e) => { if (!e.target.value) updateEditPeserta(i, 'jumlah_sesi_makeup', 1) }}
                           />
                         </div>
                       </div>
@@ -1023,6 +1028,28 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                           <input type="text" inputMode="numeric" placeholder="Rp0" value={p.komisi_tambahan ? `Rp${formatAngkaInput(p.komisi_tambahan)}` : ''} onChange={(e) => updateEditPeserta(i, 'komisi_tambahan', parseAngkaInput(e.target.value))} />
                         </div>
                           )}
+                      </div>
+                      )}
+                      {/* Jumlah Sesi buat Layanan Tambahan -- TERPISAH
+                          dari Jumlah Sesi Makeup di atas. Nggak selalu
+                          makeup 2x otomatis berarti hairdo-nya ikut 2x
+                          juga. */}
+                      {p.layanan_tambahan !== 'Tidak Ada' && (
+                      <div className="field-grid-peserta cols-2">
+                        <div className="field">
+                          <label>Jumlah Sesi Layanan Tambahan</label>
+                          <input
+                            type="text"
+                            inputMode="numeric"
+                            placeholder="1"
+                            value={p.jumlah_sesi_tambahan ?? 1}
+                            onChange={(e) => {
+                              const digits = e.target.value.replace(/[^0-9]/g, '')
+                              updateEditPeserta(i, 'jumlah_sesi_tambahan', digits === '' ? '' : Math.max(1, parseInt(digits, 10)))
+                            }}
+                            onBlur={(e) => { if (!e.target.value) updateEditPeserta(i, 'jumlah_sesi_tambahan', 1) }}
+                          />
+                        </div>
                       </div>
                       )}
                       {p.layanan_tambahan !== 'Tidak Ada' && p.dikerjakan_oleh_tambahan === 'Tim' && (

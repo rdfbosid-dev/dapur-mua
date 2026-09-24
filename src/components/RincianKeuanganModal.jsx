@@ -34,11 +34,11 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
   // liat pickNilai di bawah).
   const makeupRows = peserta.map((p) => {
     const tim = p.dikerjakan_oleh_makeup === 'Tim'
-    // Jumlah Sesi -- berapa kali klien yang SAMA di-makeup di booking
-    // yang sama (misal sesi pagi & sore). Biaya & komisi yang
+    // Jumlah Sesi Makeup -- TERPISAH dari Jumlah Sesi Layanan
+    // Tambahan (lihat tambahanRows di bawah). Biaya & komisi yang
     // ditampilin di sini UDAH dikali, biar rincian ini selalu cocok
     // sama angka final di kartu Belanja Klien/Omzet/Penghasilan.
-    const sesi = Math.max(1, Number(p.jumlah_sesi) || 1)
+    const sesi = Math.max(1, Number(p.jumlah_sesi_makeup) || 1)
     return {
       nama: p.nama_anggota,
       tim,
@@ -51,7 +51,7 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
 
   const tambahanRows = peserta.filter(punyaTambahan).map((p) => {
     const tim = p.dikerjakan_oleh_tambahan === 'Tim'
-    const sesi = Math.max(1, Number(p.jumlah_sesi) || 1)
+    const sesi = Math.max(1, Number(p.jumlah_sesi_tambahan) || 1)
     return {
       nama: p.nama_anggota,
       jenis: p.layanan_tambahan,
