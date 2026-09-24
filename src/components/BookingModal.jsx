@@ -150,6 +150,17 @@ export default function BookingModal({ onClose, onSaved }) {
         updated.komisiTambahan = ''
         updated.namaTimTambahan = ''
       }
+      // BUG YANG BARU DIBENERIN (sama kasusnya kayak yang kejadian di
+      // BookingDetailModal.jsx): begitu Layanan Tambahan di-toggle
+      // BALIK ke "Tidak Ada", field Biaya Tambahan sebelumnya cuma
+      // ke-sembunyiin di form, nggak ke-reset -- jadi bisa nyangkut
+      // diem-diem ke Total Tagihan tanpa kelihatan barisnya di Invoice.
+      if (field === 'layananTambahan' && value === 'Tidak Ada') {
+        updated.dikerjakanOlehTambahan = 'Me'
+        updated.biayaTambahan = ''
+        updated.komisiTambahan = ''
+        updated.namaTimTambahan = ''
+      }
       return updated
     }))
   }
@@ -314,10 +325,14 @@ export default function BookingModal({ onClose, onSaved }) {
       komisi_makeup_tim: p.dikerjakanOlehMakeup === 'Tim' ? (Number(p.komisiMakeup) || 0) : 0,
       nama_tim_makeup: p.dikerjakanOlehMakeup === 'Tim' ? (p.namaTimMakeup.trim() || null) : null,
       layanan_tambahan: p.layananTambahan,
-      dikerjakan_oleh_tambahan: p.dikerjakanOlehTambahan,
-      biaya_tambahan: Number(p.biayaTambahan) || 0,
-      komisi_tambahan: p.dikerjakanOlehTambahan === 'Tim' ? (Number(p.komisiTambahan) || 0) : 0,
-      nama_tim_tambahan: p.dikerjakanOlehTambahan === 'Tim' ? (p.namaTimTambahan.trim() || null) : null,
+      // Sama pola & alasannya kayak komisi_makeup_tim/nama_tim_makeup
+      // di atas -- ini akar bug invoice Ka Linda (Rp100rb nyangkut
+      // nggak kelihatan di Invoice). biaya_tambahan sekarang dipaksa
+      // ngikutin status layananTambahan, bukan nilai mentah form.
+      dikerjakan_oleh_tambahan: p.layananTambahan !== 'Tidak Ada' ? p.dikerjakanOlehTambahan : 'Me',
+      biaya_tambahan: p.layananTambahan !== 'Tidak Ada' ? (Number(p.biayaTambahan) || 0) : 0,
+      komisi_tambahan: (p.layananTambahan !== 'Tidak Ada' && p.dikerjakanOlehTambahan === 'Tim') ? (Number(p.komisiTambahan) || 0) : 0,
+      nama_tim_tambahan: (p.layananTambahan !== 'Tidak Ada' && p.dikerjakanOlehTambahan === 'Tim') ? (p.namaTimTambahan.trim() || null) : null,
       ...addOnsToRow(p.addOnLainnya),
     }))
 

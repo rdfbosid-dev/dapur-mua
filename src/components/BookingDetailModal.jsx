@@ -250,6 +250,20 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
         updated.komisi_tambahan = 0
         updated.nama_tim_tambahan = ''
       }
+      // BUG YANG BARU DIBENERIN: field ini yang KELEWAT waktu Add On &
+      // Komisi/Nama Tim di atas dibenerin -- begitu Layanan Tambahan
+      // (Hairdo/Hijabdo+) di-toggle BALIK ke "Tidak Ada", field Biaya
+      // Tambahan cuma ke-SEMBUNYIIN di form (nggak ke-reset), jadi kalau
+      // user sempet isi biaya terus batal, angkanya nyangkut diem-diem
+      // ke Total Tagihan padahal barisnya nggak nongol di Invoice sama
+      // sekali. Sekarang begitu balik ke "Tidak Ada", Dikerjakan Oleh,
+      // Biaya, Komisi, DAN Nama Tim-nya langsung ke-reset semua.
+      if (field === 'layanan_tambahan' && value === 'Tidak Ada') {
+        updated.dikerjakan_oleh_tambahan = 'Me'
+        updated.biaya_tambahan = 0
+        updated.komisi_tambahan = 0
+        updated.nama_tim_tambahan = ''
+      }
       // Toggle "Sertakan Paket Bundling?" dimatiin -> vendor yang udah
       // sempet keisi ikut ke-reset juga, biar nggak nyangkut diem-diem.
       // Vendor yang UDAH ADA di database (punya .id) dicatat dulu ke
@@ -416,10 +430,16 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
         komisi_makeup_tim: p.dikerjakan_oleh_makeup === 'Tim' ? (Number(p.komisi_makeup_tim) || 0) : 0,
         nama_tim_makeup: p.dikerjakan_oleh_makeup === 'Tim' ? ((p.nama_tim_makeup || '').trim() || null) : null,
         layanan_tambahan: p.layanan_tambahan,
-        dikerjakan_oleh_tambahan: p.dikerjakan_oleh_tambahan,
-        biaya_tambahan: Number(p.biaya_tambahan) || 0,
-        komisi_tambahan: p.dikerjakan_oleh_tambahan === 'Tim' ? (Number(p.komisi_tambahan) || 0) : 0,
-        nama_tim_tambahan: p.dikerjakan_oleh_tambahan === 'Tim' ? ((p.nama_tim_tambahan || '').trim() || null) : null,
+        // Sama pola-nya kayak komisi_makeup_tim/nama_tim_makeup di
+        // atas -- DAN ini yang jadi akar bug invoice Ka Linda (Rp100rb
+        // nyangkut nggak kelihatan): biaya_tambahan sebelumnya nggak
+        // dipaksa nol pas layanan_tambahan "Tidak Ada", cuma field
+        // form-nya doang yang disembunyiin. Sekarang dipaksa ngikutin
+        // status layanan_tambahan, bukan nilai mentah p.biaya_tambahan.
+        dikerjakan_oleh_tambahan: p.layanan_tambahan !== 'Tidak Ada' ? p.dikerjakan_oleh_tambahan : 'Me',
+        biaya_tambahan: p.layanan_tambahan !== 'Tidak Ada' ? (Number(p.biaya_tambahan) || 0) : 0,
+        komisi_tambahan: (p.layanan_tambahan !== 'Tidak Ada' && p.dikerjakan_oleh_tambahan === 'Tim') ? (Number(p.komisi_tambahan) || 0) : 0,
+        nama_tim_tambahan: (p.layanan_tambahan !== 'Tidak Ada' && p.dikerjakan_oleh_tambahan === 'Tim') ? ((p.nama_tim_tambahan || '').trim() || null) : null,
       }
       for (let n = 1; n <= 5; n++) {
         const suffix = n === 1 ? '' : `_${n}`
