@@ -287,8 +287,8 @@ export default function Dashboard() {
   // Warna garis tren dibedain per tema -- versi terang butuh warna gelap
   // biar kebaca di atas kartu putih, versi dark butuh warna cerah biar
   // nggak "ilang" ketelen background gelap.
-  const trendColorA = isDark ? '#6eb4ceff' : '#3d4a9a'
-  const trendColorB = isDark ? '#F5C368' : '#E7A33D'
+  const trendColorA = isDark ? '#6eb4ceff' : '#6eb4ceff'
+  const trendColorB = isDark ? '#b79ae0' : '#b79ae0'
 
   const SUMBER_BRAND_COLORS = {
     Instagram: '#C13584',
