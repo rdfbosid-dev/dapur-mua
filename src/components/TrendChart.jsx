@@ -190,7 +190,18 @@ export default function TrendChart({ series, months, area = false, mounted }) {
         <div
           ref={tooltipRef}
           className="trendchart-tooltip"
-          style={{ left: `${tooltipLeft}px` }}
+          style={{
+            left: `${tooltipLeft}px`,
+            // Warna tooltip NGIKUT warna series pertama chart ini
+            // sendiri (sama pola kayak MonthlyBarChart.jsx) -- biar
+            // otomatis seragam sama lingkaran legend/garisnya, apapun
+            // chart-nya, tanpa perlu diatur manual satu-satu per
+            // halaman. Chart 1-variabel (misal Tren Penghasilan/
+            // Pengeluaran) otomatis kebagian warna series itu sendiri;
+            // chart 2-variabel (misal Tren Booking & Klien di
+            // Dashboard) numpang warna series PERTAMA.
+            background: `color-mix(in srgb, ${series[0].color} 70%, transparent)`,
+          }}
         >
           <div className="tt-month">{months[hoverIdx]}</div>
           {series.map((s) => (
