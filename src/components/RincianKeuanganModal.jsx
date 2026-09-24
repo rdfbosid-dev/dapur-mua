@@ -86,6 +86,38 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
   const tambahanMeAda = tambahanRows.some((r) => !r.tim)
   const tambahanTimAda = tambahanRows.some((r) => r.tim)
 
+  // "Pengeluaran" (kartu ke-4, BARU) -- BEDA TOTAL sama fitur tabel
+  // `pengeluaran` yang terpisah (itu buat pengeluaran bisnis umum yang
+  // diinput manual, bukan dari sini). Yang ini adalah bagian dari data
+  // booking yang SUDAH ADA, cuma belum pernah ditarik keluar jadi
+  // angka sendiri: selisih antara biaya PENUH yang ditagih ke klien
+  // dan komisi/untung yang di-set user -- itu bagian yang "keluar" ke
+  // tim/vendor luar, BUKAN masuk kantong MUA. Cuma dihitung buat
+  // baris yang MEMANG dikerjain Tim (Makeup/Tambahan) atau emang
+  // punya vendor luar (Add On/Paket Bundling) -- baris yang dikerjain
+  // Me sendiri nggak ada "pengeluaran"-nya (0).
+  function pengeluaranMakeupTambahan(r) {
+    return r.tim ? Math.max(0, r.biaya - r.komisi) : 0
+  }
+  function pengeluaranAddOn(item) {
+    return Math.max(0, item.biaya - item.untung)
+  }
+  function pengeluaranBundling(item) {
+    return Math.max(0, (Number(item.biaya) || 0) - (Number(item.keuntungan) || 0))
+  }
+  const totalPengeluaranMakeup = makeupRows.reduce((s, r) => s + pengeluaranMakeupTambahan(r), 0)
+  const totalPengeluaranTambahan = tambahanRows.reduce((s, r) => s + pengeluaranMakeupTambahan(r), 0)
+  const totalPengeluaranAddOn = addOnItems.reduce((s, i) => s + pengeluaranAddOn(i), 0)
+  const totalPengeluaranBundling = bundlingItems.reduce((s, i) => s + pengeluaranBundling(i), 0)
+  const totalPengeluaran = totalPengeluaranMakeup + totalPengeluaranTambahan + totalPengeluaranAddOn + totalPengeluaranBundling
+  // Baris yang beneran ditampilin di section "Pengeluaran" -- CUMA yang
+  // nilainya > 0 (baris Me/item tanpa selisih nggak usah nongol, biar
+  // nggak berisik nampilin "Rp0" di mana-mana).
+  const pengeluaranMakeupRows = makeupRows.filter((r) => pengeluaranMakeupTambahan(r) > 0)
+  const pengeluaranTambahanRows = tambahanRows.filter((r) => pengeluaranMakeupTambahan(r) > 0)
+  const pengeluaranAddOnRows = addOnItems.filter((i) => pengeluaranAddOn(i) > 0)
+  const pengeluaranBundlingTop = bundlingTop.filter((i) => pengeluaranBundling(i) > 0 || bundlingItems.some((c) => c.parent_id === i.id && pengeluaranBundling(c) > 0))
+
   // Rumus -- SENGAJA cuma nulis LABEL/poin-nya doang, BUKAN angka --
   // biar rumus ini jelasin KONSEPNYA ("dari mana asalnya Omzet"),
   // bukan sekadar ngulang angka yang udah keliatan di kartu Omzet/
@@ -153,7 +185,7 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
     return activeCard !== 'belanja' ? 'Keuntungan' : null
   }
 
-  const judulCard = { belanja: 'Belanja Klien', omzet: 'Omzet', penghasilan: 'Penghasilan' }
+  const judulCard = { belanja: 'Belanja Klien', omzet: 'Omzet', penghasilan: 'Penghasilan', pengeluaran: 'Pengeluaran' }
 
   return (
     <div className="rincian-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose() }}>
@@ -181,73 +213,93 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
               <div className="rincian-summary-label-penghasilan">Penghasilan</div>
               <div className="rincian-summary-value-penghasilan">{formatRupiah(booking.penghasilan)}</div>
             </button>
+            <button type="button" className={`rincian-summary-item pengeluaran${activeCard === 'pengeluaran' ? ' active' : ''}`} onClick={() => setActiveCard('pengeluaran')}>
+              <div className="rincian-summary-label-pengeluaran">Pengeluaran</div>
+              <div className="rincian-summary-value-pengeluaran">{formatRupiah(totalPengeluaran)}</div>
+            </button>
           </div>
 
           <div className="rincian-aktif-label">Rincian {judulCard[activeCard]}</div>
 
-          {makeupRows.length > 0 && (
+          {activeCard === 'pengeluaran' && totalPengeluaran === 0 && (
+            <div className="rincian-kosong">Nggak ada pengeluaran di booking ini — semua layanan dikerjain sendiri (Me), tanpa Add On atau Paket Bundling.</div>
+          )}
+
+          {(activeCard === 'pengeluaran' ? pengeluaranMakeupRows : makeupRows).length > 0 && (
             <div className="rincian-section">
               <div className="rincian-section-title">Layanan Makeup</div>
-              {makeupRows.map((r, idx) => (
+              {(activeCard === 'pengeluaran' ? pengeluaranMakeupRows : makeupRows).map((r, idx) => (
                 <div className="rincian-row" key={idx}>
                   <span>{r.nama} (<span className="rincian-metim">{r.tim ? `Tim${r.namaTim ? ' - ' + r.namaTim : ''}` : 'Me'}</span>){r.sesi > 1 ? ` (${r.sesi}x sesi)` : ''}</span>
                   <div className="rincian-nilai-wrap">
-                    <b>{formatRupiah(nilaiMakeupTambahan(r))}</b>
-                    {keteranganTim(r) && <span className="rincian-keterangan">{keteranganTim(r)}</span>}
+                    <b>{formatRupiah(activeCard === 'pengeluaran' ? pengeluaranMakeupTambahan(r) : nilaiMakeupTambahan(r))}</b>
+                    {activeCard === 'pengeluaran'
+                      ? <span className="rincian-keterangan">Ke tim</span>
+                      : (keteranganTim(r) && <span className="rincian-keterangan">{keteranganTim(r)}</span>)}
                   </div>
                 </div>
               ))}
             </div>
           )}
 
-          {tambahanRows.length > 0 && (
+          {(activeCard === 'pengeluaran' ? pengeluaranTambahanRows : tambahanRows).length > 0 && (
             <div className="rincian-section">
               <div className="rincian-section-title">Layanan Tambahan (Hairdo/Hijabdo+)</div>
-              {tambahanRows.map((r, idx) => (
+              {(activeCard === 'pengeluaran' ? pengeluaranTambahanRows : tambahanRows).map((r, idx) => (
                 <div className="rincian-row" key={idx}>
                   <span>{r.nama} ({r.jenis} | <span className="rincian-metim">{r.tim ? `Tim${r.namaTim ? ' - ' + r.namaTim : ''}` : 'Me'}</span>){r.sesi > 1 ? ` (${r.sesi}x sesi)` : ''}</span>
                   <div className="rincian-nilai-wrap">
-                    <b>{formatRupiah(nilaiMakeupTambahan(r))}</b>
-                    {keteranganTim(r) && <span className="rincian-keterangan">{keteranganTim(r)}</span>}
+                    <b>{formatRupiah(activeCard === 'pengeluaran' ? pengeluaranMakeupTambahan(r) : nilaiMakeupTambahan(r))}</b>
+                    {activeCard === 'pengeluaran'
+                      ? <span className="rincian-keterangan">Ke tim</span>
+                      : (keteranganTim(r) && <span className="rincian-keterangan">{keteranganTim(r)}</span>)}
                   </div>
                 </div>
               ))}
             </div>
           )}
 
-          {addOnItems.length > 0 && (
+          {(activeCard === 'pengeluaran' ? pengeluaranAddOnRows : addOnItems).length > 0 && (
             <div className="rincian-section">
               <div className="rincian-section-title">Add On</div>
-              {addOnItems.map((item, idx) => (
+              {(activeCard === 'pengeluaran' ? pengeluaranAddOnRows : addOnItems).map((item, idx) => (
                 <div className="rincian-row" key={idx}>
                   <span>{item.nama}{peserta.length > 1 ? ` (${item.pesertaNama})` : ''}</span>
                   <div className="rincian-nilai-wrap">
-                    <b>{formatRupiah(nilaiAddOn(item))}</b>
-                    {keteranganAddOn() && <span className="rincian-keterangan">{keteranganAddOn()}</span>}
+                    <b>{formatRupiah(activeCard === 'pengeluaran' ? pengeluaranAddOn(item) : nilaiAddOn(item))}</b>
+                    {activeCard === 'pengeluaran'
+                      ? <span className="rincian-keterangan">Belanja produk</span>
+                      : (keteranganAddOn() && <span className="rincian-keterangan">{keteranganAddOn()}</span>)}
                   </div>
                 </div>
               ))}
             </div>
           )}
 
-          {bundlingTop.length > 0 && (
+          {(activeCard === 'pengeluaran' ? pengeluaranBundlingTop : bundlingTop).length > 0 && (
             <div className="rincian-section">
               <div className="rincian-section-title">Paket Bundling</div>
-              {bundlingTop.map((item) => (
+              {(activeCard === 'pengeluaran' ? pengeluaranBundlingTop : bundlingTop).map((item) => (
                 <div key={item.id}>
-                  <div className="rincian-row">
-                    <span>{item.nama}</span>
-                    <div className="rincian-nilai-wrap">
-                      <b>{formatRupiah(nilaiBundling(item))}</b>
-                      {keteranganBundling() && <span className="rincian-keterangan">{keteranganBundling()}</span>}
+                  {(activeCard !== 'pengeluaran' || pengeluaranBundling(item) > 0) && (
+                    <div className="rincian-row">
+                      <span>{item.nama}</span>
+                      <div className="rincian-nilai-wrap">
+                        <b>{formatRupiah(activeCard === 'pengeluaran' ? pengeluaranBundling(item) : nilaiBundling(item))}</b>
+                        {activeCard === 'pengeluaran'
+                          ? <span className="rincian-keterangan">Ke vendor</span>
+                          : (keteranganBundling() && <span className="rincian-keterangan">{keteranganBundling()}</span>)}
+                      </div>
                     </div>
-                  </div>
-                  {bundlingItems.filter((c) => c.parent_id === item.id).map((child) => (
+                  )}
+                  {bundlingItems.filter((c) => c.parent_id === item.id && (activeCard !== 'pengeluaran' || pengeluaranBundling(c) > 0)).map((child) => (
                     <div className="rincian-row" key={child.id} style={{ paddingLeft: 20 }}>
                       <span>↳ {child.nama}</span>
                       <div className="rincian-nilai-wrap">
-                        <b>{formatRupiah(nilaiBundling(child))}</b>
-                        {keteranganBundling() && <span className="rincian-keterangan">{keteranganBundling()}</span>}
+                        <b>{formatRupiah(activeCard === 'pengeluaran' ? pengeluaranBundling(child) : nilaiBundling(child))}</b>
+                        {activeCard === 'pengeluaran'
+                          ? <span className="rincian-keterangan">Ke vendor</span>
+                          : (keteranganBundling() && <span className="rincian-keterangan">{keteranganBundling()}</span>)}
                       </div>
                     </div>
                   ))}
@@ -260,7 +312,7 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
               Penghasilan emang nggak masukin Transport sama sekali
               (bukan Rp0, tapi beneran nggak dihitung), jadi baris ini
               disembunyiin total biar nggak nyesatin. */}
-          {transport > 0 && activeCard !== 'penghasilan' && (
+          {transport > 0 && activeCard !== 'penghasilan' && activeCard !== 'pengeluaran' && (
             <div className="rincian-section">
               <div className="rincian-section-title">Transport</div>
               <div className="rincian-row">

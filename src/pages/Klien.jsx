@@ -185,7 +185,7 @@ export default function Klien() {
       { header: 'Nomor WhatsApp', key: 'whatsapp', width: 18 },
       { header: 'Total Booking', key: 'totalCount', width: 14 },
       { header: 'Total Selesai', key: 'selesaiCount', width: 14 },
-      { header: 'Total Pembayaran', key: 'totalBelanja', width: 16 },
+      { header: 'Total Pembayaran Klien', key: 'totalBelanja', width: 16 },
     ]
     clients.forEach((c) => {
       wsRingkasan.addRow({
@@ -241,7 +241,7 @@ export default function Klien() {
 
     const sorted = [...list]
     if (sortBy === 'Nama A-Z') sorted.sort((a, b) => (a.nama || '').localeCompare(b.nama || ''))
-    else if (sortBy === 'Total Pembayaran') sorted.sort((a, b) => b.totalBelanja - a.totalBelanja)
+    else if (sortBy === 'Total Pembayaran Klien') sorted.sort((a, b) => b.totalBelanja - a.totalBelanja)
     else if (sortBy === 'Kode Booking') {
       const minKode = (c) => Math.min(...c.bookingList.map((b) => kodeBookingNum(b.kode_booking)))
       sorted.sort((a, b) => minKode(a) - minKode(b))
@@ -322,7 +322,7 @@ export default function Klien() {
           </div>
           <div className="klien-stat-card-totalbelanja">
             <div className="klien-stat-top">
-              <div className="klien-stat-label4">Total Pembayaran</div>
+              <div className="klien-stat-label4">Total Pembayaran Klien</div>
               <div className="klien-stat-icon coral">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><path d="M12 6v12M15 9.5c0-1.38-1.34-2.5-3-2.5s-3 1.12-3 2.5 1.34 2.5 3 2.5 3 1.12 3 2.5-1.34 2.5-3 2.5-3-1.12-3-2.5" /></svg>
               </div>
@@ -346,7 +346,7 @@ export default function Klien() {
           </div>
           <div className="filter-select filter-select-sort">
               <CustomSelect
-                options={['Terbaru', 'Nama A-Z', 'Total Pembayaran', 'Kode Booking']}
+                options={['Terbaru', 'Nama A-Z', 'Total Pembayaran Klien', 'Kode Booking']}
                 value={sortBy}
                 onChange={setSortBy}
                 icon={
@@ -455,7 +455,7 @@ export default function Klien() {
                 <div><span className="detail-label">ID Klien</span><div>{selectedClient.id.slice(0, 8)}</div></div>
                 <div><span className="detail-label">No. WhatsApp</span><div>{selectedClient.whatsapp || '-'}</div></div>
                 <div><span className="detail-label">Total Booking</span><div>{selectedClient.bookingList.length}</div></div>
-                <div><span className="detail-label">Total Pembayaran</span><div>{formatRupiah(selectedClient.totalBelanja)}</div></div>
+                <div><span className="detail-label">Total Pembayaran Klien</span><div>{formatRupiah(selectedClient.totalBelanja)}</div></div>
               </div>
               <div className="section-label">Riwayat Booking</div>
               <div className="riwayat-list">

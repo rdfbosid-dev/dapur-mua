@@ -68,7 +68,12 @@
   --field: #e1e3f5;
   --bar-belanja: #ef5b36;
   --bar-transport: #3ea346;
-  --bar-komisi: #475ad6;
+  --bar-komisi: #f06db1;
+  --bar-tim: #c93180;
+  --bar-vendor: #416fee;
+  --bar-komisi-vendor: #6e7fae;
+  --bar-produk: #4b1d8b;
+  --bar-untung-produk: #9c73d6;
   --table-body: #f2f3fc;
   --line-box: #ced3f5;
   --line-modal: color-mix(in srgb, var(--ink-soft) 80%, transparent);
@@ -151,7 +156,12 @@
   --field: #22414c;
   --bar-belanja: #F5C368;
   --bar-transport: #63cc6c;
-  --bar-komisi: #c98eee;
+  --bar-komisi: #cc8af6;
+  --bar-tim: #f15aa8;
+  --bar-vendor: #416fee;
+  --bar-komisi-vendor: #41a9ee;
+  --bar-produk: #e879b4;
+  --bar-untung-produk: #d699af;
   --table-body: rgb(19, 44, 63);
   --line-box: #1f405a;
   --line-modal: #FFFFFF;

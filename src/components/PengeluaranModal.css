@@ -1,0 +1,77 @@
+/* Semua selector di file ini di-scope di bawah .pengeluaran-modal-overlay --
+   pola yang sama kayak file modal lain di project ini (BookingModal.css,
+   RincianKeuanganModal.css, dst), biar nama class umum (.modal, .field,
+   .btn-ghost) nggak bentrok antar file. */
+
+.pengeluaran-modal-overlay {
+  position: fixed; inset: 0; background: rgb(36, 55, 62, 0.45);
+  display: flex; align-items: center; justify-content: center; padding: 24px;
+  z-index: 95;
+}
+.pengeluaran-modal-overlay .modal {
+  background: var(--table-body); border-radius: 24px; width: 100%; max-width: 480px;
+  max-height: 88vh; display: flex; flex-direction: column; overflow: hidden;
+  box-shadow: 0 24px 60px -12px var(--shadow-modal);
+}
+.pengeluaran-modal-overlay .modal-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 16px; flex-shrink: 0;
+}
+.pengeluaran-modal-overlay .modal-head h2 { font-size: 18px; color: var(--ink-soft); }
+.pengeluaran-modal-overlay .modal-close {
+  width: 32px; height: 32px; border-radius: 10px; border: none; background: color-mix(in srgb, var(--h3) 20%, transparent);
+  color: var(--h3); font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s;
+}
+.pengeluaran-modal-overlay .modal-close:hover { background: color-mix(in srgb, var(--h3) 50%, transparent); }
+.pengeluaran-modal-overlay .modal-body { padding: 5px 16px 8px; overflow-y: auto; flex: 1; -webkit-overflow-scrolling: touch; }
+.pengeluaran-modal-overlay .modal-foot { display: flex; justify-content: flex-end; gap: 8px; padding: 14px 16px; flex-shrink: 0; }
+
+.pengeluaran-modal-overlay .field-grid-pengeluaran { display: grid; gap: 10px; margin-bottom: 12px; }
+.pengeluaran-modal-overlay .field-grid-pengeluaran.cols-2 { grid-template-columns: 1fr 1fr; }
+.pengeluaran-modal-overlay .field-grid-pengeluaran.cols-1 { grid-template-columns: 1fr; }
+.pengeluaran-modal-overlay .field { display: flex; flex-direction: column; gap: 4px; }
+.pengeluaran-modal-overlay .field label { font-size: 12.5px; font-weight: 600; color: var(--ink-soft); }
+.pengeluaran-modal-overlay .field input,
+.pengeluaran-modal-overlay .field textarea {
+  padding: 10px 12px; border-radius: 10px; border: 1.5px solid var(--button-border);
+  background: var(--table-body); color: var(--ink-soft); font-size: 14px; font-family: inherit;
+  outline: none; transition: border-color 0.15s;
+}
+.pengeluaran-modal-overlay .field textarea { resize: vertical; min-height: 44px; }
+.pengeluaran-modal-overlay .field input:focus,
+.pengeluaran-modal-overlay .field textarea:focus { border-color: var(--h3); }
+
+.pengeluaran-modal-overlay .toggle-row { display: flex; gap: 6px; }
+.pengeluaran-modal-overlay .toggle-opt {
+  flex: 1; text-align: center; padding: 9px 10px; border-radius: 10px; border: 1.5px solid var(--button-border);
+  background: var(--table-body); color: var(--ink-soft); font-size: 13.5px; font-weight: 600; cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.pengeluaran-modal-overlay .toggle-opt:not(.sel):hover { background: color-mix(in srgb, var(--ink-faint) 50%, transparent); }
+.pengeluaran-modal-overlay .toggle-opt.sel { background: var(--h3); color: #fff; border-color: transparent; }
+
+.pengeluaran-modal-overlay .btn-ghost {
+  padding: 9px 16px; border-radius: 10px; border: 1.5px solid var(--button-border); background: var(--table-body);
+  font-size: 14px; font-weight: 600; color: var(--ink-soft); cursor: pointer; font-family: inherit;
+  transition: background 0.15s;
+}
+.pengeluaran-modal-overlay .btn-ghost:hover { background: color-mix(in srgb, var(--button-prm-hover) 50%, transparent); }
+.pengeluaran-modal-overlay .btn-primary-pengeluaran {
+  padding: 10px 18px; border-radius: 11px; border: 1.5px solid var(--button-prm-hover); background: var(--button-prm-hover);
+  font-size: 13.5px; font-weight: 600; color: var(--button-tx-hover); cursor: pointer; font-family: inherit;
+  transition: background 0.15s, border-color 0.15s;
+}
+.pengeluaran-modal-overlay .btn-primary-pengeluaran:hover { background: var(--h3); border-color: var(--h3); }
+.pengeluaran-modal-overlay .btn-primary-pengeluaran:disabled { opacity: 0.6; cursor: default; }
+
+.pengeluaran-error {
+  background: color-mix(in srgb, var(--h8) 12%, transparent); border: 1px solid color-mix(in srgb, var(--h8) 40%, transparent);
+  color: var(--h8); font-size: 12.5px; padding: 8px 10px; border-radius: 8px; margin-bottom: 10px;
+}
+
+@media (max-width: 640px) {
+  .pengeluaran-modal-overlay { padding: 0; align-items: flex-end; }
+  .pengeluaran-modal-overlay .modal { max-width: 100%; max-height: 92vh; border-radius: 22px 22px 0 0; }
+  .pengeluaran-modal-overlay .field-grid-pengeluaran.cols-2 { grid-template-columns: 1fr; }
+}

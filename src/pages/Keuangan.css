@@ -22,16 +22,39 @@
 }
 
 .card-keuangan { background: color-mix(in srgb, var(--box-dashboard) 90%, transparent); border-radius: 20px; padding: 22px; border: 1px solid var(--line-box); box-shadow: var(--shadow-card); }
-.card-head-keuangan { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.card-head-keuangan { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; margin-bottom: 10px; }
 .card-head-keuangan h3 { font-size: 14px; color: var(--ink-soft); }
 
 .bar-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-bottom: 30px; }
+/* Baris ke-2 chart bar -- 2 kolom (bukan 3), buat kartu-kartu gabungan
+   (Vendor, Produk, dan potensi nambah lagi ke depan kayak Portofolio).
+   Pola persis .bar-grid, cuma jumlah kolomnya beda. */
+.bar-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 30px; }
+/* Tren Omzet & Penghasilan (kiri) + Tren Pengeluaran (kanan), sejajar
+   di desktop -- polanya SAMA kayak .bar-grid (grid 2 kolom, numpuk 1
+   kolom di mobile), cuma 2 kolom bukan 3. */
+.tren-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
 .bar-grid .chart-total-belanja { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 14px; color: var(--bar-belanja); filter: brightness(1.08); }
 .bar-grid .chart-total-transport { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 14px; color: var(--bar-transport); filter: brightness(1.08); }
 .bar-grid .chart-total-komisi { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 14px; color: var(--bar-komisi); filter: brightness(1.08); }
+.bar-grid .chart-total-tim,
+.bar-grid-2 .chart-total-tim { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 14px; color: var(--bar-tim); filter: brightness(1.08); }
+.bar-grid .chart-total-vendor,
+.bar-grid-2 .chart-total-vendor { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 14px; color: var(--bar-vendor); filter: brightness(1.08); }
+.bar-grid .chart-total-produk,
+.bar-grid-2 .chart-total-produk { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 14px; color: var(--bar-produk); filter: brightness(1.08); }
+/* Kartu GABUNGAN (2 variabel) -- angka total di kanan atas jadi 2
+   angka dipisah "/", masing-masing warnanya ngikutin series-nya
+   sendiri (lihat komisi-vendor & untung-produk, token BARU yang beda
+   dari pasangannya di atas biar 2 angka itu kebeda jelas). */
+.chart-total-pair { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 13px; filter: brightness(1.08); white-space: nowrap; }
+.chart-total-komisi-vendor { color: var(--bar-komisi-vendor); }
+.chart-total-untung-produk { color: var(--bar-untung-produk); }
 
 @media (max-width: 1100px) {
   .bar-grid { grid-template-columns: 1fr; }
+  .bar-grid-2 { grid-template-columns: 1fr; }
+  .tren-grid { grid-template-columns: 1fr; }
   .card-keuangan { border: 1px solid var(--line-box); }
 }
 
@@ -50,19 +73,36 @@
 }
 .keuangan-table { table-layout: fixed; }
 
-.keuangan-table { width: 100%; border-collapse: collapse; min-width: 1150px; }
+.keuangan-table { width: 100%; border-collapse: collapse; min-width: 1750px; }
 .keuangan-table thead th {
-  text-align: left; font-size: 12px; font-weight: 700; color: var(--h4);
-  text-transform: uppercase; letter-spacing: 0.03em; padding: 16px 24px;
+  text-align: center; font-size: 12px; font-weight: 700; color: var(--h4);
+  text-transform: uppercase; letter-spacing: 0.03em; padding: 12px 16px;
   background: color-mix(in srgb, var(--sidebar) 90%, transparent);
-  white-space: nowrap;
+  white-space: normal; line-height: 1.35; vertical-align: middle;
+  /* Header kolom yang teksnya panjang (misal "KOMISI DARI VENDOR")
+     dulu bisa "tembus" visual ke kolom sebelah walau white-space udah
+     normal -- soalnya table-layout:fixed cuma ngunci lebar KOTAK
+     kolomnya, konten teks yang overflow tetep bisa kecat keluar kotak
+     itu kalau nggak ada overflow:hidden. overflow-wrap+word-break
+     jadi jaring pengaman kedua: kalau 1 KATA aja udah kepanjangan buat
+     muat di kolom sempit, dipaksa patah di tengah kata itu sendiri,
+     bukan dibiarin numpuk ke kolom lain. */
+  overflow-wrap: break-word;
+  word-break: break-word;
+  overflow: hidden;
 }
-.keuangan-table thead th.right { text-align: right; }
-.keuangan-table thead th.center { text-align: center; }
+.keuangan-table thead th.right,
+.keuangan-table thead th.center {
+  /* SENGAJA dikosongin -- header SEMUANYA rata tengah sekarang (lihat
+     rule dasar .keuangan-table thead th di atas), class .right/.center
+     di <th> cuma kepake buat align badan tabel (.keuangan-table td),
+     bukan buat header lagi. */
+}
 .keuangan-table tbody tr {
   background: var(--table-body);
   border-bottom: 1px solid color-mix(in srgb, var(--ink-soft) 50%, transparent);
   transition: background 0.15s;
+  cursor: pointer;
 }
 .keuangan-table tbody tr:last-child { border-bottom: none; }
 .keuangan-table tbody tr:hover { background: color-mix(in srgb, var(--active-nav) var(--mix-box), transparent); }
@@ -74,6 +114,19 @@
 .keuangan-table .bulan-cell { font-weight: 700; white-space: nowrap; }
 .keuangan-table tr.row-empty td { opacity: 0.6; }
 .keuangan-table tbody tr:hover td { opacity: 1; color: var(--ink); }
+/* Baris yang DIKLIK-tandain user -- beda dari :hover (yang cuma nyala
+   selagi kursor nangkring di atasnya, ilang begitu kursor pindah).
+   Ini TETEP nempel sampai user klik lagi buat batalin/pindah ke baris
+   lain, jadi warnanya SENGAJA lebih pekat & dikasih garis kiri (border-left)
+   biar keliatan jelas beda dari sekadar hover sekilas. Ditaruh SETELAH
+   rule :hover di atas biar menang kalau kursor kebetulan nangkring di
+   baris yang lagi ke-select. */
+.keuangan-table tbody tr.row-selected {
+  background: color-mix(in srgb, var(--h3) 28%, var(--table-body));
+}
+.keuangan-table tbody tr.row-selected td { opacity: 1; color: var(--ink); }
+.keuangan-table tbody tr.row-selected td:first-child { box-shadow: inset 3px 0 0 var(--h3); }
+.keuangan-table tbody tr.row-selected:hover { background: color-mix(in srgb, var(--h3) 38%, var(--table-body)); }
 
 /* Foot sengaja dibikin "kembaran" head (bookend atas-bawah buat body) --
    alignment tiap kolom udah dihandle otomatis lewat class .right/.center
@@ -106,5 +159,5 @@
 }
 
 @media (max-width: 900px) {
-  .keuangan-table { min-width: 1150px; }
+  .keuangan-table { min-width: 1750px; }
 }

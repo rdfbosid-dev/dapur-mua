@@ -585,6 +585,7 @@ export default function Dashboard() {
                   <TrendChart
                     months={BULAN_SINGKAT}
                     mounted={chartsIn}
+                    area="all"
                     series={[
                       { label: 'Booking', values: monthlyStats.map((m) => m.booking), color: trendColorA },
                       { label: 'Klien', values: monthlyStats.map((m) => m.klien), color: trendColorB },
@@ -604,7 +605,7 @@ export default function Dashboard() {
                   <TrendChart
                     months={BULAN_SINGKAT}
                     mounted={chartsIn}
-                    area
+                    area="all"
                     series={[
                       { label: 'Omzet', values: monthlyStats.map((m) => m.omzet), color: trendColorA, format: formatRupiah },
                       { label: 'Penghasilan', values: monthlyStats.map((m) => m.penghasilan), color: trendColorB, format: formatRupiah },

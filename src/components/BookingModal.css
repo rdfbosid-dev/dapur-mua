@@ -249,3 +249,12 @@
   }
   .booking-modal-overlay .toggle-row-rambut { display: flex; gap: 3px; }
 }
+
+/* Garis pembatas antar bagian form peserta -- 3 titik: bawah Jumlah
+   Sesi Makeup, atas Add On Layanan Rambut, atas Add On Item. Polanya
+   numpang .rincian-note-divider di RincianKeuanganModal.css (garis
+   tipis pake token warna button-border), diseragamin di sini. */
+.booking-modal-overlay .form-divider {
+  height: 1px; background: color-mix(in srgb, var(--button-border) 45%, transparent);
+  margin: 14px 0;
+}

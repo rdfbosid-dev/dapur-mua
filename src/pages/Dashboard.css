@@ -5,6 +5,17 @@
 
 .main {
   flex: 1;
+  /* WAJIB -- tanpa ini, elemen flex (.main) nggak mau menyusut lebih
+     kecil dari konten TERLEBARNYA (default browser: min-width:auto
+     buat flex item). Begitu ada elemen lebar di dalam sini (misal
+     tabel Keuangan yang min-width-nya 1750px), TANPA min-width:0
+     seluruh halaman ikut kedorong lebar & muncul scroll horizontal di
+     LEVEL HALAMAN -- padahal niatnya cuma tabelnya doang yang mau
+     di-scroll (sudah ada overflow-x:auto di .table-card-finance).
+     min-width:0 di sini yang "ngizinin" .main menyusut normal, biar
+     overflow-x:auto di elemen anak yang beneran jalan ngurusin scroll,
+     bukan malah halaman globalnya yang melar. */
+  min-width: 0;
   padding: 20px 20px;
 }
 

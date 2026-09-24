@@ -6,7 +6,6 @@ import Sidebar from '../components/Sidebar'
 import CustomSelect from '../components/CustomSelect'
 import TrendChart from '../components/TrendChart'
 import MonthlyBarChart from '../components/MonthlyBarChart'
-import { useTheme } from '../context/ThemeContext'
 import { useAuth } from '../context/AuthContext'
 import './Keuangan.css'
 
@@ -47,18 +46,26 @@ function TrendArrow({ curr, prev, isFirst }) {
 export default function Keuangan() {
   const location = useLocation()
   const navigate = useNavigate()
-  const { theme } = useTheme()
   const { profile } = useAuth()
-  const isDark = theme === 'dark'
-  const trendColorA = isDark ? '#6eb4ceff' : '#3d4a9a'
-  const trendColorB = isDark ? '#F5C368' : '#E7A33D'
 
   const [bookings, setBookings] = useState([])
+  // Dua tabel BARU yang perlu ditarik khusus buat chart Tren Pengeluaran
+  // (bukan dari booking_summary, soalnya "Belanja Produk"/"Pembayaran ke
+  // Vendor" itu turunan dari data Add On & Paket Bundling per peserta,
+  // BUKAN kolom yang udah dijumlahin di VIEW). Cuma kolom yang kepake
+  // doang yang ditarik, biar query-nya ringan.
+  const [pesertaAll, setPesertaAll] = useState([])
+  const [bundlingAll, setBundlingAll] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [filterTahun, setFilterTahun] = useState(String(new Date().getFullYear()))
   const [chartsIn, setChartsIn] = useState(false)
   const [highlightBulan, setHighlightBulan] = useState(null)
+  // Baris yang diklik-tandain user (BEDA sama highlightBulan di atas --
+  // itu highlight OTOMATIS yang muncul-lalu-fade dari notifikasi/link,
+  // ini TETEP nempel sampai user klik lagi buat batalin atau klik baris
+  // lain). Murni penanda visual, nggak ngefek ke data/kalkulasi apapun.
+  const [selectedBulan, setSelectedBulan] = useState(null)
 
   // Kalau halaman ini dibuka dari klik notif "Laporan Akhir Bulan" di
   // Dashboard, ada state { highlightBulan, highlightTahun } yang dikirim
@@ -81,9 +88,15 @@ export default function Keuangan() {
     async function load() {
       setLoading(true)
       setError('')
-      const { data, error } = await supabase.from('booking_summary').select('*')
-      if (error) setError(error.message)
-      else setBookings(data || [])
+      const [bookingRes, pesertaRes, bundlingRes] = await Promise.all([
+        supabase.from('booking_summary').select('*'),
+        supabase.from('peserta').select('booking_id, dikerjakan_oleh_makeup, biaya_makeup, komisi_makeup_tim, dikerjakan_oleh_tambahan, biaya_tambahan, komisi_tambahan, layanan_lainnya, biaya_lainnya, keuntungan_lainnya, layanan_lainnya_2, biaya_lainnya_2, keuntungan_lainnya_2, layanan_lainnya_3, biaya_lainnya_3, keuntungan_lainnya_3, layanan_lainnya_4, biaya_lainnya_4, keuntungan_lainnya_4, layanan_lainnya_5, biaya_lainnya_5, keuntungan_lainnya_5'),
+        supabase.from('bundling_items').select('booking_id, biaya, keuntungan'),
+      ])
+      if (bookingRes.error) setError(bookingRes.error.message)
+      else setBookings(bookingRes.data || [])
+      if (!pesertaRes.error) setPesertaAll(pesertaRes.data || [])
+      if (!bundlingRes.error) setBundlingAll(bundlingRes.data || [])
       setLoading(false)
       setChartsIn(false)
       requestAnimationFrame(() => requestAnimationFrame(() => setChartsIn(true)))
@@ -124,10 +137,81 @@ export default function Keuangan() {
         // difilter cuma yang dikerjain Tim, bukan dikerjain sendiri) --
         // tinggal jumlahin langsung, nggak perlu diitung ulang manual.
         komisi: bulanBookings.reduce((s, b) => s + (Number(b.komisi_makeup_tim) || 0) + (Number(b.komisi_tambahan_tim) || 0), 0),
+        // Komisi dari Vendor & Untung Produk -- DUA-DUANYA udah ada
+        // langsung sebagai kolom jadi di VIEW booking_summary
+        // (bundling_keuntungan_total & keuntungan_lainnya_total),
+        // nggak perlu diitung ulang manual dari tabel lain kayak
+        // "Bayar ke Tim/Vendor/Belanja Produk" di monthlyPengeluaranStats.
+        komisiVendor: bulanBookings.reduce((s, b) => s + (Number(b.bundling_keuntungan_total) || 0), 0),
+        untungProduk: bulanBookings.reduce((s, b) => s + (Number(b.keuntungan_lainnya_total) || 0), 0),
         penghasilan: bulanBookings.reduce((s, b) => s + (Number(b.penghasilan) || 0), 0),
       }
     })
   }, [bookings, filterTahun])
+
+  // Data buat chart "Tren Pengeluaran" & 3 kartu bar baru di bawah --
+  // 3 variabel: Pembayaran ke Tim (Makeup/Hairdo/Hijabdo+ yang
+  // dikerjain Tim, biaya dikurangi komisi buat Me), Pembayaran ke
+  // Vendor (dari Paket Bundling, biaya dikurangi keuntungan), Belanja
+  // Produk (dari Add On, biaya dikurangi untung/modal barang). Rumusnya
+  // SAMA PERSIS kayak kartu Pengeluaran di Rincian Keuangan per
+  // booking -- ini cuma versi dijumlahin per bulan buat 1 tahun penuh.
+  const monthlyPengeluaranStats = useMemo(() => {
+    // Peta booking_id -> bulan (0-11), CUMA buat booking yang
+    // tanggal_acara-nya di tahun filterTahun yang lagi difilter.
+    const bulanByBookingId = {}
+    bookings.forEach((b) => {
+      const d = new Date(b.tanggal_acara)
+      if (String(d.getFullYear()) === filterTahun) bulanByBookingId[b.id] = d.getMonth()
+    })
+
+    const pembayaranTim = Array(12).fill(0)
+    const belanjaProduk = Array(12).fill(0)
+    pesertaAll.forEach((p) => {
+      const bulan = bulanByBookingId[p.booking_id]
+      if (bulan === undefined) return
+
+      // Pembayaran ke Tim -- Makeup & Layanan Tambahan (Hairdo/
+      // Hijabdo+) yang dikerjain Tim doang, biaya penuh dikurangi
+      // komisi yang di-set buat Me. Kalau komisi nggak diisi, dianggap
+      // 0 (jadi Math.max jaga-jaga nilai nggak minus).
+      if (p.dikerjakan_oleh_makeup === 'Tim') {
+        pembayaranTim[bulan] += Math.max(0, (Number(p.biaya_makeup) || 0) - (Number(p.komisi_makeup_tim) || 0))
+      }
+      if (p.dikerjakan_oleh_tambahan === 'Tim') {
+        pembayaranTim[bulan] += Math.max(0, (Number(p.biaya_tambahan) || 0) - (Number(p.komisi_tambahan) || 0))
+      }
+
+      for (let n = 1; n <= 5; n++) {
+        const suffix = n === 1 ? '' : `_${n}`
+        const nama = (p[`layanan_lainnya${suffix}`] || '').trim()
+        if (!nama) continue
+        const biaya = Number(p[`biaya_lainnya${suffix}`]) || 0
+        const untung = Number(p[`keuntungan_lainnya${suffix}`]) || 0
+        belanjaProduk[bulan] += Math.max(0, biaya - untung)
+      }
+    })
+
+    const pembayaranVendor = Array(12).fill(0)
+    bundlingAll.forEach((item) => {
+      const bulan = bulanByBookingId[item.booking_id]
+      if (bulan === undefined) return
+      pembayaranVendor[bulan] += Math.max(0, (Number(item.biaya) || 0) - (Number(item.keuntungan) || 0))
+    })
+
+    return BULAN_SINGKAT.map((label, i) => ({
+      label,
+      pembayaranTim: pembayaranTim[i],
+      belanjaProduk: belanjaProduk[i],
+      pembayaranVendor: pembayaranVendor[i],
+    }))
+  }, [bookings, pesertaAll, bundlingAll, filterTahun])
+  const adaDataPengeluaran = monthlyPengeluaranStats.some((m) => m.pembayaranTim > 0 || m.belanjaProduk > 0 || m.pembayaranVendor > 0)
+  const totalPengeluaranTahun = monthlyPengeluaranStats.reduce((acc, m) => ({
+    pembayaranTim: acc.pembayaranTim + m.pembayaranTim,
+    belanjaProduk: acc.belanjaProduk + m.belanjaProduk,
+    pembayaranVendor: acc.pembayaranVendor + m.pembayaranVendor,
+  }), { pembayaranTim: 0, belanjaProduk: 0, pembayaranVendor: 0 })
 
   // Begitu data kelar dimuat DAN tahunnya udah sesuai target dari notif,
   // baru scroll ke baris bulan yang dimaksud + nyalain highlight sebentar
@@ -156,8 +240,10 @@ export default function Keuangan() {
     transport: acc.transport + m.transport,
     omzet: acc.omzet + m.omzet,
     komisi: acc.komisi + m.komisi,
+    komisiVendor: acc.komisiVendor + m.komisiVendor,
+    untungProduk: acc.untungProduk + m.untungProduk,
     penghasilan: acc.penghasilan + m.penghasilan,
-  }), { booking: 0, klien: 0, belanja: 0, transport: 0, omzet: 0, komisi: 0, penghasilan: 0 })
+  }), { booking: 0, klien: 0, belanja: 0, transport: 0, omzet: 0, komisi: 0, komisiVendor: 0, untungProduk: 0, penghasilan: 0 })
 
   const adaData = monthlyStats.some((m) => m.booking > 0)
 
@@ -177,7 +263,12 @@ export default function Keuangan() {
       { header: 'Pembayaran', key: 'belanja', width: 15 },
       { header: 'Transport', key: 'transport', width: 13 },
       { header: 'Omzet', key: 'omzet', width: 15 },
-      { header: 'Komisi Tim', key: 'komisi', width: 13 },
+      { header: 'Bayar ke Tim', key: 'bayarTim', width: 15 },
+      { header: 'Komisi dari Tim', key: 'komisi', width: 15 },
+      { header: 'Bayar ke Vendor', key: 'bayarVendor', width: 15 },
+      { header: 'Komisi dari Vendor', key: 'komisiVendor', width: 17 },
+      { header: 'Belanja Produk', key: 'belanjaProduk', width: 15 },
+      { header: 'Untung Produk', key: 'untungProduk', width: 15 },
       { header: 'Penghasilan', key: 'penghasilan', width: 15 },
     ]
 
@@ -192,7 +283,10 @@ export default function Keuangan() {
       ws.addRow({
         bulan: BULAN_PENUH[i], booking: m.booking, klien: m.klien,
         belanja: m.belanja, transport: m.transport, omzet: m.omzet,
-        komisi: m.komisi, penghasilan: m.penghasilan,
+        bayarTim: monthlyPengeluaranStats[i].pembayaranTim, komisi: m.komisi,
+        bayarVendor: monthlyPengeluaranStats[i].pembayaranVendor, komisiVendor: m.komisiVendor,
+        belanjaProduk: monthlyPengeluaranStats[i].belanjaProduk, untungProduk: m.untungProduk,
+        penghasilan: m.penghasilan,
       })
     })
 
@@ -200,7 +294,10 @@ export default function Keuangan() {
     const totalRow = ws.addRow({
       bulan: 'Total', booking: totalTahun.booking, klien: totalTahun.klien,
       belanja: totalTahun.belanja, transport: totalTahun.transport, omzet: totalTahun.omzet,
-      komisi: totalTahun.komisi, penghasilan: totalTahun.penghasilan,
+      bayarTim: totalPengeluaranTahun.pembayaranTim, komisi: totalTahun.komisi,
+      bayarVendor: totalPengeluaranTahun.pembayaranVendor, komisiVendor: totalTahun.komisiVendor,
+      belanjaProduk: totalPengeluaranTahun.belanjaProduk, untungProduk: totalTahun.untungProduk,
+      penghasilan: totalTahun.penghasilan,
     })
     totalRow.eachCell((cell) => {
       cell.font = { bold: true }
@@ -209,7 +306,7 @@ export default function Keuangan() {
 
     // Kolom duit diformat jadi angka Rupiah (pemisah ribuan), buat SEMUA
     // baris (termasuk baris Total, soalnya numFmt di-set per kolom).
-    ;['belanja', 'transport', 'omzet', 'komisi', 'penghasilan'].forEach((key) => {
+    ;['belanja', 'transport', 'omzet', 'bayarTim', 'komisi', 'bayarVendor', 'komisiVendor', 'belanjaProduk', 'untungProduk', 'penghasilan'].forEach((key) => {
       ws.getColumn(key).numFmt = '#,##0'
     })
 
@@ -262,27 +359,57 @@ export default function Keuangan() {
 
         {!loading && !error && (
           <>
-            <div className="card-keuangan" style={{ marginBottom: 18 }}>
-              <div className="card-head-keuangan"><h3>Tren Omzet &amp; Penghasilan {filterTahun}</h3></div>
-              {!adaData ? (
-                <div className="empty-state">Belum ada data di tahun ini.</div>
-              ) : (
-                <TrendChart
-                  months={BULAN_SINGKAT}
-                  mounted={chartsIn}
-                  area
-                  series={[
-                    { label: 'Omzet', values: monthlyStats.map((m) => m.omzet), color: trendColorA, format: formatRupiah },
-                    { label: 'Penghasilan', values: monthlyStats.map((m) => m.penghasilan), color: trendColorB, format: formatRupiah },
-                  ]}
-                />
-              )}
+            <div className="tren-grid">
+              <div className="card-keuangan">
+                <div className="card-head-keuangan"><h3>Tren Penghasilan {filterTahun}</h3></div>
+                {!adaData ? (
+                  <div className="empty-state">Belum ada data di tahun ini.</div>
+                ) : (
+                  <TrendChart
+                    months={BULAN_SINGKAT}
+                    mounted={chartsIn}
+                    area="all"
+                    series={[
+                      { label: 'Penghasilan', values: monthlyStats.map((m) => m.penghasilan), color: '#6eb4ce', format: formatRupiah },
+                    ]}
+                  />
+                )}
+              </div>
+
+              {/* Tren Pengeluaran -- 1 variabel "Pengeluaran" = total
+                  Belanja Produk (dari Add On) + Pembayaran ke Vendor
+                  (dari Paket Bundling) dijumlahin per bulan. Sengaja
+                  pakai kartu terpisah dari Tren Penghasilan (bukan
+                  ditumpuk jadi 1 chart yang sama), biar skala angkanya
+                  nggak nyampur -- Penghasilan biasanya jauh lebih gede
+                  dari Pengeluaran, kalau digabung 1 chart garis
+                  Pengeluaran bakal keliatan rata/nempel ke bawah,
+                  susah dibaca. */}
+              <div className="card-keuangan">
+                <div className="card-head-keuangan"><h3>Tren Pengeluaran {filterTahun}</h3></div>
+                {!adaDataPengeluaran ? (
+                  <div className="empty-state">Belum ada data pengeluaran di tahun ini.</div>
+                ) : (
+                  <TrendChart
+                    months={BULAN_SINGKAT}
+                    mounted={chartsIn}
+                    area="all"
+                    series={[
+                      { label: 'Pengeluaran', values: monthlyPengeluaranStats.map((m) => m.belanjaProduk + m.pembayaranVendor), color: '#b79ae0', format: formatRupiah },
+                    ]}
+                  />
+                )}
+              </div>
             </div>
 
+            {/* Baris 1 -- 3 kartu: Pembayaran Klien & Transport TETAP utuh
+                kayak sebelumnya. Kartu ke-3 GABUNGAN (Bayar ke Tim +
+                Komisi dari Tim jadi 1 chart, 2 bar sejajar per bulan)
+                -- pakai prop `series` yang baru di MonthlyBarChart. */}
             <div className="bar-grid">
               <div className="card-keuangan">
                 <div className="card-head-keuangan">
-                  <h3>Total Pembayaran {filterTahun}</h3>
+                  <h3>Total Pembayaran Klien {filterTahun}</h3>
                   <span className="chart-total-belanja">{formatRupiah(totalTahun.belanja)}</span>
                 </div>
                 <MonthlyBarChart
@@ -296,7 +423,7 @@ export default function Keuangan() {
 
               <div className="card-keuangan">
                 <div className="card-head-keuangan">
-                  <h3>Total Biaya Transport {filterTahun}</h3>
+                  <h3>Total Biaya Transport dari Klien {filterTahun}</h3>
                   <span className="chart-total-transport">{formatRupiah(totalTahun.transport)}</span>
                 </div>
                 <MonthlyBarChart
@@ -310,15 +437,64 @@ export default function Keuangan() {
 
               <div className="card-keuangan">
                 <div className="card-head-keuangan">
-                  <h3>Total Komisi dari Tim {filterTahun}</h3>
-                  <span className="chart-total-komisi">{formatRupiah(totalTahun.komisi)}</span>
+                  <h3>Pembayaran ke Tim &amp; Komisi dari Tim {filterTahun}</h3>
+                  <span className="chart-total-pair">
+                    <span className="chart-total-tim">{formatRupiah(totalPengeluaranTahun.pembayaranTim)}</span>
+                    {' / '}
+                    <span className="chart-total-komisi">{formatRupiah(totalTahun.komisi)}</span>
+                  </span>
                 </div>
                 <MonthlyBarChart
                   months={BULAN_SINGKAT}
-                  values={monthlyStats.map((m) => m.komisi)}
-                  color="var(--bar-komisi)"
-                  format={formatRupiah}
                   mounted={chartsIn}
+                  series={[
+                    { label: 'Bayar ke Tim', values: monthlyPengeluaranStats.map((m) => m.pembayaranTim), color: 'var(--bar-tim)', format: formatRupiah },
+                    { label: 'Komisi dari Tim', values: monthlyStats.map((m) => m.komisi), color: 'var(--bar-komisi)', format: formatRupiah },
+                  ]}
+                />
+              </div>
+            </div>
+
+            {/* Baris 2 -- 2 kartu, DUA-DUANYA gabungan (Vendor, Produk).
+                Potensi nambah kartu Pengeluaran lain ke depan (misal
+                Portofolio) -- taruh di sini juga, di baris 2 atau baris
+                baru menyusul, ngikut grid yang sama. */}
+            <div className="bar-grid-2">
+              <div className="card-keuangan">
+                <div className="card-head-keuangan">
+                  <h3>Pembayaran ke Vendor &amp; Komisi dari Vendor {filterTahun}</h3>
+                  <span className="chart-total-pair">
+                    <span className="chart-total-vendor">{formatRupiah(totalPengeluaranTahun.pembayaranVendor)}</span>
+                    {' / '}
+                    <span className="chart-total-komisi-vendor">{formatRupiah(totalTahun.komisiVendor)}</span>
+                  </span>
+                </div>
+                <MonthlyBarChart
+                  months={BULAN_SINGKAT}
+                  mounted={chartsIn}
+                  series={[
+                    { label: 'Bayar ke Vendor', values: monthlyPengeluaranStats.map((m) => m.pembayaranVendor), color: 'var(--bar-vendor)', format: formatRupiah },
+                    { label: 'Komisi dari Vendor', values: monthlyStats.map((m) => m.komisiVendor), color: 'var(--bar-komisi-vendor)', format: formatRupiah },
+                  ]}
+                />
+              </div>
+
+              <div className="card-keuangan">
+                <div className="card-head-keuangan">
+                  <h3>Belanja Produk &amp; Untung dari Produk {filterTahun}</h3>
+                  <span className="chart-total-pair">
+                    <span className="chart-total-produk">{formatRupiah(totalPengeluaranTahun.belanjaProduk)}</span>
+                    {' / '}
+                    <span className="chart-total-untung-produk">{formatRupiah(totalTahun.untungProduk)}</span>
+                  </span>
+                </div>
+                <MonthlyBarChart
+                  months={BULAN_SINGKAT}
+                  mounted={chartsIn}
+                  series={[
+                    { label: 'Belanja Produk', values: monthlyPengeluaranStats.map((m) => m.belanjaProduk), color: 'var(--bar-produk)', format: formatRupiah },
+                    { label: 'Untung Produk', values: monthlyStats.map((m) => m.untungProduk), color: 'var(--bar-untung-produk)', format: formatRupiah },
+                  ]}
                 />
               </div>
             </div>
@@ -326,39 +502,59 @@ export default function Keuangan() {
             <div className="table-card-finance">
               <table className="keuangan-table">
                 <colgroup>
-                  <col style={{ width: '13%' }} />
                   <col style={{ width: '9%' }} />
+                  <col style={{ width: '6%' }} />
+                  <col style={{ width: '6%' }} />
                   <col style={{ width: '8%' }} />
-                  <col style={{ width: '13%' }} />
-                  <col style={{ width: '11%' }} />
-                  <col style={{ width: '11%' }} />
-                  <col style={{ width: '11%' }} />
-                  <col style={{ width: '14%' }} />
-                  <col style={{ width: '10%' }} />
+                  <col style={{ width: '7%' }} />
+                  <col style={{ width: '7%' }} />
+                  <col style={{ width: '7%' }} />
+                  <col style={{ width: '7%' }} />
+                  <col style={{ width: '7%' }} />
+                  <col style={{ width: '7%' }} />
+                  <col style={{ width: '7%' }} />
+                  <col style={{ width: '7%' }} />
+                  <col style={{ width: '8%' }} />
+                  <col style={{ width: '6%' }} />
                 </colgroup>
                 <thead>
                   <tr>
                     <th>Bulan</th>
                     <th className="right">Booking</th>
                     <th className="right">Klien</th>
-                    <th className="right">Pembayaran</th>
+                    <th className="right">Pembayaran Klien</th>
                     <th className="right">Transport</th>
                     <th className="right">Omzet</th>
-                    <th className="right">Komisi Tim</th>
+                    <th className="right">Bayar ke Tim</th>
+                    <th className="right">Komisi dari Tim</th>
+                    <th className="right">Bayar ke Vendor</th>
+                    <th className="right">Komisi dari Vendor</th>
+                    <th className="right">Belanja Produk</th>
+                    <th className="right">Untung Produk</th>
                     <th className="right">Penghasilan</th>
                     <th className="center">Tren</th>
                   </tr>
                 </thead>
                 <tbody>
                   {monthlyStats.map((m, i) => (
-                    <tr key={m.label} id={`bulan-row-${i}`} className={`${m.booking === 0 ? 'row-empty' : ''}${highlightBulan === i ? ' row-highlight' : ''}`}>
+                    <tr
+                      key={m.label}
+                      id={`bulan-row-${i}`}
+                      className={`${m.booking === 0 ? 'row-empty' : ''}${highlightBulan === i ? ' row-highlight' : ''}${selectedBulan === i ? ' row-selected' : ''}`}
+                      onClick={() => setSelectedBulan((prev) => (prev === i ? null : i))}
+                    >
                       <td className="bulan-cell">{BULAN_PENUH[i]}</td>
                       <td className="right mono">{m.booking}</td>
                       <td className="right mono">{m.klien}</td>
                       <td className="right mono">{formatRupiah(m.belanja)}</td>
                       <td className="right mono">{formatRupiah(m.transport)}</td>
                       <td className="right mono">{formatRupiah(m.omzet)}</td>
+                      <td className="right mono">{formatRupiah(monthlyPengeluaranStats[i].pembayaranTim)}</td>
                       <td className="right mono">{formatRupiah(m.komisi)}</td>
+                      <td className="right mono">{formatRupiah(monthlyPengeluaranStats[i].pembayaranVendor)}</td>
+                      <td className="right mono">{formatRupiah(m.komisiVendor)}</td>
+                      <td className="right mono">{formatRupiah(monthlyPengeluaranStats[i].belanjaProduk)}</td>
+                      <td className="right mono">{formatRupiah(m.untungProduk)}</td>
                       <td className="right mono strong">{formatRupiah(m.penghasilan)}</td>
                       <td className="center">
                         <TrendArrow curr={m.penghasilan} prev={monthlyStats[i - 1]?.penghasilan} isFirst={i === 0} />
@@ -374,7 +570,12 @@ export default function Keuangan() {
                     <td className="right mono">{formatRupiah(totalTahun.belanja)}</td>
                     <td className="right mono">{formatRupiah(totalTahun.transport)}</td>
                     <td className="right mono">{formatRupiah(totalTahun.omzet)}</td>
+                    <td className="right mono">{formatRupiah(totalPengeluaranTahun.pembayaranTim)}</td>
                     <td className="right mono">{formatRupiah(totalTahun.komisi)}</td>
+                    <td className="right mono">{formatRupiah(totalPengeluaranTahun.pembayaranVendor)}</td>
+                    <td className="right mono">{formatRupiah(totalTahun.komisiVendor)}</td>
+                    <td className="right mono">{formatRupiah(totalPengeluaranTahun.belanjaProduk)}</td>
+                    <td className="right mono">{formatRupiah(totalTahun.untungProduk)}</td>
                     <td className="right mono strong">{formatRupiah(totalTahun.penghasilan)}</td>
                     <td></td>
                   </tr>

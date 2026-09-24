@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from 'react'
+import { useId, useLayoutEffect, useRef, useState } from 'react'
 import './TrendChart.css'
 
 const W = 600
@@ -32,16 +32,41 @@ function pathLen(pts) {
 }
 
 // series: [{ label, values: number[], color, format?: (v)=>string }]
-// area: kalau true, series[0] dirender sebagai area terisi (bukan cuma garis)
+// area: false = nggak ada area sama sekali. true = CUMA series[0] yang
+// diisi gradasi (pola lama, dipakai chart Omzet & Penghasilan -- nggak
+// diubah). 'all' = SEMUA series diisi gradasi, masing-masing pake
+// warnanya sendiri (dipakai chart Tren Pengeluaran).
 export default function TrendChart({ series, months, area = false, mounted }) {
   const [hoverIdx, setHoverIdx] = useState(null)
   const [tooltipLeft, setTooltipLeft] = useState(0)
   const svgRef = useRef(null)
   const tooltipRef = useRef(null)
+  // id gradient di-generate UNIK per instance komponen (bukan hardcode
+  // "trendAreaFill" kayak sebelumnya) -- soalnya bisa ada lebih dari 1
+  // <TrendChart> di halaman yang sama (misal Tren Omzet & Penghasilan +
+  // Tren Pengeluaran sejajar), dan id SVG itu global se-halaman, bukan
+  // ke-scope otomatis per komponen. Id yang nabrak bikin browser salah
+  // ambil gradient dari chart lain.
+  const uid = useId()
 
   const sharedMax = Math.max(...series.flatMap((s) => s.values), 1)
   const seriesPts = series.map((s) => buildPoints(s.values, sharedMax))
   const n = months.length
+  const filledSeries = area === 'all' ? series : (area ? [series[0]] : [])
+  function gradId(i) { return `trendAreaFill-${uid}-${i}` }
+  // Urutan GAMBAR area (bukan urutan asli array `series`, itu tetep
+  // dipakai buat garis/dot/legend) -- digambar dari yang nilai
+  // MAKSIMALNYA paling BESAR duluan (lapisan paling bawah), yang paling
+  // KECIL belakangan (lapisan paling atas). SVG numpuk elemen yang
+  // digambar belakangan di atas -- kalau urutannya ngikutin array apa
+  // adanya, area yang nilainya lebih gede bisa nutupin total area yang
+  // lebih kecil (soalnya smua area digambar dari garis sampai ke dasar
+  // chart, jadi yang gede otomatis "ngelingkupin" yang kecil). Diurutin
+  // gini biar warna yang nilainya lebih kecil SELALU keliatan nongol di
+  // lapisan atas, apapun urutan series yang dikirim parent.
+  const fillOrder = filledSeries
+    .map((s) => ({ s, idx: area === 'all' ? series.indexOf(s) : 0 }))
+    .sort((a, b) => Math.max(...b.s.values, 0) - Math.max(...a.s.values, 0))
 
   function handleMove(e) {
     const rect = svgRef.current.getBoundingClientRect()
@@ -83,24 +108,27 @@ export default function TrendChart({ series, months, area = false, mounted }) {
         onMouseMove={handleMove}
         onMouseLeave={() => setHoverIdx(null)}
       >
-        {area && (
+        {fillOrder.length > 0 && (
           <defs>
-            <linearGradient id="trendAreaFill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="70%" stopColor={series[0].color} stopOpacity="0.4" />
-              <stop offset="100%" stopColor={series[0].color} stopOpacity="0.02" />
-            </linearGradient>
+            {fillOrder.map(({ s, idx }) => (
+              <linearGradient key={s.label} id={gradId(idx)} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="70%" stopColor={s.color} stopOpacity="0.4" />
+                <stop offset="100%" stopColor={s.color} stopOpacity="0.02" />
+              </linearGradient>
+            ))}
           </defs>
         )}
 
-        {area && (
+        {fillOrder.map(({ s, idx }) => (
           <path
-            d={toAreaPath(seriesPts[0])}
-            fill="url(#trendAreaFill)"
+            key={s.label}
+            d={toAreaPath(seriesPts[idx])}
+            fill={`url(#${gradId(idx)})`}
             stroke="none"
             className="trendchart-area"
             style={{ opacity: mounted ? 1 : 0 }}
           />
-        )}
+        ))}
 
         {series.map((s, si) => {
           const pts = seriesPts[si]
