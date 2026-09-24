@@ -801,11 +801,12 @@ export default function BookingModal({ onClose, onSaved }) {
                       {/* Jumlah Sesi buat Layanan Tambahan -- TERPISAH
                           dari Jumlah Sesi Makeup di atas. Nggak selalu
                           makeup 2x otomatis berarti hairdo-nya ikut 2x
-                          juga. */}
+                          juga. Disejajarin 1 baris sama Nama Tim (kalau
+                          Tim), biar nggak makan baris sendiri-sendiri. */}
                       {p.layananTambahan !== 'Tidak Ada' && (
                       <div className="field-grid-peserta cols-2">
                         <div className="field">
-                          <label>Jumlah Sesi Layanan Tambahan</label>
+                          <label>Jumlah Sesi</label>
                           <input
                             type="text"
                             inputMode="numeric"
@@ -818,14 +819,12 @@ export default function BookingModal({ onClose, onSaved }) {
                             onBlur={(e) => { if (!e.target.value) updatePeserta(i, 'jumlahSesiTambahan', 1) }}
                           />
                         </div>
-                      </div>
-                      )}
-                      {p.layananTambahan !== 'Tidak Ada' && p.dikerjakanOlehTambahan === 'Tim' && (
-                      <div className="field-grid-peserta cols-2">
-                        <div className="field" style={{ gridColumn: 2 }}>
+                        {p.dikerjakanOlehTambahan === 'Tim' && (
+                        <div className="field">
                           <label>Nama Tim</label>
                           <input type="text" placeholder="contoh: hairdobycarmen" value={p.namaTimTambahan} onChange={(e) => updatePeserta(i, 'namaTimTambahan', e.target.value)} />
                         </div>
+                        )}
                       </div>
                       )}
 
