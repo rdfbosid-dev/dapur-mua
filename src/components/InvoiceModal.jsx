@@ -85,7 +85,12 @@ function InvoicePaper({ profile, booking, peserta, payments, bundlingItems = [],
         </thead>
         <tbody>
           {peserta.flatMap((p) => {
-            const labelMakeup = ['Makeup', p.jenis_paket || p.kategori_makeup, p.dikerjakan_oleh_makeup === 'Tim' ? '(Tim)' : ''].filter(Boolean).join(' ')
+            // Jumlah Sesi -- berapa kali klien yang SAMA di-makeup di
+            // booking yang sama (misal sesi pagi & sore). CUMA
+            // ngefek ke Biaya Makeup & Layanan Tambahan -- Add On &
+            // Paket Bundling TETAP 1x apa adanya.
+            const sesi = Math.max(1, Number(p.jumlah_sesi) || 1)
+            const labelMakeup = ['Makeup', p.jenis_paket || p.kategori_makeup, p.dikerjakan_oleh_makeup === 'Tim' ? '(Tim)' : ''].filter(Boolean).join(' ') + (sesi > 1 ? ` (${sesi}x sesi)` : '')
             // Kalau peserta ini pakai Paket Bundling, klien HARUSNYA cuma
             // liat 1 baris "Paket Bundling <vendor>..." yang udah nyatuin
             // Biaya Makeup + semua vendor level-atas jadi 1 harga paket --
@@ -96,7 +101,7 @@ function InvoicePaper({ profile, booking, peserta, payments, bundlingItems = [],
               : []
             const rows = []
             if (vendorsPeserta.length > 0) {
-              const totalPaket = Number(p.biaya_makeup || 0) + vendorsPeserta.reduce((sum, v) => sum + Number(v.biaya || 0), 0)
+              const totalPaket = Number(p.biaya_makeup || 0) * sesi + vendorsPeserta.reduce((sum, v) => sum + Number(v.biaya || 0), 0)
               const labelVendor = vendorsPeserta.map((v) => v.nama).join(' & ')
               rows.push(
                 <tr key={p.id + '-mkp'}>
@@ -110,7 +115,7 @@ function InvoicePaper({ profile, booking, peserta, payments, bundlingItems = [],
                 <tr key={p.id + '-mkp'}>
                   <td>{p.nama_anggota}{p.peran ? ` (${p.peran})` : ''}</td>
                   <td>{labelMakeup}</td>
-                  <td className="right">{formatRupiah(p.biaya_makeup)}</td>
+                  <td className="right">{formatRupiah(Number(p.biaya_makeup) * sesi)}</td>
                 </tr>
               )
             }
@@ -118,8 +123,8 @@ function InvoicePaper({ profile, booking, peserta, payments, bundlingItems = [],
               rows.push(
                 <tr key={p.id + '-tmb'}>
                   <td></td>
-                  <td>{p.layanan_tambahan}{p.dikerjakan_oleh_tambahan === 'Tim' ? ' (Tim)' : ''}</td>
-                  <td className="right">{formatRupiah(p.biaya_tambahan)}</td>
+                  <td>{p.layanan_tambahan}{p.dikerjakan_oleh_tambahan === 'Tim' ? ' (Tim)' : ''}{sesi > 1 ? ` (${sesi}x sesi)` : ''}</td>
+                  <td className="right">{formatRupiah(Number(p.biaya_tambahan) * sesi)}</td>
                 </tr>
               )
             }
