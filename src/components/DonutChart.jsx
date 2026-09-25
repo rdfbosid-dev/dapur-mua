@@ -1,19 +1,18 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import './DonutChart.css'
 
 const R = 54
 const CIRC = 2 * Math.PI * R
 
-export default function DonutChart({ data, colors, centerValue, centerLabel }) {
-  const [mounted, setMounted] = useState(false)
+// `mounted` sekarang WAJIB dioper dari parent (biasanya dari hook
+// useInViewAnimate, pola yang sama kayak TrendChart/MonthlyBarChart) --
+// sebelumnya donut ini nge-trigger animasinya SENDIRI (internal
+// useEffect + requestAnimationFrame) begitu komponennya nempel ke DOM,
+// jadi animasinya cuma jalan SEKALI pas halaman dibuka, nggak ngikutin
+// scroll kayak chart lain.
+export default function DonutChart({ data, colors, centerValue, centerLabel, mounted }) {
   const [hoverIdx, setHoverIdx] = useState(null)
   const ref = useRef(null)
-
-  useEffect(() => {
-    // trigger sesudah render pertama, biar transisi CSS-nya kepicu
-    const t = requestAnimationFrame(() => setMounted(true))
-    return () => cancelAnimationFrame(t)
-  }, [])
 
   const total = data.reduce((s, [, v]) => s + v, 0) || 1
   let cumulative = 0

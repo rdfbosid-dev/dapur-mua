@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import Sidebar from '../components/Sidebar'
 import CustomSelect from '../components/CustomSelect'
 import DonutChart from '../components/DonutChart'
+import { useInViewAnimate } from '../hooks/useInViewAnimate'
 import './Laporan.css'
 
 function formatRupiah(n) {
@@ -70,6 +71,12 @@ export default function Laporan() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [filterTahun, setFilterTahun] = useState(String(new Date().getFullYear()))
+
+  // 1 hook per kartu chart -- pola sama kayak Keuangan.jsx & Dashboard.jsx.
+  const [refDonutEvent, inViewDonutEvent] = useInViewAnimate()
+  const [refDonutPaket, inViewDonutPaket] = useInViewAnimate()
+  const [refDonutSumber, inViewDonutSumber] = useInViewAnimate()
+  const [refTop10Lokasi, inViewTop10Lokasi] = useInViewAnimate()
 
   useEffect(() => {
     async function load() {
@@ -151,12 +158,13 @@ export default function Laporan() {
             ) : (
               <>
                 <div className="grid-4-laporan">
-                  <div className="card">
+                  <div className="card" ref={refDonutEvent}>
                     <div className="card-head"><h3>Event</h3></div>
                     <DonutChart
                       data={eventCounts}
                       colors={eventCounts.map(([label], i) => chartColor(label, i))}
                       centerValue={totalBooking} centerLabel="ORDER"
+                      mounted={inViewDonutEvent}
                     />
                     <div className="legend">
                       {eventCounts.map(([label, count], i) => (
@@ -168,13 +176,14 @@ export default function Laporan() {
                     </div>
                   </div>
 
-                  <div className="card">
+                  <div className="card" ref={refDonutPaket}>
                     <div className="card-head"><h3>Jenis Paket</h3></div>
                     {paketCounts.length === 0 ? <div className="empty-state">Belum ada data</div> : (
                       <>
                         <DonutChart
                           data={paketCounts} colors={paketCounts.map(([label], i) => chartColor(label, i))}
                           centerValue={pesertaTahunIni.length} centerLabel="PESERTA"
+                          mounted={inViewDonutPaket}
                         />
                         <div className="legend">
                           {paketCounts.map(([label, count], i) => (
@@ -188,12 +197,13 @@ export default function Laporan() {
                     )}
                   </div>
 
-                  <div className="card">
+                  <div className="card" ref={refDonutSumber}>
                     <div className="card-head"><h3>Sumber Kanal</h3></div>
                     <DonutChart
                       data={sumberCounts}
                       colors={sumberCounts.map(([label], i) => sumberColor(label, i))}
                       centerValue={totalBooking} centerLabel="ORDER"
+                      mounted={inViewDonutSumber}
                     />
                     <div className="legend">
                       {sumberCounts.map(([label, count], i) => (
@@ -205,7 +215,7 @@ export default function Laporan() {
                     </div>
                   </div>
 
-                  <div className="card">
+                  <div className="card" ref={refTop10Lokasi}>
                     <div className="card-head"><h3>Top 10 Lokasi</h3></div>
                     {lokasiCounts.length === 0 ? (
                       <div className="empty-state">Belum ada data</div>
@@ -216,7 +226,10 @@ export default function Laporan() {
                           <div className="bar-track">
                             <div
                               className="bar-fill"
-                              style={{ width: `${(count / lokasiCounts[0][1]) * 100}%` }}
+                              style={{
+                                width: inViewTop10Lokasi ? `${(count / lokasiCounts[0][1]) * 100}%` : '0%',
+                                transitionDelay: `${i * 0.08}s`,
+                              }}
                             ></div>
                           </div>
                         </div>

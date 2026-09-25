@@ -6,6 +6,7 @@ import Sidebar from '../components/Sidebar'
 import CustomSelect from '../components/CustomSelect'
 import TrendChart from '../components/TrendChart'
 import MonthlyBarChart from '../components/MonthlyBarChart'
+import { useInViewAnimate } from '../hooks/useInViewAnimate'
 import { useAuth } from '../context/AuthContext'
 import './Keuangan.css'
 
@@ -59,7 +60,6 @@ export default function Keuangan() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [filterTahun, setFilterTahun] = useState(String(new Date().getFullYear()))
-  const [chartsIn, setChartsIn] = useState(false)
   const [highlightBulan, setHighlightBulan] = useState(null)
   // Baris yang diklik-tandain user (BEDA sama highlightBulan di atas --
   // itu highlight OTOMATIS yang muncul-lalu-fade dari notifikasi/link,
@@ -98,16 +98,9 @@ export default function Keuangan() {
       if (!pesertaRes.error) setPesertaAll(pesertaRes.data || [])
       if (!bundlingRes.error) setBundlingAll(bundlingRes.data || [])
       setLoading(false)
-      setChartsIn(false)
-      requestAnimationFrame(() => requestAnimationFrame(() => setChartsIn(true)))
     }
     load()
   }, [])
-
-  useEffect(() => {
-    setChartsIn(false)
-    requestAnimationFrame(() => requestAnimationFrame(() => setChartsIn(true)))
-  }, [filterTahun])
 
   const tahunOptions = useMemo(() => {
     const years = new Set(bookings.map((b) => new Date(b.tanggal_acara).getFullYear()))
@@ -212,6 +205,21 @@ export default function Keuangan() {
     belanjaProduk: acc.belanjaProduk + m.belanjaProduk,
     pembayaranVendor: acc.pembayaranVendor + m.pembayaranVendor,
   }), { pembayaranTim: 0, belanjaProduk: 0, pembayaranVendor: 0 })
+
+  // 1 hook per kartu chart -- masing-masing punya ref & status "lagi
+  // kelihatan di layar apa nggak" SENDIRI-SENDIRI (lewat
+  // IntersectionObserver), BUKAN 1 status global (chartsIn) yang dulu
+  // cuma jalan sekali pas halaman kebuka. Efeknya: animasi chart jalan
+  // tiap kali kartunya di-scroll masuk viewport -- termasuk kartu yang
+  // posisinya di bawah (belum kelihatan pas halaman baru dibuka), dan
+  // animasinya jalan ULANG tiap discroll keluar-masuk viewport lagi.
+  const [refTrenPenghasilan, inViewTrenPenghasilan] = useInViewAnimate()
+  const [refTrenPengeluaran, inViewTrenPengeluaran] = useInViewAnimate()
+  const [refBarPembayaran, inViewBarPembayaran] = useInViewAnimate()
+  const [refBarTransport, inViewBarTransport] = useInViewAnimate()
+  const [refBarTim, inViewBarTim] = useInViewAnimate()
+  const [refBarVendor, inViewBarVendor] = useInViewAnimate()
+  const [refBarProduk, inViewBarProduk] = useInViewAnimate()
 
   // Begitu data kelar dimuat DAN tahunnya udah sesuai target dari notif,
   // baru scroll ke baris bulan yang dimaksud + nyalain highlight sebentar
@@ -360,14 +368,15 @@ export default function Keuangan() {
         {!loading && !error && (
           <>
             <div className="tren-grid">
-              <div className="card-keuangan">
+              <div className="card-keuangan" ref={refTrenPenghasilan}>
                 <div className="card-head-keuangan"><h3>Tren Penghasilan {filterTahun}</h3></div>
                 {!adaData ? (
                   <div className="empty-state">Belum ada data di tahun ini.</div>
                 ) : (
                   <TrendChart
+                    key={filterTahun}
                     months={BULAN_SINGKAT}
-                    mounted={chartsIn}
+                    mounted={inViewTrenPenghasilan}
                     area="all"
                     series={[
                       { label: 'Penghasilan', values: monthlyStats.map((m) => m.penghasilan), color: '#6eb4ce', format: formatRupiah },
@@ -385,14 +394,15 @@ export default function Keuangan() {
                   dari Pengeluaran, kalau digabung 1 chart garis
                   Pengeluaran bakal keliatan rata/nempel ke bawah,
                   susah dibaca. */}
-              <div className="card-keuangan">
+              <div className="card-keuangan" ref={refTrenPengeluaran}>
                 <div className="card-head-keuangan"><h3>Tren Pengeluaran {filterTahun}</h3></div>
                 {!adaDataPengeluaran ? (
                   <div className="empty-state">Belum ada data pengeluaran di tahun ini.</div>
                 ) : (
                   <TrendChart
+                    key={filterTahun}
                     months={BULAN_SINGKAT}
-                    mounted={chartsIn}
+                    mounted={inViewTrenPengeluaran}
                     area="all"
                     series={[
                       { label: 'Pengeluaran', values: monthlyPengeluaranStats.map((m) => m.belanjaProduk + m.pembayaranVendor), color: '#b79ae0', format: formatRupiah },
@@ -407,35 +417,37 @@ export default function Keuangan() {
                 Komisi dari Tim jadi 1 chart, 2 bar sejajar per bulan)
                 -- pakai prop `series` yang baru di MonthlyBarChart. */}
             <div className="bar-grid">
-              <div className="card-keuangan">
+              <div className="card-keuangan" ref={refBarPembayaran}>
                 <div className="card-head-keuangan">
                   <h3>Total Pembayaran Klien {filterTahun}</h3>
                   <span className="chart-total-belanja">{formatRupiah(totalTahun.belanja)}</span>
                 </div>
                 <MonthlyBarChart
+                  key={filterTahun}
                   months={BULAN_SINGKAT}
                   values={monthlyStats.map((m) => m.belanja)}
                   color="var(--bar-belanja)"
                   format={formatRupiah}
-                  mounted={chartsIn}
+                  mounted={inViewBarPembayaran}
                 />
               </div>
 
-              <div className="card-keuangan">
+              <div className="card-keuangan" ref={refBarTransport}>
                 <div className="card-head-keuangan">
                   <h3>Total Biaya Transport dari Klien {filterTahun}</h3>
                   <span className="chart-total-transport">{formatRupiah(totalTahun.transport)}</span>
                 </div>
                 <MonthlyBarChart
+                  key={filterTahun}
                   months={BULAN_SINGKAT}
                   values={monthlyStats.map((m) => m.transport)}
                   color="var(--bar-transport)"
                   format={formatRupiah}
-                  mounted={chartsIn}
+                  mounted={inViewBarTransport}
                 />
               </div>
 
-              <div className="card-keuangan">
+              <div className="card-keuangan" ref={refBarTim}>
                 <div className="card-head-keuangan">
                   <h3>Pembayaran ke Tim &amp; Komisi dari Tim {filterTahun}</h3>
                   <span className="chart-total-pair">
@@ -445,8 +457,9 @@ export default function Keuangan() {
                   </span>
                 </div>
                 <MonthlyBarChart
+                  key={filterTahun}
                   months={BULAN_SINGKAT}
-                  mounted={chartsIn}
+                  mounted={inViewBarTim}
                   series={[
                     { label: 'Bayar ke Tim', values: monthlyPengeluaranStats.map((m) => m.pembayaranTim), color: 'var(--bar-tim)', format: formatRupiah },
                     { label: 'Komisi dari Tim', values: monthlyStats.map((m) => m.komisi), color: 'var(--bar-komisi)', format: formatRupiah },
@@ -460,7 +473,7 @@ export default function Keuangan() {
                 Portofolio) -- taruh di sini juga, di baris 2 atau baris
                 baru menyusul, ngikut grid yang sama. */}
             <div className="bar-grid-2">
-              <div className="card-keuangan">
+              <div className="card-keuangan" ref={refBarVendor}>
                 <div className="card-head-keuangan">
                   <h3>Pembayaran ke Vendor &amp; Komisi dari Vendor {filterTahun}</h3>
                   <span className="chart-total-pair">
@@ -470,8 +483,9 @@ export default function Keuangan() {
                   </span>
                 </div>
                 <MonthlyBarChart
+                  key={filterTahun}
                   months={BULAN_SINGKAT}
-                  mounted={chartsIn}
+                  mounted={inViewBarVendor}
                   series={[
                     { label: 'Bayar ke Vendor', values: monthlyPengeluaranStats.map((m) => m.pembayaranVendor), color: 'var(--bar-vendor)', format: formatRupiah },
                     { label: 'Komisi dari Vendor', values: monthlyStats.map((m) => m.komisiVendor), color: 'var(--bar-komisi-vendor)', format: formatRupiah },
@@ -479,7 +493,7 @@ export default function Keuangan() {
                 />
               </div>
 
-              <div className="card-keuangan">
+              <div className="card-keuangan" ref={refBarProduk}>
                 <div className="card-head-keuangan">
                   <h3>Belanja Produk &amp; Untung dari Produk {filterTahun}</h3>
                   <span className="chart-total-pair">
@@ -489,8 +503,9 @@ export default function Keuangan() {
                   </span>
                 </div>
                 <MonthlyBarChart
+                  key={filterTahun}
                   months={BULAN_SINGKAT}
-                  mounted={chartsIn}
+                  mounted={inViewBarProduk}
                   series={[
                     { label: 'Belanja Produk', values: monthlyPengeluaranStats.map((m) => m.belanjaProduk), color: 'var(--bar-produk)', format: formatRupiah },
                     { label: 'Untung Produk', values: monthlyStats.map((m) => m.untungProduk), color: 'var(--bar-untung-produk)', format: formatRupiah },

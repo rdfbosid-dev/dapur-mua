@@ -9,6 +9,7 @@ import BookingDetailModal from '../components/BookingDetailModal'
 import OnboardingModal from '../components/OnboardingModal'
 import DonutChart from '../components/DonutChart'
 import TrendChart from '../components/TrendChart'
+import { useInViewAnimate } from '../hooks/useInViewAnimate'
 import './Dashboard.css'
 
 function formatRupiah(n) {
@@ -61,7 +62,6 @@ export default function Dashboard() {
   const isDark = theme === 'dark'
   const [bookings, setBookings] = useState([])
   const [loading, setLoading] = useState(true)
-  const [chartsIn, setChartsIn] = useState(false)
   const [error, setError] = useState('')
   const [showModal, setShowModal] = useState(false)
   const [showOnboarding, setShowOnboarding] = useState(false)
@@ -94,8 +94,6 @@ export default function Dashboard() {
       }
     }
     setLoading(false)
-    setChartsIn(false)
-    requestAnimationFrame(() => requestAnimationFrame(() => setChartsIn(true)))
   }
 
   function dismissOnboarding() {
@@ -287,8 +285,18 @@ export default function Dashboard() {
   // Warna garis tren dibedain per tema -- versi terang butuh warna gelap
   // biar kebaca di atas kartu putih, versi dark butuh warna cerah biar
   // nggak "ilang" ketelen background gelap.
-  const trendColorA = isDark ? '#b79ae0' : '#b79ae0'
-  const trendColorB = isDark ? '#6eb4ceff' : '#6eb4ceff'
+  const trendColorA = isDark ? '#6eb4ceff' : '#3d4a9a'
+  const trendColorB = isDark ? '#F5C368' : '#E7A33D'
+
+  // 1 hook per kartu chart -- masing-masing punya ref & status "lagi
+  // kelihatan di layar apa nggak" SENDIRI-SENDIRI (IntersectionObserver),
+  // pola yang sama kayak di halaman Keuangan. Animasi jalan tiap kartu
+  // di-scroll masuk viewport, jalan ULANG tiap keluar-masuk lagi.
+  const [refTrenBookingKlien, inViewTrenBookingKlien] = useInViewAnimate()
+  const [refTrenOmzetPenghasilan, inViewTrenOmzetPenghasilan] = useInViewAnimate()
+  const [refDonutEvent, inViewDonutEvent] = useInViewAnimate()
+  const [refDonutSumber, inViewDonutSumber] = useInViewAnimate()
+  const [refTop5Lokasi, inViewTop5Lokasi] = useInViewAnimate()
 
   const SUMBER_BRAND_COLORS = {
     Instagram: '#C13584',
@@ -574,7 +582,7 @@ export default function Dashboard() {
             </div>
 
             <div className="grid-2">
-              <div className="card-dashboard">
+              <div className="card-dashboard" ref={refTrenBookingKlien}>
                 <div className="card-dashboard-head">
                   <h3>Tren Booking &amp; Klien</h3>
                   <span className="chart-tag">{curYear}</span>
@@ -584,7 +592,7 @@ export default function Dashboard() {
                 ) : (
                   <TrendChart
                     months={BULAN_SINGKAT}
-                    mounted={chartsIn}
+                    mounted={inViewTrenBookingKlien}
                     area="all"
                     series={[
                       { label: 'Booking', values: monthlyStats.map((m) => m.booking), color: trendColorA },
@@ -594,7 +602,7 @@ export default function Dashboard() {
                 )}
               </div>
 
-              <div className="card-dashboard">
+              <div className="card-dashboard" ref={refTrenOmzetPenghasilan}>
                 <div className="card-dashboard-head">
                   <h3>Tren Omzet &amp; Penghasilan</h3>
                   <span className="chart-tag">{curYear}</span>
@@ -604,7 +612,7 @@ export default function Dashboard() {
                 ) : (
                   <TrendChart
                     months={BULAN_SINGKAT}
-                    mounted={chartsIn}
+                    mounted={inViewTrenOmzetPenghasilan}
                     area="all"
                     series={[
                       { label: 'Omzet', values: monthlyStats.map((m) => m.omzet), color: trendColorA, format: formatRupiah },
@@ -616,7 +624,7 @@ export default function Dashboard() {
             </div>
 
             <div className="grid-3">
-              <div className="card-dashboard">
+              <div className="card-dashboard" ref={refDonutEvent}>
                 <div className="card-dashboard-head"><h3>Event</h3><span className="chart-tag">{namaBulanIni}</span></div>
                 {eventCounts.length === 0 ? (
                   <div className="empty-state">Belum ada data</div>
@@ -627,6 +635,7 @@ export default function Dashboard() {
                       colors={eventCounts.map(([label], i) => chartColor(label, i))}
                       centerValue={bookingBulanIni.length}
                       centerLabel="ORDER"
+                      mounted={inViewDonutEvent}
                     />
                     <div className="legend">
                       {eventCounts.map(([label, count], i) => (
@@ -640,7 +649,7 @@ export default function Dashboard() {
                 )}
               </div>
 
-              <div className="card-dashboard">
+              <div className="card-dashboard" ref={refDonutSumber}>
                 <div className="card-dashboard-head"><h3>Sumber Booking</h3><span className="chart-tag">{namaBulanIni}</span></div>
                 {sumberCounts.length === 0 ? (
                   <div className="empty-state">Belum ada data</div>
@@ -651,6 +660,7 @@ export default function Dashboard() {
                       colors={sumberCounts.map(([label], i) => sumberColor(label, i))}
                       centerValue={`${Math.round((sumberCounts[0][1] / bookingBulanIni.length) * 100)}%`}
                       centerLabel={sumberCounts[0][0].slice(0, 10).toUpperCase()}
+                      mounted={inViewDonutSumber}
                     />
                     <div className="legend">
                       {sumberCounts.map(([label, count], i) => (
@@ -664,7 +674,7 @@ export default function Dashboard() {
                 )}
               </div>
 
-              <div className="card-dashboard">
+              <div className="card-dashboard" ref={refTop5Lokasi}>
                 <div className="card-dashboard-head"><h3>Top 5 Lokasi</h3><span className="chart-tag">{namaBulanIni}</span></div>
                 {lokasiCounts.length === 0 ? (
                   <div className="empty-state">Belum ada data</div>
@@ -676,7 +686,7 @@ export default function Dashboard() {
                         <div
                           className="bar-fill"
                           style={{
-                            width: chartsIn ? `${(count / lokasiCounts[0][1]) * 100}%` : '0%',
+                            width: inViewTop5Lokasi ? `${(count / lokasiCounts[0][1]) * 100}%` : '0%',
                             transitionDelay: `${i * 0.08}s`,
                           }}
                         ></div>
