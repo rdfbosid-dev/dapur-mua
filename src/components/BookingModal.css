@@ -5,257 +5,257 @@
    nama sama. Kalau nambah class baru di komponen ini, taruh juga di bawah
    .booking-modal-overlay biar konsisten. */
 
-.booking-modal-overlay {
-  position: fixed; inset: 0; background: rgb(36, 55, 62, 0.45);
-  display: flex; align-items: center; justify-content: center; padding: 24px;
-  /* z-index 95, BUKAN 50 kayak sebelumnya -- .mobile-topbar (Sidebar.css)
-     punya z-index:90, jadi modal ini WAJIB lebih tinggi dari itu biar
-     nggak ketiban/ketutupan sama header app yang sticky. Sebelumnya
-     nggak kerasa masalahnya di Android (modal ngepas nggak numpang ke
-     area topbar), tapi di iPhone (viewport-fit=cover bikin tinggi layar
-     ke-hitung beda) modal-nya nyenggol area topbar -- karena z-index
-     kalah, bagian atas modal (judulnya) ketutup topbar. */
-  z-index: 95;
-  -webkit-text-size-adjust: 100%; text-size-adjust: 100%;
-}
-.booking-modal-overlay .modal {
-  background: var(--table-body); border-radius: 24px; width: 100%; max-width: 600px;
-  max-height: 88vh; display: flex; flex-direction: column; overflow: hidden;
-  box-shadow: 0 24px 60px -12px var(--shadow-modal);
-}
-.booking-modal-overlay .modal-head {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 16px 16px; flex-shrink: 0;
-}
-
-.booking-modal-overlay .modal-head h2 {
-  font-size: 18px;
-  position: relative;
-  padding-bottom: 5px;
-  color: var(--ink-soft);
-}
-
-.booking-modal-overlay .modal-head h2::after {
-  content: '';
-  position: absolute;
-  left: 0; right: 0; bottom: 0;
-  height: 4px;
-  border-radius: 2px;
-  background: var(--line-animation);
-}
-
-.booking-modal-overlay .modal-close {
-  width: 32px; height: 32px; border-radius: 10px; border: none; background: color-mix(in srgb, var(--h3) 20%, transparent);
-  color: var(--h3); font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center;
-  transition: background 0.15s;
-}
-.booking-modal-overlay .modal-close:hover { background: color-mix(in srgb, var(--h3) 50%, transparent); color: var(--h3); }
-.booking-modal-overlay .modal-body {
-  padding: 5px 16px; overflow-y: auto; flex: 1;
-  /* -webkit-overflow-scrolling:touch -- ini fix buat bug lama iOS
-     Safari/WebKit: overflow-y:auto di elemen flex bersarang kayak ini
-     kadang nggak keisolasi bener scroll-nya, jadi pas user scroll
-     form, yang ke-scroll malah SELURUH modal (termasuk .modal-head
-     yang harusnya nempel via flex-shrink:0), bukan cuma modal-body-nya
-     doang -- gejalanya: judul "Booking Baru" ketutupan/ke-scroll ke
-     atas ilang. Property ini maksa iOS ngasih layer scroll sendiri
-     yang bener-bener terisolasi ke elemen ini. Nggak ngaruh apa-apa
-     di Android/Chrome (aman diabaikan browser yang nggak butuh). */
-  -webkit-overflow-scrolling: touch;
-}
-
-.booking-modal-overlay .section-label {
-  font-size: 12px; font-weight: 700; letter-spacing: 0.06em;
-  color: var(--ink-soft); margin: 10px 0;
-  position: relative;
-  padding-bottom: 5px;
-  display: inline-block;
-}
-
-.booking-modal-overlay .field-grid-booking { display: grid; gap: 8px; margin-bottom: 5px; }
-
-.booking-modal-overlay .field-grid-booking.cols-tanggal-nama-wa { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.3fr) minmax(0, 0.8fr); }
-.booking-modal-overlay .field-grid-booking.cols-tanggal-jam-event { grid-template-columns: minmax(0, 0.9fr) minmax(0, 0.6fr) minmax(0, 1.5fr); }
-.booking-modal-overlay .field-grid-booking.cols-lokasi-sumber { grid-template-columns: 2fr 1fr; }
-.booking-modal-overlay .field-grid-booking.cols-transport-dp-metode { grid-template-columns: 1fr 1fr 1fr; }
-.booking-modal-overlay .field-grid-booking.cols-catatan { grid-template-columns: 1fr; }
-.booking-modal-overlay .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 5px; }
-.booking-modal-overlay .field label { font-size: 12px; font-weight: 600; color: var(--ink-soft); padding: 5px 0; }
-.booking-modal-overlay .field-label-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 6px; }
-.booking-modal-overlay .quickfill-btn {
-  font-size: 10px; font-weight: 500; color: var(--h1); background: var(--ink-faint);
-  border: none; border-radius: 5px; padding: 4px 6px; cursor: pointer; transition: background 0.15s;
-  /* align-self:flex-start -- .field itu flex-column, default-nya SEMUA
-     anak (label/input/tombol) stretch ngikutin lebar penuh container.
-     Itu pas buat input, tapi bukan buat tombol kecil kayak gini --
-     override biar cuma selebar teksnya sendiri, nempel rata kiri. */
-  align-self: flex-start; margin-top: 2px;
-}
-.booking-modal-overlay .quickfill-btn:hover { background: color-mix(in srgb, var(--ink-faint) 50%, transparent); }
-.booking-modal-overlay .field input,
-.booking-modal-overlay .field select,
-.booking-modal-overlay .field textarea {
-  border: 1.5px solid color-mix(in srgb, var(--button-border) 70%, transparent); border-radius: 11px; padding: 10px 10px;
-  font-size: 12px; font-family: inherit; color: var(--ink-soft); background: var(--field);
-  height: 40px;
-}
-.booking-modal-overlay .field textarea { height: auto; }
-.booking-modal-overlay .field input::placeholder,
-.booking-modal-overlay .field textarea::placeholder {
-  color: var(--placeholder);
-  opacity: 1;
-}
-.booking-modal-overlay .field input:focus,
-.booking-modal-overlay .field select:focus,
-.booking-modal-overlay .field textarea:focus {
-  outline: none; border-color: var(--h3); box-shadow: 0 0 0 3px color-mix(in srgb, var(--h3) 18%, transparent);
-}
-.booking-modal-overlay .field textarea { resize: vertical; min-height: 56px; }
-.booking-modal-overlay .cselect-trigger { height: 40px; }
-
-/* Dropdown suggestion "klien lama" pas ngetik di field Nama Klien --
-   sengaja dibikin sendiri (custom), BUKAN autofill bawaan browser (field
-   input-nya udah dikasih autoComplete="off"). Ngambang di bawah field
-   pakai position:absolute, wrapper .field induknya WAJIB position:relative
-   (udah di-set inline lewat style={{position:'relative'}} di JSX). */
-.booking-modal-overlay .klien-suggest {
-  position: absolute; top: calc(100% + 8px); left: 0; right: 0; z-index: 20;
-  background: var(--field); border: 1px solid var(--line-box);
-  border-radius: 6px; padding: 6px; max-height: 200px; overflow-y: auto;
-  box-shadow: var(--shadow-modal);
-}
-.booking-modal-overlay .klien-suggest-item {
-  display: flex; align-items: baseline; padding: 8px; border-radius: 6px;
-  cursor: pointer; transition: background 0.12s;
-}
-.booking-modal-overlay .klien-suggest-item:hover { background: color-mix(in srgb, var(--h3) 10%, transparent); }
-.booking-modal-overlay .klien-suggest-name { font-size: 12px; font-weight: 500; color: color-mix(in srgb, var(--ink-soft) 80%, transparent); }
-/* ::before nyisipin " - " otomatis SEBELUM nomor WA, jadi hasilnya
-   "Laura Basuki - 089435931745" -- tanpa perlu ubah JSX (yang dua-duanya
-   emang udah dipisah jadi <span> beda dari awal). */
-.booking-modal-overlay .klien-suggest-wa {
-  font-size: 12px; color: color-mix(in srgb, var(--ink-soft) 80%, transparent); font-family: 'Space Mono', monospace; margin-left: 4px;
-}
-.booking-modal-overlay .klien-suggest-wa::before { content: '- '; }
-
-.booking-modal-overlay .peserta-card { background: color-mix(in srgb, var(--button-prm-hover) 60%, transparent); border: none; border-radius: 16px; padding: 10px; margin-bottom: 10px; }
-.booking-modal-overlay .peserta-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-.booking-modal-overlay .peserta-title { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: var(--ink-soft); }
-.booking-modal-overlay .peserta-num {
-  width: 22px; height: 22px; border-radius: 50%; background: var(--h3); color: #fff;
-  display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0;
-}
-.booking-modal-overlay .field-grid-peserta.cols-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 0; }
-.booking-modal-overlay .field-grid-bundling { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-.booking-modal-overlay .addon-remove-row { display: flex; justify-content: flex-end; margin-bottom: 6px; }
-.booking-modal-overlay .peserta-remove {
-  font-size: 12px; font-weight: 550; color: var(--h8); cursor: pointer; background: var(--notif); border: 1px solid var(--notif);
-  padding: 4px 8px; border-radius: 7px; transition: background 0.15s;
-}
-.booking-modal-overlay .peserta-remove:hover { background: color-mix(in srgb, var(--notif) 85%, black); border: 1px solid color-mix(in srgb, var(--notif) 85%, black); color: var(--h8); }
-.booking-modal-overlay .peserta-body { background: var(--table-body); border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
-.booking-modal-overlay .toggle-row { display: flex; gap: 6px; }
-.booking-modal-overlay .toggle-opt {
-  flex: 1; text-align: center; padding: 7px; border-radius: 6px; font-size: 12px; font-weight: 600;
-  background: var(--ink-faint); color: var(--ink-soft); cursor: pointer; border: 1px;
-  transition: background 0.15s, color 0.15s;
-}
-.booking-modal-overlay .toggle-opt:not(.sel):hover { background: color-mix(in srgb, var(--ink-faint) 50%, transparent); color: var(--ink-soft); }
-.booking-modal-overlay .toggle-opt.sel { background: var(--h3); color: #fff; border-color: transparent; }
-
-.booking-modal-overlay .toggle-row-rambut { display: flex; gap: 6px; }
-.booking-modal-overlay .toggle-opt-rambut {
-  flex: 1; text-align: center; padding: 7px 5px; border-radius: 6px; font-size: 12px; font-weight: 600;
-  background: var(--ink-faint); color: var(--ink-soft); cursor: pointer; border: 1px;
-  transition: background 0.15s, color 0.15s;
-}
-.booking-modal-overlay .toggle-opt-rambut:not(.sel):hover { background: color-mix(in srgb, var(--ink-faint) 50%, transparent); color: var(--ink-soft); }
-.booking-modal-overlay .toggle-opt-rambut.sel { background: var(--h3); color: #fff; border-color: transparent; }
-
-.booking-modal-overlay .sb-label { font-size: 11.5px; font-weight: 700; color: var(--ink-soft); margin-bottom: 5px; }
-
-.booking-modal-overlay .add-peserta {
-  text-align: center; padding: 8px; border-radius: 10px;
-  background: var(--button-prm-hover); color: var(--button-tx-hover); border: none; font-size: 12px; font-weight: 600; cursor: pointer; margin-top: 5px;
-  width: 100%; transition: background 0.15s, border-color 0.15s; margin-bottom: 10px;
-}
-.booking-modal-overlay .add-peserta:hover { background: var(--h3); border-color: none; }
-
-.booking-modal-overlay .modal-foot { display: flex; justify-content: flex-end; gap: 10px; padding: 16px 26px; flex-shrink: 0; }
-
-.booking-modal-overlay .btn-primary-booking {
-  padding: 10px 18px; border-radius: 11px; border: 1.5px solid var(--button-prm-hover); background: var(--button-prm-hover);
-  font-size: 13.5px; font-weight: 600; color: var(--button-tx-hover); cursor: pointer; font-family: inherit;
-  transition: background 0.15s, border-color 0.15s;
-}
-.booking-modal-overlay .btn-primary-booking:hover { background: var(--h3); }
-.booking-modal-overlay .btn-ghost {
-  padding: 10px 18px; border-radius: 11px; border: 1.5px solid color-mix(in srgb, var(--button-border) 70%, transparent); background: var(--box-dashboard);
-  font-size: 13.5px; font-weight: 600; color: var(--ink-soft); cursor: pointer; font-family: inherit;
-  transition: background 0.15s, border-color 0.15s;
-}
-.booking-modal-overlay .btn-ghost:hover { background: color-mix(in srgb, var(--button-prm-hover) 50%, transparent); border: 1.5px solid color-mix(in srgb, var(--button-prm-hover) 50%, transparent); }
-.booking-modal-overlay .modal-error { background: var(--pill); color: var(--h8); font-size: 12.5px; padding: 10px 14px; border-radius: 10px; margin-bottom: 10px; }
-
-@media (max-width: 640px) {
-  .booking-modal-overlay { padding: 0; align-items: flex-end; }
-  .booking-modal-overlay .modal { max-width: 100%; max-height: 92vh; border-radius: 22px 22px 0 0; }
-  .booking-modal-overlay .modal-head { padding: 16px 18px; }
-  .booking-modal-overlay .modal-body { padding: 16px 18px; }
-  .booking-modal-overlay .modal-foot { padding: 12px 18px 18px; }
-  /* Susunan field di mobile SENGAJA nggak cuma numpuk 1 kolom polos --
-     tiap grup field diatur beda-beda sesuai kebutuhan barisnya masing-
-     masing (lihat komentar per grup di bawah). */
-
-  /* Baris 1: Tanggal Booking setengah lebar (kolom kiri doang, kolom
-     kanannya sengaja kosong). Baris 2 & 3: Nama Klien & Nomor WhatsApp,
-     masing-masing full-width di barisnya sendiri. */
-  .booking-modal-overlay .field-grid-booking.cols-tanggal-nama-wa { grid-template-columns: 1fr 1fr; }
-  .booking-modal-overlay .field-grid-booking.cols-tanggal-nama-wa > .field:nth-child(1) { grid-column: 1 / 2; }
-  .booking-modal-overlay .field-grid-booking.cols-tanggal-nama-wa > .field:nth-child(2) { grid-column: 1 / -1; }
-.booking-modal-overlay .field-grid-booking.cols-tanggal-nama-wa > .field:nth-child(3) { grid-column: 1 / 2; }
-
-  /* Baris 4: Tanggal Acara & Jam Mulai berbagi 1 baris (2 kolom sama
-     rata). Baris 5: Event full-width sendiri di bawahnya. */
-  .booking-modal-overlay .field-grid-booking.cols-tanggal-jam-event { grid-template-columns: 1fr 1fr; }
-  .booking-modal-overlay .field-grid-booking.cols-tanggal-jam-event > .field:nth-child(3) { grid-column: 1 / -1; }
-
-  /* Baris 6 & 7: Lokasi & Sumber Kanal Booking, masing-masing full-width
-     di barisnya sendiri-sendiri. */
-  .booking-modal-overlay .field-grid-booking.cols-lokasi-sumber { grid-template-columns: 1fr 1fr; }
-  .booking-modal-overlay .field-grid-booking.cols-lokasi-sumber > .field:nth-child(1) { grid-column: 1 / -1; }
-  .booking-modal-overlay .field-grid-booking.cols-lokasi-sumber > .field:nth-child(2) { grid-column: 1 / 2; }
-
-  /* Baris 8: Biaya Transport, DP Masuk, Metode DP -- SENGAJA TETEP 3
-     kolom sebaris (nggak di-collapse), persis konsepnya kayak desktop.
-     Metode DP tetep cuma muncul kondisional pas DP Masuk diisi (logic-nya
-     di JSX, nggak berubah). */
-  .booking-modal-overlay .field-grid-booking.cols-transport-dp-metode { grid-template-columns: minmax(0, 0.95fr) minmax(0, 0.95fr) minmax(0, 1.1fr); }
-
-  /* Baris 9: Catatan -- udah 1fr (full-width) dari sononya, nggak perlu
-     rule tambahan. */
-
-  /* Field pasangan Biaya Makeup+Komisi & Biaya Layanan Tambahan+Komisi
-     SENGAJA nggak di-collapse -- dipertahanin 2 kolom (default desktop-nya),
-     jadi tetep sebaris kayak yang diminta. Nggak ada rule di sini sama
-     sekali buat .field-grid-peserta.cols-2 -- default-nya udah 2 kolom. */
-
-  .booking-modal-overlay .field-grid-peserta.cols-2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; margin-bottom: 0; }
-  .booking-modal-overlay .field-grid-bundling { grid-template-columns: 1fr; gap: 8px; }
-
+   .booking-modal-overlay {
+    position: fixed; inset: 0; background: rgb(36, 55, 62, 0.45);
+    display: flex; align-items: center; justify-content: center; padding: 24px;
+    /* z-index 95, BUKAN 50 kayak sebelumnya -- .mobile-topbar (Sidebar.css)
+       punya z-index:90, jadi modal ini WAJIB lebih tinggi dari itu biar
+       nggak ketiban/ketutupan sama header app yang sticky. Sebelumnya
+       nggak kerasa masalahnya di Android (modal ngepas nggak numpang ke
+       area topbar), tapi di iPhone (viewport-fit=cover bikin tinggi layar
+       ke-hitung beda) modal-nya nyenggol area topbar -- karena z-index
+       kalah, bagian atas modal (judulnya) ketutup topbar. */
+    z-index: 95;
+    -webkit-text-size-adjust: 100%; text-size-adjust: 100%;
+  }
+  .booking-modal-overlay .modal {
+    background: var(--table-body); border-radius: 24px; width: 100%; max-width: 600px;
+    max-height: 88vh; display: flex; flex-direction: column; overflow: hidden;
+    box-shadow: 0 24px 60px -12px var(--shadow-modal);
+  }
+  .booking-modal-overlay .modal-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 16px; flex-shrink: 0;
+  }
+  
+  .booking-modal-overlay .modal-head h2 {
+    font-size: 18px;
+    position: relative;
+    padding-bottom: 5px;
+    color: var(--ink-soft);
+  }
+  
+  .booking-modal-overlay .modal-head h2::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--line-animation);
+  }
+  
+  .booking-modal-overlay .modal-close {
+    width: 32px; height: 32px; border-radius: 10px; border: none; background: color-mix(in srgb, var(--h3) 20%, transparent);
+    color: var(--h3); font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+  }
+  .booking-modal-overlay .modal-close:hover { background: color-mix(in srgb, var(--h3) 50%, transparent); color: var(--h3); }
+  .booking-modal-overlay .modal-body {
+    padding: 5px 16px; overflow-y: auto; flex: 1;
+    /* -webkit-overflow-scrolling:touch -- ini fix buat bug lama iOS
+       Safari/WebKit: overflow-y:auto di elemen flex bersarang kayak ini
+       kadang nggak keisolasi bener scroll-nya, jadi pas user scroll
+       form, yang ke-scroll malah SELURUH modal (termasuk .modal-head
+       yang harusnya nempel via flex-shrink:0), bukan cuma modal-body-nya
+       doang -- gejalanya: judul "Booking Baru" ketutupan/ke-scroll ke
+       atas ilang. Property ini maksa iOS ngasih layer scroll sendiri
+       yang bener-bener terisolasi ke elemen ini. Nggak ngaruh apa-apa
+       di Android/Chrome (aman diabaikan browser yang nggak butuh). */
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .booking-modal-overlay .section-label {
+    font-size: 12px; font-weight: 700; letter-spacing: 0.06em;
+    color: var(--ink-soft); margin: 10px 0;
+    position: relative;
+    padding-bottom: 5px;
+    display: inline-block;
+  }
+  
+  .booking-modal-overlay .field-grid-booking { display: grid; gap: 8px; margin-bottom: 5px; }
+  
+  .booking-modal-overlay .field-grid-booking.cols-tanggal-nama-wa { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.3fr) minmax(0, 0.8fr); }
+  .booking-modal-overlay .field-grid-booking.cols-tanggal-jam-event { grid-template-columns: minmax(0, 0.9fr) minmax(0, 0.6fr) minmax(0, 1.5fr); }
+  .booking-modal-overlay .field-grid-booking.cols-lokasi-sumber { grid-template-columns: 2fr 1fr; }
+  .booking-modal-overlay .field-grid-booking.cols-transport-dp-metode { grid-template-columns: 1fr 1fr 1fr; }
+  .booking-modal-overlay .field-grid-booking.cols-catatan { grid-template-columns: 1fr; }
+  .booking-modal-overlay .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; margin-top: 5px; }
+  .booking-modal-overlay .field label { font-size: 12px; font-weight: 600; color: var(--ink-soft); }
+  .booking-modal-overlay .field-label-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 6px; }
   .booking-modal-overlay .quickfill-btn {
     font-size: 10px; font-weight: 500; color: var(--h1); background: var(--ink-faint);
     border: none; border-radius: 5px; padding: 4px 6px; cursor: pointer; transition: background 0.15s;
+    /* align-self:flex-start -- .field itu flex-column, default-nya SEMUA
+       anak (label/input/tombol) stretch ngikutin lebar penuh container.
+       Itu pas buat input, tapi bukan buat tombol kecil kayak gini --
+       override biar cuma selebar teksnya sendiri, nempel rata kiri. */
     align-self: flex-start; margin-top: 2px;
   }
-  .booking-modal-overlay .toggle-row-rambut { display: flex; gap: 3px; }
-}
-
-/* Garis pembatas antar bagian form peserta -- 3 titik: bawah Jumlah
-   Sesi Makeup, atas Add On Layanan Rambut, atas Add On Item. Polanya
-   numpang .rincian-note-divider di RincianKeuanganModal.css (garis
-   tipis pake token warna button-border), diseragamin di sini. */
-.booking-modal-overlay .form-divider {
-  height: 1px; background: color-mix(in srgb, var(--button-border) 45%, transparent);
-  margin: 8px 0;
-}
+  .booking-modal-overlay .quickfill-btn:hover { background: color-mix(in srgb, var(--ink-faint) 50%, transparent); }
+  .booking-modal-overlay .field input,
+  .booking-modal-overlay .field select,
+  .booking-modal-overlay .field textarea {
+    border: 1.5px solid color-mix(in srgb, var(--button-border) 70%, transparent); border-radius: 11px; padding: 10px 10px;
+    font-size: 12px; font-family: inherit; color: var(--ink-soft); background: var(--field);
+    height: 40px;
+  }
+  .booking-modal-overlay .field textarea { height: auto; }
+  .booking-modal-overlay .field input::placeholder,
+  .booking-modal-overlay .field textarea::placeholder {
+    color: var(--placeholder);
+    opacity: 1;
+  }
+  .booking-modal-overlay .field input:focus,
+  .booking-modal-overlay .field select:focus,
+  .booking-modal-overlay .field textarea:focus {
+    outline: none; border-color: var(--h3); box-shadow: 0 0 0 3px color-mix(in srgb, var(--h3) 18%, transparent);
+  }
+  .booking-modal-overlay .field textarea { resize: vertical; min-height: 56px; }
+  .booking-modal-overlay .cselect-trigger { height: 40px; }
+  
+  /* Dropdown suggestion "klien lama" pas ngetik di field Nama Klien --
+     sengaja dibikin sendiri (custom), BUKAN autofill bawaan browser (field
+     input-nya udah dikasih autoComplete="off"). Ngambang di bawah field
+     pakai position:absolute, wrapper .field induknya WAJIB position:relative
+     (udah di-set inline lewat style={{position:'relative'}} di JSX). */
+  .booking-modal-overlay .klien-suggest {
+    position: absolute; top: calc(100% + 8px); left: 0; right: 0; z-index: 20;
+    background: var(--field); border: 1px solid var(--line-box);
+    border-radius: 6px; padding: 6px; max-height: 200px; overflow-y: auto;
+    box-shadow: var(--shadow-modal);
+  }
+  .booking-modal-overlay .klien-suggest-item {
+    display: flex; align-items: baseline; padding: 8px; border-radius: 6px;
+    cursor: pointer; transition: background 0.12s;
+  }
+  .booking-modal-overlay .klien-suggest-item:hover { background: color-mix(in srgb, var(--h3) 10%, transparent); }
+  .booking-modal-overlay .klien-suggest-name { font-size: 12px; font-weight: 500; color: color-mix(in srgb, var(--ink-soft) 80%, transparent); }
+  /* ::before nyisipin " - " otomatis SEBELUM nomor WA, jadi hasilnya
+     "Laura Basuki - 089435931745" -- tanpa perlu ubah JSX (yang dua-duanya
+     emang udah dipisah jadi <span> beda dari awal). */
+  .booking-modal-overlay .klien-suggest-wa {
+    font-size: 12px; color: color-mix(in srgb, var(--ink-soft) 80%, transparent); font-family: 'Space Mono', monospace; margin-left: 4px;
+  }
+  .booking-modal-overlay .klien-suggest-wa::before { content: '- '; }
+  
+  .booking-modal-overlay .peserta-card { background: color-mix(in srgb, var(--button-prm-hover) 60%, transparent); border: none; border-radius: 16px; padding: 10px; margin-bottom: 10px; }
+  .booking-modal-overlay .peserta-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .booking-modal-overlay .peserta-title { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: var(--ink-soft); }
+  .booking-modal-overlay .peserta-num {
+    width: 22px; height: 22px; border-radius: 50%; background: var(--h3); color: #fff;
+    display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0;
+  }
+  .booking-modal-overlay .field-grid-peserta.cols-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 0; }
+  .booking-modal-overlay .field-grid-bundling { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 0; }
+  .booking-modal-overlay .addon-remove-row { display: flex; justify-content: flex-end; margin-bottom: 5px; margin-top: 10px; }
+  .booking-modal-overlay .peserta-remove {
+    font-size: 12px; font-weight: 550; color: var(--h8); cursor: pointer; background: var(--notif); border: 1px solid var(--notif);
+    padding: 4px 8px; border-radius: 7px; transition: background 0.15s;
+  }
+  .booking-modal-overlay .peserta-remove:hover { background: color-mix(in srgb, var(--notif) 85%, black); border: 1px solid color-mix(in srgb, var(--notif) 85%, black); color: var(--h8); }
+  .booking-modal-overlay .peserta-body { background: var(--table-body); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; }
+  .booking-modal-overlay .toggle-row { display: flex; gap: 6px; }
+  .booking-modal-overlay .toggle-opt {
+    flex: 1; text-align: center; padding: 7px; border-radius: 6px; font-size: 12px; font-weight: 600;
+    background: var(--ink-faint); color: var(--ink-soft); cursor: pointer; border: 1px;
+    transition: background 0.15s, color 0.15s;
+  }
+  .booking-modal-overlay .toggle-opt:not(.sel):hover { background: color-mix(in srgb, var(--ink-faint) 50%, transparent); color: var(--ink-soft); }
+  .booking-modal-overlay .toggle-opt.sel { background: var(--h3); color: #fff; border-color: transparent; }
+  
+  .booking-modal-overlay .toggle-row-rambut { display: flex; gap: 6px; }
+  .booking-modal-overlay .toggle-opt-rambut {
+    flex: 1; text-align: center; padding: 7px 5px; border-radius: 6px; font-size: 12px; font-weight: 600;
+    background: var(--ink-faint); color: var(--ink-soft); cursor: pointer; border: 1px;
+    transition: background 0.15s, color 0.15s;
+  }
+  .booking-modal-overlay .toggle-opt-rambut:not(.sel):hover { background: color-mix(in srgb, var(--ink-faint) 50%, transparent); color: var(--ink-soft); }
+  .booking-modal-overlay .toggle-opt-rambut.sel { background: var(--h3); color: #fff; border-color: transparent; }
+  
+  .booking-modal-overlay .sb-label { font-size: 11.5px; font-weight: 700; color: var(--ink-soft); margin-bottom: 5px; }
+  
+  .booking-modal-overlay .add-peserta {
+    text-align: center; padding: 8px; border-radius: 10px;
+    background: var(--button-prm-hover); color: var(--button-tx-hover); border: none; font-size: 12px; font-weight: 600; cursor: pointer; margin-top: 10px;
+    width: 100%; transition: background 0.15s, border-color 0.15s; margin-bottom: 10px;
+  }
+  .booking-modal-overlay .add-peserta:hover { background: var(--h3); border-color: none; }
+  
+  .booking-modal-overlay .modal-foot { display: flex; justify-content: flex-end; gap: 10px; padding: 16px 26px; flex-shrink: 0; }
+  
+  .booking-modal-overlay .btn-primary-booking {
+    padding: 10px 18px; border-radius: 11px; border: 1.5px solid var(--button-prm-hover); background: var(--button-prm-hover);
+    font-size: 13.5px; font-weight: 600; color: var(--button-tx-hover); cursor: pointer; font-family: inherit;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .booking-modal-overlay .btn-primary-booking:hover { background: var(--h3); }
+  .booking-modal-overlay .btn-ghost {
+    padding: 10px 18px; border-radius: 11px; border: 1.5px solid color-mix(in srgb, var(--button-border) 70%, transparent); background: var(--box-dashboard);
+    font-size: 13.5px; font-weight: 600; color: var(--ink-soft); cursor: pointer; font-family: inherit;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .booking-modal-overlay .btn-ghost:hover { background: color-mix(in srgb, var(--button-prm-hover) 50%, transparent); border: 1.5px solid color-mix(in srgb, var(--button-prm-hover) 50%, transparent); }
+  .booking-modal-overlay .modal-error { background: var(--pill); color: var(--h8); font-size: 12.5px; padding: 10px 14px; border-radius: 10px; margin-bottom: 10px; }
+  
+  @media (max-width: 640px) {
+    .booking-modal-overlay { padding: 0; align-items: flex-end; }
+    .booking-modal-overlay .modal { max-width: 100%; max-height: 92vh; border-radius: 22px 22px 0 0; }
+    .booking-modal-overlay .modal-head { padding: 16px 18px; }
+    .booking-modal-overlay .modal-body { padding: 16px 18px; }
+    .booking-modal-overlay .modal-foot { padding: 12px 18px 18px; }
+    /* Susunan field di mobile SENGAJA nggak cuma numpuk 1 kolom polos --
+       tiap grup field diatur beda-beda sesuai kebutuhan barisnya masing-
+       masing (lihat komentar per grup di bawah). */
+  
+    /* Baris 1: Tanggal Booking setengah lebar (kolom kiri doang, kolom
+       kanannya sengaja kosong). Baris 2 & 3: Nama Klien & Nomor WhatsApp,
+       masing-masing full-width di barisnya sendiri. */
+    .booking-modal-overlay .field-grid-booking.cols-tanggal-nama-wa { grid-template-columns: 1fr 1fr; }
+    .booking-modal-overlay .field-grid-booking.cols-tanggal-nama-wa > .field:nth-child(1) { grid-column: 1 / 2; }
+    .booking-modal-overlay .field-grid-booking.cols-tanggal-nama-wa > .field:nth-child(2) { grid-column: 1 / -1; }
+  .booking-modal-overlay .field-grid-booking.cols-tanggal-nama-wa > .field:nth-child(3) { grid-column: 1 / 2; }
+  
+    /* Baris 4: Tanggal Acara & Jam Mulai berbagi 1 baris (2 kolom sama
+       rata). Baris 5: Event full-width sendiri di bawahnya. */
+    .booking-modal-overlay .field-grid-booking.cols-tanggal-jam-event { grid-template-columns: 1fr 1fr; }
+    .booking-modal-overlay .field-grid-booking.cols-tanggal-jam-event > .field:nth-child(3) { grid-column: 1 / -1; }
+  
+    /* Baris 6 & 7: Lokasi & Sumber Kanal Booking, masing-masing full-width
+       di barisnya sendiri-sendiri. */
+    .booking-modal-overlay .field-grid-booking.cols-lokasi-sumber { grid-template-columns: 1fr 1fr; }
+    .booking-modal-overlay .field-grid-booking.cols-lokasi-sumber > .field:nth-child(1) { grid-column: 1 / -1; }
+    .booking-modal-overlay .field-grid-booking.cols-lokasi-sumber > .field:nth-child(2) { grid-column: 1 / 2; }
+  
+    /* Baris 8: Biaya Transport, DP Masuk, Metode DP -- SENGAJA TETEP 3
+       kolom sebaris (nggak di-collapse), persis konsepnya kayak desktop.
+       Metode DP tetep cuma muncul kondisional pas DP Masuk diisi (logic-nya
+       di JSX, nggak berubah). */
+    .booking-modal-overlay .field-grid-booking.cols-transport-dp-metode { grid-template-columns: minmax(0, 0.95fr) minmax(0, 0.95fr) minmax(0, 1.1fr); }
+  
+    /* Baris 9: Catatan -- udah 1fr (full-width) dari sononya, nggak perlu
+       rule tambahan. */
+  
+    /* Field pasangan Biaya Makeup+Komisi & Biaya Layanan Tambahan+Komisi
+       SENGAJA nggak di-collapse -- dipertahanin 2 kolom (default desktop-nya),
+       jadi tetep sebaris kayak yang diminta. Nggak ada rule di sini sama
+       sekali buat .field-grid-peserta.cols-2 -- default-nya udah 2 kolom. */
+  
+    .booking-modal-overlay .field-grid-peserta.cols-2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; margin-bottom: 0; }
+    .booking-modal-overlay .field-grid-bundling { grid-template-columns: 1fr; gap: 8px; }
+  
+    .booking-modal-overlay .quickfill-btn {
+      font-size: 10px; font-weight: 500; color: var(--h1); background: var(--ink-faint);
+      border: none; border-radius: 5px; padding: 4px 6px; cursor: pointer; transition: background 0.15s;
+      align-self: flex-start; margin-top: 2px;
+    }
+    .booking-modal-overlay .toggle-row-rambut { display: flex; gap: 3px; }
+  }
+  
+  /* Garis pembatas antar bagian form peserta -- 3 titik: bawah Jumlah
+     Sesi Makeup, atas Add On Layanan Rambut, atas Add On Item. Polanya
+     numpang .rincian-note-divider di RincianKeuanganModal.css (garis
+     tipis pake token warna button-border), diseragamin di sini. */
+  .booking-modal-overlay .form-divider {
+    height: 1px; background: color-mix(in srgb, var(--button-border) 45%, transparent);
+    margin: 8px 0;
+  }

@@ -973,7 +973,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                         </div>
                         <div className="field">
                           <label>Jenis Makeup</label>
-                          <input type="text" placeholder="Standar/VIP/Gold/Premium" value={p.jenis_paket || ''} onChange={(e) => updateEditPeserta(i, 'jenis_paket', e.target.value)} />
+                          <input type="text" placeholder="Standar/VIP/Sesuai kebutuhan masing-masing" value={p.jenis_paket || ''} onChange={(e) => updateEditPeserta(i, 'jenis_paket', e.target.value)} />
                         </div>
                       </div>
                       <div className="field-grid-peserta cols-2">

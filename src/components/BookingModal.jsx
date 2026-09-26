@@ -731,7 +731,7 @@ export default function BookingModal({ onClose, onSaved }) {
                         </div>
                         <div className="field">
                           <label>Jenis Makeup</label>
-                          <input type="text" placeholder="Standar/VIP/Gold/Premium" value={p.jenisPaket} onChange={(e) => updatePeserta(i, 'jenisPaket', e.target.value)} />
+                          <input type="text" placeholder="Standar/VIP/Sesuai kebutuhan masing-masing" value={p.jenisPaket} onChange={(e) => updatePeserta(i, 'jenisPaket', e.target.value)} />
                         </div>
                       </div>
 

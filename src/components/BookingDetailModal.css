@@ -205,7 +205,7 @@
    field-nya maksa tetep lebar minimalnya sendiri, nembus keluar
    pembungkusnya. min-width:0 ngebolehin dia nyusut ngikutin kolom
    yang beneran tersedia. */
-.booking-detail-overlay .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; min-width: 0; }
+.booking-detail-overlay .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; margin-top: 5px; min-width: 0; }
 .booking-detail-overlay .field label { font-size: 12px; font-weight: 600; color: var(--ink-soft); margin-bottom: 5px; }
 .booking-detail-overlay .field input,
 .booking-detail-overlay .field select,
@@ -262,7 +262,7 @@
 
 .booking-detail-overlay .add-peserta {
   text-align: center; padding: 8px; border-radius: 10px;
-  background: var(--button-prm-hover); color: var(--button-tx-hover); border: none; font-size: 12px; font-weight: 600; cursor: pointer; margin-top: 5px;
+  background: var(--button-prm-hover); color: var(--button-tx-hover); border: none; font-size: 12px; font-weight: 600; cursor: pointer; margin-top: 10px;
   width: 100%; transition: background 0.15s, border-color 0.15s; margin-bottom: 10px;
 }
 .booking-detail-overlay .add-peserta:hover { background: var(--h3); border-color: none; }
