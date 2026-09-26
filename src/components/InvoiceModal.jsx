@@ -78,7 +78,7 @@ function InvoicePaper({ profile, booking, peserta, payments, bundlingItems = [],
       <table className="inv-table">
         <thead>
           <tr>
-            <th>Peserta</th>
+            <th>Klien</th>
             <th>Layanan/Add On</th>
             <th className="right">Biaya</th>
           </tr>

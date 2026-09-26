@@ -164,7 +164,7 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
     makeupRows.length > 0 && 'Biaya Makeup',
     tambahanRows.length > 0 && 'Biaya Layanan Tambahan',
     retouchRows.length > 0 && 'Biaya Retouch',
-    addOnItems.length > 0 && 'Biaya Add On',
+    addOnItems.length > 0 && 'harga Add On (Beli)',
     sewaRows.length > 0 && 'Biaya Add On (Sewa)',
     bundlingTop.length > 0 && 'Biaya Paket Bundling',
     transport > 0 && 'Biaya Transport',
@@ -377,7 +377,7 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
 
           {(activeCard === 'pengeluaran' ? pengeluaranAddOnRows : addOnItems).length > 0 && (
             <div className="rincian-section">
-              <div className="rincian-section-title">Add On</div>
+              <div className="rincian-section-title">Add On (Beli)</div>
               {(activeCard === 'pengeluaran' ? pengeluaranAddOnRows : addOnItems).map((item, idx) => (
                 <div className="rincian-row" key={idx}>
                   <span>{item.nama}{item.jumlah > 1 ? ` (x${item.jumlah})` : ''}{peserta.length > 1 ? <span className="rincian-metim"> ({item.pesertaNama})</span> : ''}</span>
@@ -448,10 +448,10 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
             <div className="rincian-note-divider"></div>
 
             <div className="rincian-note-title">Penjelasan</div>
-            <div className="rincian-penjelasan"><b>Belanja Klien</b> = total semua yang ditagihkan ke klien dalam sebuah booking. Apapun jenisnya dan siapapun yang mengerjakan. Termasuk seluruh biaya Add On, jika ada.</div>
-            <div className="rincian-penjelasan"><b>Omzet</b> = total pemasukan dalam sebuah booking yang terdiri dari biaya jasa/layanan yang dikerjain sendiri (Me) dihitung penuh, yang dikerjain Tim cuma dihitung komisinya (jika ada), ditambah untung dari Add On, komisi/untung dari Paket Bundling dan Add On Paket Bundling (jika ada), dan biaya transport.</div>
-            <div className="rincian-penjelasan"><b>Penghasilan</b> = bagian yang beneran jadi keuntungan bagi MUA. Sama kayak Omzet, tapi Add On cuma dihitung untungnya (bukan biaya penuh), Paket Bundling dan Add On Paket Bundling cuma dihitung untung/komisinya, dan biaya transport nggak dihitung sama sekali (karena biaya transport itu ongkos, bukan keuntungan).</div>
-            <div className="rincian-penjelasan"><b>Pengeluaran</b> = bagian dari Belanja Klien yang KELUAR LAGI ke tim/vendor luar, bukan masuk kantong MUA. Selisih antara biaya penuh yang ditagih ke klien dan komisi/untung yang di-set user, dari Makeup/Layanan Tambahan yang dikerjain Tim, Add On, Add On (Sewa), dan Paket Bundling.</div>
+            <div className="rincian-penjelasan"><b>Belanja Klien</b> = total semua yang ditagihkan ke klien dalam sebuah booking. Apapun jenisnya dan siapapun yang mengerjakan. Termasuk biaya Retouch, seluruh harga Add On (Beli), biaya Add On (Sewa), dan biaya Paket Bundling, jika ada.</div>
+            <div className="rincian-penjelasan"><b>Omzet</b> = total pemasukan dalam sebuah booking yang terdiri dari biaya jasa/layanan yang dikerjain sendiri (Me) dihitung penuh, yang dikerjain Tim cuma dihitung komisinya (jika ada), ditambah biaya Retouch (selalu penuh), harga penuh dari Add On (Beli), untung dari Add On (Sewa) dan untung dari Paket Bundling (jika ada), dan biaya transport.</div>
+            <div className="rincian-penjelasan"><b>Penghasilan</b> = bagian yang beneran jadi keuntungan bagi MUA. Sama kayak Omzet, tapi Add On (Beli) cuma dihitung untungnya (bukan biaya penuh), Add On (Sewa) dan Paket Bundling cuma dihitung untung/komisinya, biaya Retouch tetap dihitung penuh, dan biaya transport nggak dihitung sama sekali (karena biaya transport itu ongkos, bukan keuntungan).</div>
+            <div className="rincian-penjelasan"><b>Pengeluaran</b> = bagian dari Belanja Klien yang KELUAR LAGI ke tim/vendor luar, bukan masuk kantong MUA. Selisih antara biaya penuh yang ditagih ke klien dan komisi/untung yang di-set user, dari Makeup/Layanan Tambahan yang dikerjain Tim, Add On (Beli), Add On (Sewa), dan Paket Bundling.</div>
           </div>
         </div>
 
