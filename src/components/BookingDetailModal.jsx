@@ -198,7 +198,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
     setNomorWhatsApp(liveBooking.nomor_whatsapp || '')
     setSumber(liveBooking.sumber || 'Instagram')
     setTanggalAcara(liveBooking.tanggal_acara || '')
-    setJamStartMakeup(liveBooking.jam_start_makeup || '')
+    setJamStartMakeup(liveBooking.jam_start_makeup ? liveBooking.jam_start_makeup.slice(0, 5) : '')
     setLokasi(liveBooking.lokasi || '')
     if (EVENT_OPTIONS.includes(liveBooking.event)) {
       setEvent(liveBooking.event)

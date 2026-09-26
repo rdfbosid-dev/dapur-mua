@@ -443,7 +443,11 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
             {activeCard === 'belanja' && <div className="rincian-rumus"><b>Belanja Klien</b> = {rumusBelanja}</div>}
             {activeCard === 'omzet' && <div className="rincian-rumus"><b>Omzet</b> = {rumusOmzet}</div>}
             {activeCard === 'penghasilan' && <div className="rincian-rumus"><b>Penghasilan</b> = {rumusPenghasilan}</div>}
-            {activeCard === 'pengeluaran' && <div className="rincian-rumus"><b>Pengeluaran</b> = {rumusPengeluaran}</div>}
+            {activeCard === 'pengeluaran' && (
+              rumusPengeluaran
+                ? <div className="rincian-rumus"><b>Pengeluaran</b> = {rumusPengeluaran}</div>
+                : <div className="rincian-rumus"><b>Pengeluaran</b> = Rp0 (semua dikerjain sendiri/Me, nggak ada Tim/vendor luar yang dibayar)</div>
+            )}
 
             <div className="rincian-note-divider"></div>
 
