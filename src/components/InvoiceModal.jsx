@@ -121,6 +121,15 @@ function InvoicePaper({ profile, booking, peserta, payments, bundlingItems = [],
                 </tr>
               )
             }
+            if (p.retouch) {
+              rows.push(
+                <tr key={p.id + '-rtc'}>
+                  <td></td>
+                  <td>Retouch</td>
+                  <td className="right">{formatRupiah(p.biaya_retouch)}</td>
+                </tr>
+              )
+            }
             if (p.layanan_tambahan !== 'Tidak Ada') {
               rows.push(
                 <tr key={p.id + '-tmb'}>
@@ -149,23 +158,51 @@ function InvoicePaper({ profile, booking, peserta, payments, bundlingItems = [],
                 )
               })
             })
+            // Add On Item (Sewa) -- nongol di sini (setelah Layanan
+            // Tambahan/vendor, sebelum Add On Item biasa), ngikutin
+            // urutan yang sama kayak di form booking.
+            if (p.nama_sewa) {
+              const jumlahSewa1 = Math.max(1, Number(p.jumlah_sewa) || 1)
+              rows.push(
+                <tr key={p.id + '-sewa'}>
+                  <td></td>
+                  <td>{p.nama_sewa}{jumlahSewa1 > 1 ? ` (x${jumlahSewa1})` : ''}</td>
+                  <td className="right">{formatRupiah(Number(p.biaya_sewa) * jumlahSewa1)}</td>
+                </tr>
+              )
+            }
+            for (let n = 2; n <= 5; n++) {
+              const namaSewaN = p[`nama_sewa_${n}`]
+              if (namaSewaN) {
+                const jumlahSewaN = Math.max(1, Number(p[`jumlah_sewa_${n}`]) || 1)
+                rows.push(
+                  <tr key={p.id + '-sewa' + n}>
+                    <td></td>
+                    <td>{namaSewaN}{jumlahSewaN > 1 ? ` (x${jumlahSewaN})` : ''}</td>
+                    <td className="right">{formatRupiah(Number(p[`biaya_sewa_${n}`]) * jumlahSewaN)}</td>
+                  </tr>
+                )
+              }
+            }
             if (p.layanan_lainnya) {
+              const jumlah1 = Math.max(1, Number(p.jumlah_lainnya) || 1)
               rows.push(
                 <tr key={p.id + '-lain'}>
                   <td></td>
-                  <td>{p.layanan_lainnya}</td>
-                  <td className="right">{formatRupiah(p.biaya_lainnya)}</td>
+                  <td>{p.layanan_lainnya}{jumlah1 > 1 ? ` (x${jumlah1})` : ''}</td>
+                  <td className="right">{formatRupiah(Number(p.biaya_lainnya) * jumlah1)}</td>
                 </tr>
               )
             }
             for (let n = 2; n <= 5; n++) {
               const nama = p[`layanan_lainnya_${n}`]
               if (nama) {
+                const jumlahN = Math.max(1, Number(p[`jumlah_lainnya_${n}`]) || 1)
                 rows.push(
                   <tr key={p.id + '-lain' + n}>
                     <td></td>
-                    <td>{nama}</td>
-                    <td className="right">{formatRupiah(p[`biaya_lainnya_${n}`])}</td>
+                    <td>{nama}{jumlahN > 1 ? ` (x${jumlahN})` : ''}</td>
+                    <td className="right">{formatRupiah(Number(p[`biaya_lainnya_${n}`]) * jumlahN)}</td>
                   </tr>
                 )
               }

@@ -67,6 +67,16 @@ function countAddOnSlots(p) {
   }
   return count
 }
+// Sama pola persis kayak countAddOnSlots di atas, buat Add On Item (Sewa).
+function countSewaSlots(p) {
+  let count = 1
+  for (let n = 5; n >= 2; n--) {
+    const nama = p[`nama_sewa_${n}`]
+    const biaya = p[`biaya_sewa_${n}`]
+    if ((nama && nama.trim()) || Number(biaya) > 0) { count = n; break }
+  }
+  return count
+}
 function formatTanggal(dateStr) {
   if (!dateStr) return '-'
   return new Date(dateStr).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })
@@ -208,6 +218,9 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
     setEditPeserta(peserta.map((p) => ({
       ...p,
       _addonCount: countAddOnSlots(p),
+      _adaAddOn: !!(p.layanan_lainnya && p.layanan_lainnya.trim()),
+      _sewaCount: countSewaSlots(p),
+      _adaSewa: !!(p.nama_sewa && p.nama_sewa.trim()),
       vendors: bundlingItems.filter((b) => b.peserta_id === p.id && !b.parent_id).map((v) => ({
         id: v.id,
         nama: v.nama,
@@ -237,6 +250,41 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
         const suffix = field.replace('layanan_lainnya', '')
         updated[`biaya_lainnya${suffix}`] = 0
         updated[`keuntungan_lainnya${suffix}`] = 0
+        updated[`jumlah_lainnya${suffix}`] = 1
+      }
+      // Field Add On Sewa -- pola live-clear SAMA PERSIS kayak Add On
+      // Item biasa di atas, cuma buat kolom nama_sewa[_N].
+      if (field.startsWith('nama_sewa') && !(value || '').trim()) {
+        const suffix = field.replace('nama_sewa', '')
+        updated[`biaya_sewa${suffix}`] = 0
+        updated[`jumlah_sewa${suffix}`] = 1
+        updated[`untung_sewa${suffix}`] = 0
+      }
+      // Toggle "Add On Item (Beli)?" dimatiin -> semua slot Add On Item
+      // yang udah keisi ke-reset & slotnya balik jadi 1 (pola SAMA
+      // kayak Add On Item (Sewa) di bawah).
+      if (field === '_adaAddOn' && value === false) {
+        updated._addonCount = 1
+        for (let n = 1; n <= 5; n++) {
+          const suffix = n === 1 ? '' : `_${n}`
+          updated[`layanan_lainnya${suffix}`] = ''
+          updated[`biaya_lainnya${suffix}`] = 0
+          updated[`keuntungan_lainnya${suffix}`] = 0
+          updated[`jumlah_lainnya${suffix}`] = 1
+        }
+      }
+      // Toggle "Add On Item (Sewa)?" dimatiin -> semua slot sewa yang
+      // udah keisi ke-reset & slotnya balik jadi 1 (pola SAMA kayak
+      // Paket Bundling dimatiin di bawah).
+      if (field === '_adaSewa' && value === false) {
+        updated._sewaCount = 1
+        for (let n = 1; n <= 5; n++) {
+          const suffix = n === 1 ? '' : `_${n}`
+          updated[`nama_sewa${suffix}`] = ''
+          updated[`biaya_sewa${suffix}`] = 0
+          updated[`jumlah_sewa${suffix}`] = 1
+          updated[`untung_sewa${suffix}`] = 0
+        }
       }
       // Sama persis alasannya kayak Add On di atas -- begitu di-toggle
       // BALIK ke "Me", Komisi & Nama Tim langsung ke-reset di form-nya
@@ -264,6 +312,9 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
         updated.komisi_tambahan = 0
         updated.nama_tim_tambahan = ''
         updated.jumlah_sesi_tambahan = 1
+      }
+      if (field === 'retouch' && value === false) {
+        updated.biaya_retouch = 0
       }
       // Toggle "Sertakan Paket Bundling?" dimatiin -> vendor yang udah
       // sempet keisi ikut ke-reset juga, biar nggak nyangkut diem-diem.
@@ -324,15 +375,24 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
     setEditPeserta((list) => [...list, {
       nama_anggota: '', peran: '', jumlah_sesi_makeup: 1, jumlah_sesi_tambahan: 1, kategori_makeup: 'Regular', jenis_paket: '', dikerjakan_oleh_makeup: 'Me',
       pakai_paket_bundling: false,
-      biaya_makeup: 0, komisi_makeup_tim: 0, nama_tim_makeup: '', layanan_tambahan: 'Tidak Ada',
+      biaya_makeup: 0, komisi_makeup_tim: 0, nama_tim_makeup: '', retouch: false, biaya_retouch: 0, layanan_tambahan: 'Tidak Ada',
       dikerjakan_oleh_tambahan: 'Me', biaya_tambahan: 0, komisi_tambahan: 0, nama_tim_tambahan: '',
-      layanan_lainnya: '', biaya_lainnya: 0, keuntungan_lainnya: 0,
-      layanan_lainnya_2: '', biaya_lainnya_2: 0, keuntungan_lainnya_2: 0,
-      layanan_lainnya_3: '', biaya_lainnya_3: 0, keuntungan_lainnya_3: 0,
-      layanan_lainnya_4: '', biaya_lainnya_4: 0, keuntungan_lainnya_4: 0,
-      layanan_lainnya_5: '', biaya_lainnya_5: 0, keuntungan_lainnya_5: 0,
+      layanan_lainnya: '', biaya_lainnya: 0, keuntungan_lainnya: 0, jumlah_lainnya: 1,
+      layanan_lainnya_2: '', biaya_lainnya_2: 0, keuntungan_lainnya_2: 0, jumlah_lainnya_2: 1,
+      layanan_lainnya_3: '', biaya_lainnya_3: 0, keuntungan_lainnya_3: 0, jumlah_lainnya_3: 1,
+      layanan_lainnya_4: '', biaya_lainnya_4: 0, keuntungan_lainnya_4: 0, jumlah_lainnya_4: 1,
+      layanan_lainnya_5: '', biaya_lainnya_5: 0, keuntungan_lainnya_5: 0, jumlah_lainnya_5: 1,
+      // Add On Item (Sewa) -- section terpisah, defaultnya nggak aktif.
+      nama_sewa: '', biaya_sewa: 0, jumlah_sewa: 1, untung_sewa: 0,
+      nama_sewa_2: '', biaya_sewa_2: 0, jumlah_sewa_2: 1, untung_sewa_2: 0,
+      nama_sewa_3: '', biaya_sewa_3: 0, jumlah_sewa_3: 1, untung_sewa_3: 0,
+      nama_sewa_4: '', biaya_sewa_4: 0, jumlah_sewa_4: 1, untung_sewa_4: 0,
+      nama_sewa_5: '', biaya_sewa_5: 0, jumlah_sewa_5: 1, untung_sewa_5: 0,
       vendors: [],
       _addonCount: 1,
+      _adaAddOn: false,
+      _sewaCount: 1,
+      _adaSewa: false,
     }])
   }
   function addAddOnSlot(i) {
@@ -348,7 +408,21 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
       if (idx !== i || p._addonCount <= 1) return p
       const n = p._addonCount
       const suffix = n === 1 ? '' : `_${n}`
-      return { ...p, _addonCount: n - 1, [`layanan_lainnya${suffix}`]: '', [`biaya_lainnya${suffix}`]: 0, [`keuntungan_lainnya${suffix}`]: 0 }
+      return { ...p, _addonCount: n - 1, [`layanan_lainnya${suffix}`]: '', [`biaya_lainnya${suffix}`]: 0, [`keuntungan_lainnya${suffix}`]: 0, [`jumlah_lainnya${suffix}`]: 1 }
+    }))
+  }
+  // Add On Item (Sewa) -- pola CRUD-nya SAMA PERSIS kayak Add On Item
+  // biasa di atas, cuma numpang kolom nama_sewa[_N]/biaya_sewa[_N]/
+  // jumlah_sewa[_N]/untung_sewa[_N].
+  function addSewaSlot(i) {
+    setEditPeserta((list) => list.map((p, idx) => (idx === i && p._sewaCount < 5) ? { ...p, _sewaCount: p._sewaCount + 1 } : p))
+  }
+  function removeSewaSlot(i) {
+    setEditPeserta((list) => list.map((p, idx) => {
+      if (idx !== i || p._sewaCount <= 1) return p
+      const n = p._sewaCount
+      const suffix = n === 1 ? '' : `_${n}`
+      return { ...p, _sewaCount: n - 1, [`nama_sewa${suffix}`]: '', [`biaya_sewa${suffix}`]: 0, [`jumlah_sewa${suffix}`]: 1, [`untung_sewa${suffix}`]: 0 }
     }))
   }
   function removeEditPeserta(i) {
@@ -431,6 +505,8 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
         // Nama Tim yang baru kena masalah sama.
         komisi_makeup_tim: p.dikerjakan_oleh_makeup === 'Tim' ? (Number(p.komisi_makeup_tim) || 0) : 0,
         nama_tim_makeup: p.dikerjakan_oleh_makeup === 'Tim' ? ((p.nama_tim_makeup || '').trim() || null) : null,
+        retouch: !!p.retouch,
+        biaya_retouch: p.retouch ? (Number(p.biaya_retouch) || 0) : 0,
         layanan_tambahan: p.layanan_tambahan,
         // Sama pola-nya kayak komisi_makeup_tim/nama_tim_makeup di
         // atas -- DAN ini yang jadi akar bug invoice Ka Linda (Rp100rb
@@ -458,6 +534,15 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
         payload[`layanan_lainnya${suffix}`] = namaAddOn || null
         payload[`biaya_lainnya${suffix}`] = namaAddOn ? (Number(p[`biaya_lainnya${suffix}`]) || 0) : 0
         payload[`keuntungan_lainnya${suffix}`] = namaAddOn ? (Number(p[`keuntungan_lainnya${suffix}`]) || 0) : 0
+        payload[`jumlah_lainnya${suffix}`] = namaAddOn ? Math.max(1, Number(p[`jumlah_lainnya${suffix}`]) || 1) : 1
+      }
+      for (let n = 1; n <= 5; n++) {
+        const suffix = n === 1 ? '' : `_${n}`
+        const namaSewa = (p[`nama_sewa${suffix}`] || '').trim()
+        payload[`nama_sewa${suffix}`] = namaSewa || null
+        payload[`biaya_sewa${suffix}`] = namaSewa ? (Number(p[`biaya_sewa${suffix}`]) || 0) : 0
+        payload[`jumlah_sewa${suffix}`] = namaSewa ? Math.max(1, Number(p[`jumlah_sewa${suffix}`]) || 1) : 1
+        payload[`untung_sewa${suffix}`] = namaSewa ? (Number(p[`untung_sewa${suffix}`]) || 0) : 0
       }
       let pesertaId = p.id
       if (p.id) {
@@ -733,6 +818,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                           }).join('')
                         : ''}
                       {p.layanan_tambahan !== 'Tidak Ada' ? ` | ${p.layanan_tambahan} (${p.dikerjakan_oleh_tambahan}${p.dikerjakan_oleh_tambahan === 'Tim' && p.nama_tim_tambahan ? ' - ' + p.nama_tim_tambahan : ''})${p.jumlah_sesi_tambahan > 1 ? ` (${p.jumlah_sesi_tambahan}x sesi)` : ''} ${formatRupiah(Number(p.biaya_tambahan) * (p.jumlah_sesi_tambahan || 1))}` : ''}
+                      {p.retouch ? ` | Retouch ${formatRupiah(p.biaya_retouch)}` : ''}
                       {[1, 2, 3, 4, 5].map((n) => {
                         const suffix = n === 1 ? '' : `_${n}`
                         const nama = p[`layanan_lainnya${suffix}`]
@@ -842,7 +928,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                           <input type="text" placeholder="contoh: Jenny Black Pink" value={p.nama_anggota} onChange={(e) => updateEditPeserta(i, 'nama_anggota', e.target.value)} onBlur={(e) => updateEditPeserta(i, 'nama_anggota', capitalizeWords(e.target.value))} />
                         </div>
                         <div className="field">
-                          <label>Peran</label>
+                          <label>Peran (Opsional)</label>
                           <input type="text" placeholder="contoh: Klien Utama/Wisudawati" value={p.peran} onChange={(e) => updateEditPeserta(i, 'peran', e.target.value)} />
                         </div>
                       </div>
@@ -875,6 +961,73 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                         </div>
                       </div>
 
+                      <div className="field-grid-peserta cols-2">
+                        <div className="field">
+                          <label>Kategori</label>
+                          <CustomSelect
+                            options={KATEGORI_MAKEUP_OPTIONS}
+                            value={p.kategori_makeup || 'Regular'}
+                            onChange={(v) => updateEditPeserta(i, 'kategori_makeup', v)}
+                            variant="modal"
+                          />
+                        </div>
+                        <div className="field">
+                          <label>Jenis Makeup</label>
+                          <input type="text" placeholder="Standar/VIP/Gold/Premium" value={p.jenis_paket || ''} onChange={(e) => updateEditPeserta(i, 'jenis_paket', e.target.value)} />
+                        </div>
+                      </div>
+                      <div className="field-grid-peserta cols-2">
+                        <div className="field">
+                          <label>Dikerjakan oleh</label>
+                          <div className="toggle-row">
+                            <div className={`toggle-opt${p.dikerjakan_oleh_makeup === 'Me' ? ' sel' : ''}`} onClick={() => updateEditPeserta(i, 'dikerjakan_oleh_makeup', 'Me')}>Me</div>
+                            <div className={`toggle-opt${p.dikerjakan_oleh_makeup === 'Tim' ? ' sel' : ''}`} onClick={() => updateEditPeserta(i, 'dikerjakan_oleh_makeup', 'Tim')}>Tim</div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="field-grid-peserta cols-2">
+                        <div className="field">
+                          <label>Biaya Makeup</label>
+                          <input type="text" inputMode="numeric" placeholder="Rp0" value={p.biaya_makeup ? `Rp${formatAngkaInput(p.biaya_makeup)}` : ''} onChange={(e) => updateEditPeserta(i, 'biaya_makeup', parseAngkaInput(e.target.value))} />
+                        </div>
+                        {p.dikerjakan_oleh_makeup === 'Tim' && (
+                        <div className="field">
+                          <label>Komisi untuk Kamu</label>
+                          <input type="text" inputMode="numeric" placeholder="Rp0" value={p.komisi_makeup_tim ? `Rp${formatAngkaInput(p.komisi_makeup_tim)}` : ''} onChange={(e) => updateEditPeserta(i, 'komisi_makeup_tim', parseAngkaInput(e.target.value))} />
+                        </div>
+                        )}
+                      </div>
+                      {p.dikerjakan_oleh_makeup === 'Tim' && (
+                      <div className="field-grid-peserta cols-2">
+                        <div className="field" style={{ gridColumn: 2 }}>
+                          <label>Nama Tim</label>
+                          <input type="text" placeholder="contoh: makeupbyjennie" value={p.nama_tim_makeup || ''} onChange={(e) => updateEditPeserta(i, 'nama_tim_makeup', e.target.value)} />
+                        </div>
+                      </div>
+                      )}
+
+                      {/* Retouch -- BEDA dari Add On Item, ini JASA (sekelas
+                          Makeup/Layanan Tambahan), BUKAN produk. SELALU
+                          dikerjain Me (nggak ada opsi Tim/Komisi/Nama Tim
+                          kayak yang lain) -- biayanya masuk PENUH ke Omzet/
+                          Penghasilan, BUKAN dianggap "modal keluar" kayak
+                          Add On Item (yang emang buat produk fisik). */}
+                      <div className="field-grid-peserta cols-2">
+                        <div className="field">
+                          <label>Retouch</label>
+                          <div className="toggle-row">
+                            <div className={`toggle-opt${!p.retouch ? ' sel' : ''}`} onClick={() => updateEditPeserta(i, 'retouch', false)}>Tidak</div>
+                            <div className={`toggle-opt${p.retouch ? ' sel' : ''}`} onClick={() => updateEditPeserta(i, 'retouch', true)}>Ya</div>
+                          </div>
+                        </div>
+                        {p.retouch && (
+                        <div className="field">
+                          <label>Biaya Retouch</label>
+                          <input type="text" inputMode="numeric" placeholder="Rp0" value={p.biaya_retouch ? `Rp${formatAngkaInput(p.biaya_retouch)}` : ''} onChange={(e) => updateEditPeserta(i, 'biaya_retouch', parseAngkaInput(e.target.value))} />
+                        </div>
+                        )}
+                      </div>
+
                       <div className="form-divider"></div>
 
                       {/* Paket Bundling -- toggle TERPISAH dari Kategori
@@ -884,13 +1037,9 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                           luar tambahan apa nggak". Klien Wedding/Reguler/
                           dst BISA juga sekalian pakai Paket Bundling --
                           makanya harus bisa nyala bareng, bukan saling
-                          gantiin. Biaya Makeup/Komisi/dkk di bawah TETEP
+                          gantiin. Biaya Makeup/Komisi/dkk di atas TETEP
                           jalan apa adanya, BEDA hal (harga jasa vendor
-                          luar vs harga makeup MUA sendiri). Diposisikan
-                          di ATAS Kategori/Jenis Makeup biar field Vendor
-                          yang muncul pas "Ya" nempel langsung di bawah
-                          toggle-nya, bukan nyempil di tengah-tengah
-                          form. */}
+                          luar vs harga makeup MUA sendiri). */}
                       <div className="field-grid-peserta cols-2">
                         <div className="field">
                           <label>Sertakan Paket Bundling?</label>
@@ -947,51 +1096,6 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                           </div>
                         ))}
                         <button type="button" className="add-peserta" onClick={() => addVendor(i)}>+ Tambah Vendor</button>
-                      </div>
-                      )}
-
-                      <div className="field-grid-peserta cols-2">
-                        <div className="field">
-                          <label>Kategori</label>
-                          <CustomSelect
-                            options={KATEGORI_MAKEUP_OPTIONS}
-                            value={p.kategori_makeup || 'Regular'}
-                            onChange={(v) => updateEditPeserta(i, 'kategori_makeup', v)}
-                            variant="modal"
-                          />
-                        </div>
-                        <div className="field">
-                          <label>Jenis Makeup</label>
-                          <input type="text" placeholder="Standar/VIP/Gold/Premium" value={p.jenis_paket || ''} onChange={(e) => updateEditPeserta(i, 'jenis_paket', e.target.value)} />
-                        </div>
-                      </div>
-                      <div className="field-grid-peserta cols-2">
-                        <div className="field">
-                          <label>Dikerjakan oleh</label>
-                          <div className="toggle-row">
-                            <div className={`toggle-opt${p.dikerjakan_oleh_makeup === 'Me' ? ' sel' : ''}`} onClick={() => updateEditPeserta(i, 'dikerjakan_oleh_makeup', 'Me')}>Me</div>
-                            <div className={`toggle-opt${p.dikerjakan_oleh_makeup === 'Tim' ? ' sel' : ''}`} onClick={() => updateEditPeserta(i, 'dikerjakan_oleh_makeup', 'Tim')}>Tim</div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="field-grid-peserta cols-2">
-                        <div className="field">
-                          <label>Biaya Makeup</label>
-                          <input type="text" inputMode="numeric" placeholder="Rp0" value={p.biaya_makeup ? `Rp${formatAngkaInput(p.biaya_makeup)}` : ''} onChange={(e) => updateEditPeserta(i, 'biaya_makeup', parseAngkaInput(e.target.value))} />
-                        </div>
-                        {p.dikerjakan_oleh_makeup === 'Tim' && (
-                        <div className="field">
-                          <label>Komisi untuk Kamu</label>
-                          <input type="text" inputMode="numeric" placeholder="Rp0" value={p.komisi_makeup_tim ? `Rp${formatAngkaInput(p.komisi_makeup_tim)}` : ''} onChange={(e) => updateEditPeserta(i, 'komisi_makeup_tim', parseAngkaInput(e.target.value))} />
-                        </div>
-                        )}
-                      </div>
-                      {p.dikerjakan_oleh_makeup === 'Tim' && (
-                      <div className="field-grid-peserta cols-2">
-                        <div className="field" style={{ gridColumn: 2 }}>
-                          <label>Nama Tim</label>
-                          <input type="text" placeholder="contoh: makeupbyjennie" value={p.nama_tim_makeup || ''} onChange={(e) => updateEditPeserta(i, 'nama_tim_makeup', e.target.value)} />
-                        </div>
                       </div>
                       )}
 
@@ -1066,11 +1170,102 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
 
                       <div className="form-divider"></div>
 
-                      {Array.from({ length: p._addonCount }, (_, idx) => idx + 1).map((n) => {
+                      {/* Add On Item (Sewa) -- section TERPISAH dari Add On
+                          Item biasa (di bawah), konsepnya mirip Paket
+                          Bundling (sewa dari pihak luar) tapi nggak perlu
+                          ikut mekanisme bundling penuh -- buat kasus
+                          kondisional (misal sewa Kebaya buat ibu pengantin,
+                          di luar paket bundling manapun). Toggle Tidak/Ya
+                          nge-gate slotnya, defaultnya Tidak. Rumus
+                          hitungannya numpang Paket Bundling (biaya penuh
+                          masuk Belanja Klien, UNTUNG doang yang masuk
+                          Omzet/Penghasilan -- lihat migrasi SQL + Rincian
+                          Keuangan). */}
+                      <div className="field-grid-peserta cols-2">
+                        <div className="field">
+                          <label>Add On Item (Sewa)</label>
+                          <div className="toggle-row">
+                            <div className={`toggle-opt${!p._adaSewa ? ' sel' : ''}`} onClick={() => updateEditPeserta(i, '_adaSewa', false)}>Tidak</div>
+                            <div className={`toggle-opt${p._adaSewa ? ' sel' : ''}`} onClick={() => updateEditPeserta(i, '_adaSewa', true)}>Ya</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {p._adaSewa && Array.from({ length: p._sewaCount }, (_, idx) => idx + 1).map((n) => {
+                        const suffix = n === 1 ? '' : `_${n}`
+                        const namaField = `nama_sewa${suffix}`
+                        const biayaField = `biaya_sewa${suffix}`
+                        const jumlahField = `jumlah_sewa${suffix}`
+                        const untungField = `untung_sewa${suffix}`
+                        return (
+                          <div key={n}>
+                            {n === p._sewaCount && n > 1 && (
+                              <div className="addon-remove-row">
+                                <button type="button" className="peserta-remove" onClick={() => removeSewaSlot(i)}>Hapus Add On Item (Sewa) {n}</button>
+                              </div>
+                            )}
+                            <div className="field-grid-peserta cols-2">
+                              <div className="field">
+                                <label>{n === 1 ? 'Nama Produk' : `Nama Produk ${n}`}</label>
+                                <input type="text" placeholder="contoh: Kebaya/Baju Beskap/lainnya" value={p[namaField] || ''} onChange={(e) => updateEditPeserta(i, namaField, e.target.value)} />
+                              </div>
+                              {(p[namaField] || '').trim() && (
+                                <div className="field">
+                                  <label>Biaya (Ditagih ke Klien)</label>
+                                  <input type="text" inputMode="numeric" placeholder="Rp0" value={p[biayaField] ? `Rp${formatAngkaInput(p[biayaField])}` : ''} onChange={(e) => updateEditPeserta(i, biayaField, parseAngkaInput(e.target.value))} />
+                                </div>
+                              )}
+                            </div>
+                            {(p[namaField] || '').trim() && (
+                              <div className="field-grid-peserta cols-2">
+                                <div className="field">
+                                  <label>Jumlah</label>
+                                  <input
+                                    type="text"
+                                    inputMode="numeric"
+                                    placeholder="1"
+                                    value={p[jumlahField] ?? 1}
+                                    onChange={(e) => {
+                                      const digits = e.target.value.replace(/[^0-9]/g, '')
+                                      updateEditPeserta(i, jumlahField, digits === '' ? '' : Math.max(1, parseInt(digits, 10)))
+                                    }}
+                                    onBlur={(e) => { if (!e.target.value) updateEditPeserta(i, jumlahField, 1) }}
+                                  />
+                                </div>
+                                <div className="field">
+                                  <label>Untung (per Item)</label>
+                                  <input type="text" inputMode="numeric" placeholder="Rp0" value={p[untungField] ? `Rp${formatAngkaInput(p[untungField])}` : ''} onChange={(e) => updateEditPeserta(i, untungField, parseAngkaInput(e.target.value))} />
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )
+                      })}
+                      {p._adaSewa && p._sewaCount < 5 && (
+                        <button type="button" className="add-peserta" onClick={() => addSewaSlot(i)}>+ Tambah Add On Item (Sewa)</button>
+                      )}
+
+                      <div className="form-divider"></div>
+
+                      {/* Add On Item (Beli) -- SEKARANG dikasih toggle
+                          Tidak/Ya juga, sama pola persis kayak Add On
+                          Item (Sewa) di atas. */}
+                      <div className="field-grid-peserta cols-2">
+                        <div className="field">
+                          <label>Add On Item (Beli)</label>
+                          <div className="toggle-row">
+                            <div className={`toggle-opt${!p._adaAddOn ? ' sel' : ''}`} onClick={() => updateEditPeserta(i, '_adaAddOn', false)}>Tidak</div>
+                            <div className={`toggle-opt${p._adaAddOn ? ' sel' : ''}`} onClick={() => updateEditPeserta(i, '_adaAddOn', true)}>Ya</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {p._adaAddOn && Array.from({ length: p._addonCount }, (_, idx) => idx + 1).map((n) => {
                         const suffix = n === 1 ? '' : `_${n}`
                         const namaField = `layanan_lainnya${suffix}`
                         const biayaField = `biaya_lainnya${suffix}`
                         const untungField = `keuntungan_lainnya${suffix}`
+                        const jumlahField = `jumlah_lainnya${suffix}`
                         return (
                           <div key={n}>
                             {/* Tombol Hapus SENGAJA dipindah jadi baris sendiri,
@@ -1087,25 +1282,43 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                                 lebar layarnya. */}
                             {n === p._addonCount && n > 1 && (
                               <div className="addon-remove-row">
-                                <button type="button" className="peserta-remove" onClick={() => removeAddOnSlot(i)}>Hapus Add On Item {n}</button>
+                                <button type="button" className="peserta-remove" onClick={() => removeAddOnSlot(i)}>Hapus Add On Item (Beli) {n}</button>
                               </div>
                             )}
                             <div className="field-grid-peserta cols-2">
                               <div className="field">
-                                <label>{n === 1 ? 'Add On Item' : `Add On Item ${n}`}</label>
+                                <label>{n === 1 ? 'Nama Produk' : `Nama Produk ${n}`}</label>
                                 <input type="text" placeholder="contoh: Softlens" value={p[namaField] || ''} onChange={(e) => updateEditPeserta(i, namaField, e.target.value)} />
                               </div>
                               {(p[namaField] || '').trim() && (
                                 <div className="field">
-                                  <label>Biaya Add On Item</label>
+                                  <label>Harga (Ditagih ke Klien)</label>
                                   <input type="text" inputMode="numeric" placeholder="Rp0" value={p[biayaField] ? `Rp${formatAngkaInput(p[biayaField])}` : ''} onChange={(e) => updateEditPeserta(i, biayaField, parseAngkaInput(e.target.value))} />
                                 </div>
                               )}
                             </div>
+                            {/* Jumlah & Untung digabung 1 baris -- Jumlah di
+                                kiri, Untung (per Item) di kanan. Biaya &
+                                Untung itu harga PER-UNIT, dikaliin
+                                otomatis. */}
                             {(p[namaField] || '').trim() && (
                               <div className="field-grid-peserta cols-2">
-                                <div className="field" style={{ gridColumn: 2 }}>
-                                  <label>Keuntungan Add On Item</label>
+                                <div className="field">
+                                  <label>Jumlah</label>
+                                  <input
+                                    type="text"
+                                    inputMode="numeric"
+                                    placeholder="1"
+                                    value={p[jumlahField] ?? 1}
+                                    onChange={(e) => {
+                                      const digits = e.target.value.replace(/[^0-9]/g, '')
+                                      updateEditPeserta(i, jumlahField, digits === '' ? '' : Math.max(1, parseInt(digits, 10)))
+                                    }}
+                                    onBlur={(e) => { if (!e.target.value) updateEditPeserta(i, jumlahField, 1) }}
+                                  />
+                                </div>
+                                <div className="field">
+                                  <label>Untung (per Item)</label>
                                   <input type="text" inputMode="numeric" placeholder="Rp0" value={p[untungField] ? `Rp${formatAngkaInput(p[untungField])}` : ''} onChange={(e) => updateEditPeserta(i, untungField, parseAngkaInput(e.target.value))} />
                                 </div>
                               </div>
@@ -1113,8 +1326,8 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                           </div>
                         )
                       })}
-                      {p._addonCount < 5 && (
-                        <button type="button" className="add-peserta" onClick={() => addAddOnSlot(i)}>+ Tambah Add On Item</button>
+                      {p._adaAddOn && p._addonCount < 5 && (
+                        <button type="button" className="add-peserta" onClick={() => addAddOnSlot(i)}>+ Tambah Add On Item (Beli)</button>
                       )}
                     </div>
                   </div>
