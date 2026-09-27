@@ -28,10 +28,18 @@
 .rincian-overlay .modal-foot { display: flex; justify-content: flex-end; padding: 14px 20px; flex-shrink: 0; }
 .rincian-overlay .btn-ghost {
   padding: 5px 10px; border-radius: 8px; border: 1.5px solid var(--button-border); background: var(--table-body);
-  font-size: 13px; font-weight: 600; color: var(--ink-soft); cursor: pointer; font-family: inherit;
+  font-size: 11px; font-weight: 600; color: var(--ink-soft); cursor: pointer; font-family: inherit;
   transition: background 0.15s;
 }
 .rincian-overlay .btn-ghost:hover { background: color-mix(in srgb, var(--button-prm-hover) 50%, transparent); }
+
+.btn-ra {
+  padding: 3px 5px; border-radius: 6px; border: 1px solid var(--button-prm-hover); background: var(--button-prm-hover);
+  font-size: 10px; font-weight: 600; color: var(--button-tx-hover); cursor: pointer; font-family: inherit;
+  transition: background 0.15s; margin: 5px 0;
+}
+
+.btn-ra:hover { background: var(--h3); }
 
 /* 2 kartu besar Omzet & Penghasilan -- Penghasilan dikasih aksen warna
    beda (var(--h7), hijau -- sama kayak warna "Sudah Dibayar" di section
@@ -93,12 +101,38 @@
   color: var(--h5); margin-bottom: 5px; margin-top: 10px;
 }
 .rincian-row {
-  display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;
   font-size: 12px; color: var(--ink-soft); padding: 5px 0;
   border-bottom: 1px solid color-mix(in srgb, var(--button-border) 30%, transparent);
 }
 .rincian-row b { color: var(--ink-soft); font-weight: 700; }
 .rincian-metim { font-weight: 800; color: var(--h5); }
+/* Bungkus nama/label + tombol "Buat Remittance Advice" jadi 1 GRUP di
+   sisi kiri baris -- biar tombolnya nempel PAS di sebelah nama (bukan
+   ngambang di tengah baris gara-gara justify-content:space-between
+   di .rincian-row ngitung 3 anak langsung alih-alih 2). min-width:0
+   + flex-wrap biar teks nama yang panjang bisa turun baris sendiri
+   tanpa dorong tombolnya keluar kotak di layar sempit. */
+/* Nama/label DI ATAS, tombol "Buat Remittance Advice" di baris ke-2 DI
+   BAWAHNYA -- tumpuk vertikal, BUKAN sejajar horizontal kayak versi
+   sebelumnya (itu bikin masalah alignment ribet + kacau khususnya di
+   HP, layarnya sempit jadi gampang ke-wrap nggak karuan). Tumpukan
+   simpel kayak gini jauh lebih aman di semua ukuran layar. */
+.rincian-nama-grup { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-width: 0; }
+/* Tombol "Buat Remittance Advice" -- nempel LANGSUNG di baris rincian
+   (bukan section terpisah lagi), jadi dibikin lebih kecil dari
+   .btn-ghost biasa (yang dipake buat tombol "Tutup" dll) biar nggak
+   makan tempat berlebihan di baris yang udah padat teks. flex-shrink:0
+   biar tombolnya nggak ke-gencet kalau nama Tim/Vendor-nya panjang. */
+/* Tombol "Buat Remittance Advice" -- ukuran font/padding-nya sekarang
+   diatur langsung di .btn-ghost (atas), BUKAN di sini -- rule di sini
+   sempet nyoba nge-override font-size/padding-nya sendiri, tapi kalah
+   spesifisitas sama ".rincian-overlay .btn-ghost" (2 class ngalahin 1
+   class, apapun urutan tulisnya di file), jadi nggak pernah beneran
+   kepake -- dibersihin biar nggak nyesatin. Yang masih kepake cuma
+   2 baris ini: flex-shrink biar tombolnya nggak ke-gencet kalau nama
+   Tim/Vendor-nya panjang, white-space biar teksnya nggak kepotong. */
+.rincian-ra-btn { white-space: nowrap; flex-shrink: 0; }
 /* Angka + keterangan komisi/untung ditumpuk vertikal, rata kanan --
    sama pola-nya kayak yang dulu dipake buat biaya/untung Add On,
    sebelum diganti jadi 1 angka doang per kartu aktif. */

@@ -1,0 +1,21 @@
+/* Style KHUSUS Remittance Advice doang -- terpisah dari InvoiceModal.css
+   (yang isinya style BERSAMA, dipakai Invoice juga). Cuma buat
+   penyesuaian yang SENGAJA beda dari Invoice.
+
+   Dua warna (ra-payment-line/ra-payment-value) dikasih 2 versi:
+   1. Versi NORMAL (buat preview di layar) -- numpang var(--ink-soft)/
+      var(--h5), otomatis ngikutin tema app yang lagi aktif (terang/
+      gelap), sama kayak teks lain di modal ini.
+   2. Versi ".invoice-print-portal" (buat hasil Cetak/Unduh) -- warna
+      DIPAKSA FIKS (bukan var tema), numpang nilai yang SAMA persis
+      kayak --pi-text/--pi-primary di InvoiceModal.css. Kertas hasil
+      cetak/PDF/PNG SELALU background putih, apapun tema app-nya --
+      kalau numpang var(--ink-soft)/var(--h5) biasa, pas app lagi
+      Mode Gelap nilainya jadi warna TERANG (nyaris putih), teksnya
+      bakal nyaris nggak kebaca di atas kertas putih. Pola & alasan
+      ini SAMA PERSIS kayak komentar di InvoiceModal.css baris ~195. */
+.ra-payment-line { font-size: 13px; margin-top: 1px; color: var(--ink-soft); }
+.ra-payment-value { font-weight: 700; color: var(--h5); }
+
+.invoice-print-portal .ra-payment-line { color: #4a5490; }
+.invoice-print-portal .ra-payment-value { color: #3f4ca2; }

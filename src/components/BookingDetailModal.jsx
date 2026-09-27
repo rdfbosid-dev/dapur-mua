@@ -281,6 +281,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
         for (let n = 1; n <= 5; n++) {
           const suffix = n === 1 ? '' : `_${n}`
           updated[`nama_sewa${suffix}`] = ''
+          updated[`vendor_sewa${suffix}`] = ''
           updated[`biaya_sewa${suffix}`] = 0
           updated[`jumlah_sewa${suffix}`] = 1
           updated[`untung_sewa${suffix}`] = 0
@@ -383,11 +384,11 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
       layanan_lainnya_4: '', biaya_lainnya_4: 0, keuntungan_lainnya_4: 0, jumlah_lainnya_4: 1,
       layanan_lainnya_5: '', biaya_lainnya_5: 0, keuntungan_lainnya_5: 0, jumlah_lainnya_5: 1,
       // Add On Item (Sewa) -- section terpisah, defaultnya nggak aktif.
-      nama_sewa: '', biaya_sewa: 0, jumlah_sewa: 1, untung_sewa: 0,
-      nama_sewa_2: '', biaya_sewa_2: 0, jumlah_sewa_2: 1, untung_sewa_2: 0,
-      nama_sewa_3: '', biaya_sewa_3: 0, jumlah_sewa_3: 1, untung_sewa_3: 0,
-      nama_sewa_4: '', biaya_sewa_4: 0, jumlah_sewa_4: 1, untung_sewa_4: 0,
-      nama_sewa_5: '', biaya_sewa_5: 0, jumlah_sewa_5: 1, untung_sewa_5: 0,
+      nama_sewa: '', vendor_sewa: '', biaya_sewa: 0, jumlah_sewa: 1, untung_sewa: 0,
+      nama_sewa_2: '', vendor_sewa_2: '', biaya_sewa_2: 0, jumlah_sewa_2: 1, untung_sewa_2: 0,
+      nama_sewa_3: '', vendor_sewa_3: '', biaya_sewa_3: 0, jumlah_sewa_3: 1, untung_sewa_3: 0,
+      nama_sewa_4: '', vendor_sewa_4: '', biaya_sewa_4: 0, jumlah_sewa_4: 1, untung_sewa_4: 0,
+      nama_sewa_5: '', vendor_sewa_5: '', biaya_sewa_5: 0, jumlah_sewa_5: 1, untung_sewa_5: 0,
       vendors: [],
       _addonCount: 1,
       _adaAddOn: false,
@@ -422,7 +423,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
       if (idx !== i || p._sewaCount <= 1) return p
       const n = p._sewaCount
       const suffix = n === 1 ? '' : `_${n}`
-      return { ...p, _sewaCount: n - 1, [`nama_sewa${suffix}`]: '', [`biaya_sewa${suffix}`]: 0, [`jumlah_sewa${suffix}`]: 1, [`untung_sewa${suffix}`]: 0 }
+      return { ...p, _sewaCount: n - 1, [`nama_sewa${suffix}`]: '', [`vendor_sewa${suffix}`]: '', [`biaya_sewa${suffix}`]: 0, [`jumlah_sewa${suffix}`]: 1, [`untung_sewa${suffix}`]: 0 }
     }))
   }
   function removeEditPeserta(i) {
@@ -540,6 +541,10 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
         const suffix = n === 1 ? '' : `_${n}`
         const namaSewa = (p[`nama_sewa${suffix}`] || '').trim()
         payload[`nama_sewa${suffix}`] = namaSewa || null
+        // vendor_sewa murni identitas, disimpen apa adanya (nggak
+        // di-force-zero pas nama produknya kosong, beda pola dari
+        // biaya/jumlah/untung).
+        payload[`vendor_sewa${suffix}`] = (p[`vendor_sewa${suffix}`] || '').trim() || null
         payload[`biaya_sewa${suffix}`] = namaSewa ? (Number(p[`biaya_sewa${suffix}`]) || 0) : 0
         payload[`jumlah_sewa${suffix}`] = namaSewa ? Math.max(1, Number(p[`jumlah_sewa${suffix}`]) || 1) : 1
         payload[`untung_sewa${suffix}`] = namaSewa ? (Number(p[`untung_sewa${suffix}`]) || 0) : 0
@@ -1077,7 +1082,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                             {v.addOns.map((a, ai) => (
                               <div key={a.id || ai}>
                                 <div className="addon-remove-row">
-                                  <button type="button" className="peserta-remove" onClick={() => removeVendorAddOn(i, vi, ai)}>Hapus Add On {ai + 1}</button>
+                                  <button type="button" className="peserta-remove" onClick={() => removeVendorAddOn(i, vi, ai)}>Hapus Add On Vendor {ai + 1}</button>
                                 </div>
                                 <div className="field-grid-bundling">
                                   <div className="field"><label>Nama Add On</label><input type="text" placeholder="contoh: Lighting" value={a.nama} onChange={(e) => updateVendorAddOn(i, vi, ai, 'nama', e.target.value)} /></div>
@@ -1194,6 +1199,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                       {p._adaSewa && Array.from({ length: p._sewaCount }, (_, idx) => idx + 1).map((n) => {
                         const suffix = n === 1 ? '' : `_${n}`
                         const namaField = `nama_sewa${suffix}`
+                        const vendorField = `vendor_sewa${suffix}`
                         const biayaField = `biaya_sewa${suffix}`
                         const jumlahField = `jumlah_sewa${suffix}`
                         const untungField = `untung_sewa${suffix}`
@@ -1209,15 +1215,17 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                                 <label>{n === 1 ? 'Nama Produk' : `Nama Produk ${n}`}</label>
                                 <input type="text" placeholder="contoh: Kebaya/Baju Beskap/lainnya" value={p[namaField] || ''} onChange={(e) => updateEditPeserta(i, namaField, e.target.value)} />
                               </div>
-                              {(p[namaField] || '').trim() && (
-                                <div className="field">
-                                  <label>Biaya (Ditagih ke Klien)</label>
-                                  <input type="text" inputMode="numeric" placeholder="Rp0" value={p[biayaField] ? `Rp${formatAngkaInput(p[biayaField])}` : ''} onChange={(e) => updateEditPeserta(i, biayaField, parseAngkaInput(e.target.value))} />
-                                </div>
-                              )}
+                              <div className="field">
+                                <label>Nama Vendor</label>
+                                <input type="text" placeholder="contoh: @attirebyjennie" value={p[vendorField] || ''} onChange={(e) => updateEditPeserta(i, vendorField, e.target.value)} />
+                              </div>
                             </div>
+                            {/* Jumlah, Biaya & Untung digabung 1 baris (3
+                                kolom, numpang .field-grid-bundling) --
+                                Biaya & Untung itu harga PER-UNIT, dikaliin
+                                otomatis. */}
                             {(p[namaField] || '').trim() && (
-                              <div className="field-grid-peserta cols-2">
+                              <div className="field-grid-bundling">
                                 <div className="field">
                                   <label>Jumlah</label>
                                   <input
@@ -1231,6 +1239,10 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                                     }}
                                     onBlur={(e) => { if (!e.target.value) updateEditPeserta(i, jumlahField, 1) }}
                                   />
+                                </div>
+                                <div className="field">
+                                  <label>Biaya (Ditagih ke Klien)</label>
+                                  <input type="text" inputMode="numeric" placeholder="Rp0" value={p[biayaField] ? `Rp${formatAngkaInput(p[biayaField])}` : ''} onChange={(e) => updateEditPeserta(i, biayaField, parseAngkaInput(e.target.value))} />
                                 </div>
                                 <div className="field">
                                   <label>Untung (per Item)</label>

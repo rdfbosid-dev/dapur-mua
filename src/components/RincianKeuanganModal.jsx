@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import RemittanceAdviceModal from './RemittanceAdviceModal'
 import './RincianKeuanganModal.css'
 
 function formatRupiah(n) {
@@ -23,6 +24,9 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
   // tiap baris rincian di bawah. Defaultnya "belanja" (kartu paling
   // kiri) biar modal nggak kosong pas pertama dibuka.
   const [activeCard, setActiveCard] = useState('belanja')
+  // Key pihak (Tim/Vendor) yang lagi dipilih buat dibikinin Remittance
+  // Advice -- null berarti nggak ada modal RA yang lagi kebuka.
+  const [selectedPayeeKey, setSelectedPayeeKey] = useState(null)
 
   const transport = booking.biaya_transport || 0
   const punyaTambahan = (p) => p.layanan_tambahan && p.layanan_tambahan !== 'Tidak Ada'
@@ -104,6 +108,7 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
         const jumlah = Math.max(1, Number(p[`jumlah_sewa${suffix}`]) || 1)
         sewaRows.push({
           nama,
+          vendor: (p[`vendor_sewa${suffix}`] || '').trim(),
           pesertaNama: p.nama_anggota,
           jumlah,
           biaya: (Number(p[`biaya_sewa${suffix}`]) || 0) * jumlah,
@@ -155,6 +160,59 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
   const pengeluaranAddOnRows = addOnItems.filter((i) => pengeluaranAddOn(i) > 0)
   const pengeluaranSewaRows = sewaRows.filter((i) => pengeluaranSewa(i) > 0)
   const pengeluaranBundlingTop = bundlingTop.filter((i) => pengeluaranBundling(i) > 0 || bundlingItems.some((c) => c.parent_id === i.id && pengeluaranBundling(c) > 0))
+
+  // ============================================================
+  // REMITTANCE ADVICE -- gabungin semua baris Pengeluaran (Tim Makeup,
+  // Tim Layanan Tambahan, Add On Sewa, Paket Bundling) JADI 1 PIHAK
+  // per nama/handle yang SAMA -- misal vendor "@fourgrads" ngerjain
+  // Fotografer & Attire dalam 1 booking, harus jadi 1 dokumen, bukan 2.
+  //
+  // Cara ngelompokinnya: ambil bagian "(...)" di AKHIR nama kalau ada
+  // (pola sama kayak highlightKurung di bawah) -- itu yang jadi KUNCI
+  // pengelompokan (misal "Fotografer (@fourgrads)" -> kunci "@fourgrads").
+  // Kalau nggak ada tanda kurung (misal Tim ditulis "@hairdobygal"
+  // polos, atau Nama Vendor Sewa "Toko Kebaya Ayu"), kunci = teks penuh
+  // apa adanya. "role" (bagian SEBELUM kurung) dipake buat label jasa
+  // baris Paket Bundling-nya sendiri (misal "Fotografer").
+  function splitNamaVendor(nama) {
+    const n = (nama || '').trim()
+    const match = n.match(/^(.*?)\s*\(([^)]*)\)\s*$/)
+    if (match) {
+      const handle = match[2].trim()
+      return { key: handle.toLowerCase(), display: handle, role: match[1].trim() || handle }
+    }
+    return { key: n.toLowerCase(), display: n, role: n }
+  }
+
+  const pengeluaranPayeeMap = new Map()
+  function tambahKePayee(rawNama, jasa, jumlah, dibayar) {
+    const nama = (rawNama || '').trim()
+    if (!nama || dibayar <= 0) return
+    const { key, display } = splitNamaVendor(nama)
+    if (!pengeluaranPayeeMap.has(key)) pengeluaranPayeeMap.set(key, { key, display, items: [], total: 0 })
+    const entry = pengeluaranPayeeMap.get(key)
+    entry.items.push({ jasa, jumlah, dibayar })
+    entry.total += dibayar
+  }
+
+  makeupRows.forEach((r) => {
+    if (r.tim) tambahKePayee(r.namaTim, `Makeup — ${r.nama}`, r.sesi, pengeluaranMakeupTambahan(r))
+  })
+  tambahanRows.forEach((r) => {
+    if (r.tim) tambahKePayee(r.namaTim, `${r.jenis} — ${r.nama}`, r.sesi, pengeluaranMakeupTambahan(r))
+  })
+  sewaRows.forEach((item) => {
+    tambahKePayee(item.vendor, `${item.nama}${peserta.length > 1 ? ' — ' + item.pesertaNama : ''}`, item.jumlah, pengeluaranSewa(item))
+  })
+  bundlingTop.forEach((item) => {
+    const { role } = splitNamaVendor(item.nama)
+    tambahKePayee(item.nama, role, 1, pengeluaranBundling(item))
+    bundlingItems.filter((c) => c.parent_id === item.id).forEach((child) => {
+      tambahKePayee(item.nama, child.nama, 1, pengeluaranBundling(child))
+    })
+  })
+
+  const selectedPayee = selectedPayeeKey ? pengeluaranPayeeMap.get(selectedPayeeKey) : null
 
   // Rumus -- SENGAJA cuma nulis LABEL/poin-nya doang, BUKAN angka --
   // biar rumus ini jelasin KONSEPNYA ("dari mana asalnya Omzet"),
@@ -261,12 +319,13 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
   // @handle" di section Makeup/Tambahan (.rincian-metim), biar visual-nya
   // konsisten: warna itu = "penanda pihak yang terlibat".
   function highlightKurung(nama) {
-    const match = nama.match(/^(.*?)(\s*\([^)]*\))\s*$/)
+    const match = nama.match(/^(.*?)\s*\(([^)]*)\)\s*$/)
     if (!match) return nama
-    return <>{match[1]}<span className="rincian-metim">{match[2]}</span></>
+    return <>{match[1]} (<span className="rincian-metim">{match[2]}</span>)</>
   }
 
   return (
+    <>
     <div className="rincian-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose() }}>
       <div className="modal">
         <div className="modal-head">
@@ -309,7 +368,12 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
               <div className="rincian-section-title">Layanan Makeup</div>
               {(activeCard === 'pengeluaran' ? pengeluaranMakeupRows : makeupRows).map((r, idx) => (
                 <div className="rincian-row" key={idx}>
-                  <span>{r.nama} (<span className="rincian-metim">{r.tim ? `Tim${r.namaTim ? ' - ' + r.namaTim : ''}` : 'Me'}</span>){r.sesi > 1 ? ` (${r.sesi}x sesi)` : ''}</span>
+                  <div className="rincian-nama-grup">
+                    <span>{r.nama} (<span className="rincian-metim">{r.tim ? `Tim${r.namaTim ? ' - ' + r.namaTim : ''}` : 'Me'}</span>){r.sesi > 1 ? ` (${r.sesi}x sesi)` : ''}</span>
+                    {activeCard === 'pengeluaran' && r.tim && r.namaTim && r.namaTim.trim() && (
+                      <button type="button" className="btn-ra rincian-ra-btn" onClick={() => setSelectedPayeeKey(splitNamaVendor(r.namaTim).key)}>Buat Remittance Advice</button>
+                    )}
+                  </div>
                   <div className="rincian-nilai-wrap">
                     <b>{formatRupiah(activeCard === 'pengeluaran' ? pengeluaranMakeupTambahan(r) : nilaiMakeupTambahan(r))}</b>
                     {activeCard === 'pengeluaran'
@@ -340,7 +404,12 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
               <div className="rincian-section-title">Layanan Tambahan (Hairdo/Hijabdo+)</div>
               {(activeCard === 'pengeluaran' ? pengeluaranTambahanRows : tambahanRows).map((r, idx) => (
                 <div className="rincian-row" key={idx}>
-                  <span>{r.nama} ({r.jenis} | <span className="rincian-metim">{r.tim ? `Tim${r.namaTim ? ' - ' + r.namaTim : ''}` : 'Me'}</span>){r.sesi > 1 ? ` (${r.sesi}x sesi)` : ''}</span>
+                  <div className="rincian-nama-grup">
+                    <span>{r.nama} ({r.jenis} | <span className="rincian-metim">{r.tim ? `Tim${r.namaTim ? ' - ' + r.namaTim : ''}` : 'Me'}</span>){r.sesi > 1 ? ` (${r.sesi}x sesi)` : ''}</span>
+                    {activeCard === 'pengeluaran' && r.tim && r.namaTim && r.namaTim.trim() && (
+                      <button type="button" className="btn-ra rincian-ra-btn" onClick={() => setSelectedPayeeKey(splitNamaVendor(r.namaTim).key)}>Buat Remittance Advice</button>
+                    )}
+                  </div>
                   <div className="rincian-nilai-wrap">
                     <b>{formatRupiah(activeCard === 'pengeluaran' ? pengeluaranMakeupTambahan(r) : nilaiMakeupTambahan(r))}</b>
                     {activeCard === 'pengeluaran'
@@ -363,7 +432,12 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
               <div className="rincian-section-title">Add On (Sewa)</div>
               {(activeCard === 'pengeluaran' ? pengeluaranSewaRows : sewaRows).map((item, idx) => (
                 <div className="rincian-row" key={idx}>
-                  <span>{item.nama}{item.jumlah > 1 ? ` (x${item.jumlah})` : ''}{peserta.length > 1 ? <span className="rincian-metim"> ({item.pesertaNama})</span> : ''}</span>
+                  <div className="rincian-nama-grup">
+                    <span>{item.nama}{item.jumlah > 1 ? ` (x${item.jumlah})` : ''}{peserta.length > 1 ? <> (<span className="rincian-metim">{item.pesertaNama}</span>)</> : ''}</span>
+                    {activeCard === 'pengeluaran' && item.vendor && item.vendor.trim() && (
+                      <button type="button" className="btn-ra rincian-ra-btn" onClick={() => setSelectedPayeeKey(splitNamaVendor(item.vendor).key)}>Buat Remittance Advice</button>
+                    )}
+                  </div>
                   <div className="rincian-nilai-wrap">
                     <b>{formatRupiah(activeCard === 'pengeluaran' ? pengeluaranSewa(item) : nilaiSewa(item))}</b>
                     {activeCard === 'pengeluaran'
@@ -380,7 +454,7 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
               <div className="rincian-section-title">Add On (Beli)</div>
               {(activeCard === 'pengeluaran' ? pengeluaranAddOnRows : addOnItems).map((item, idx) => (
                 <div className="rincian-row" key={idx}>
-                  <span>{item.nama}{item.jumlah > 1 ? ` (x${item.jumlah})` : ''}{peserta.length > 1 ? <span className="rincian-metim"> ({item.pesertaNama})</span> : ''}</span>
+                  <span>{item.nama}{item.jumlah > 1 ? ` (x${item.jumlah})` : ''}{peserta.length > 1 ? <> (<span className="rincian-metim">{item.pesertaNama}</span>)</> : ''}</span>
                   <div className="rincian-nilai-wrap">
                     <b>{formatRupiah(activeCard === 'pengeluaran' ? pengeluaranAddOn(item) : nilaiAddOn(item))}</b>
                     {activeCard === 'pengeluaran'
@@ -399,7 +473,12 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
                 <div key={item.id}>
                   {(activeCard !== 'pengeluaran' || pengeluaranBundling(item) > 0) && (
                     <div className="rincian-row">
-                      <span>{highlightKurung(item.nama)}</span>
+                      <div className="rincian-nama-grup">
+                        <span>{highlightKurung(item.nama)}</span>
+                        {activeCard === 'pengeluaran' && item.nama && item.nama.trim() && (
+                          <button type="button" className="btn-ra rincian-ra-btn" onClick={() => setSelectedPayeeKey(splitNamaVendor(item.nama).key)}>Buat Remittance Advice</button>
+                        )}
+                      </div>
                       <div className="rincian-nilai-wrap">
                         <b>{formatRupiah(activeCard === 'pengeluaran' ? pengeluaranBundling(item) : nilaiBundling(item))}</b>
                         {activeCard === 'pengeluaran'
@@ -452,6 +531,7 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
             <div className="rincian-note-divider"></div>
 
             <div className="rincian-note-title">Penjelasan</div>
+            <div className="rincian-penjelasan"><b>Remittance Advice/Pemberitahuan Pembayaran</b> = Dokumen pemberitahuan pembayaran yang dikirimkan MUA kepada tim/vendor/penyedia jasa yang berkaitan dengan booking-an ini, setelah acara selesai/tanggungjawab selesai dilaksanakan.</div>
             <div className="rincian-penjelasan"><b>Belanja Klien</b> = total semua yang ditagihkan ke klien dalam sebuah booking. Apapun jenisnya dan siapapun yang mengerjakan. Termasuk biaya Retouch, seluruh harga Add On (Beli), biaya Add On (Sewa), dan biaya Paket Bundling, jika ada.</div>
             <div className="rincian-penjelasan"><b>Omzet</b> = total pemasukan dalam sebuah booking yang terdiri dari biaya jasa/layanan yang dikerjain sendiri (Me) dihitung penuh, yang dikerjain Tim cuma dihitung komisinya (jika ada), ditambah biaya Retouch (selalu penuh), harga penuh dari Add On (Beli), untung dari Add On (Sewa) dan untung dari Paket Bundling (jika ada), dan biaya transport.</div>
             <div className="rincian-penjelasan"><b>Penghasilan</b> = bagian yang beneran jadi keuntungan bagi MUA. Sama kayak Omzet, tapi Add On (Beli) cuma dihitung untungnya (bukan biaya penuh), Add On (Sewa) dan Paket Bundling cuma dihitung untung/komisinya, biaya Retouch tetap dihitung penuh, dan biaya transport nggak dihitung sama sekali (karena biaya transport itu ongkos, bukan keuntungan).</div>
@@ -464,5 +544,10 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
         </div>
       </div>
     </div>
+
+    {selectedPayee && (
+      <RemittanceAdviceModal booking={booking} payee={selectedPayee} onClose={() => setSelectedPayeeKey(null)} />
+    )}
+    </>
   )
 }
