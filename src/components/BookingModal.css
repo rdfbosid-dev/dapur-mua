@@ -81,6 +81,23 @@
   .booking-modal-overlay .field-grid-booking.cols-catatan { grid-template-columns: 1fr; }
   .booking-modal-overlay .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; margin-top: 5px; }
   .booking-modal-overlay .field label { font-size: 12px; font-weight: 600; color: var(--ink-soft); }
+  /* Bungkus label + catatan kecil italic ("*di luar paket bundling")
+     jadi 1 baris sejajar horizontal -- .field sendiri flex-column
+     (label numpuk di atas input), jadi butuh wrapper row terpisah
+     biar label & catatannya bisa nempel di SAMPING, bukan turun baris. */
+  .booking-modal-overlay .field-label-inline { display: flex; align-items: baseline; gap: 6px; }
+  .booking-modal-overlay .field-note { font-size: 10px; font-style: italic; color: var(--ink-soft); opacity: 0.65; }
+  /* Label "Nama Produk" itu SELALU 1 baris, tapi pasangannya di
+     sebelah ("Harga/Biaya per Item (Ditagih ke Klien)") dipaksa 2
+     baris (<br/> manual). Beda dari fix .field-grid-bundling di atas
+     (yang nge-target SEMUA label dalam grid itu), di sini nge-target
+     LABEL INI DOANG (class ditempel langsung di <label>-nya) -- soalnya
+     baris ini numpang .field-grid-peserta.cols-2, class yang dipake
+     BANYAK banget di form ini buat pasangan field pendek-pendek biasa
+     (Nama Klien/Peran, dst) -- kalau nge-fix di level grid-nya kayak
+     .field-grid-bundling, SEMUA pasangan field 2-kolom lain di form
+     ini ikut ketarik kasih ruang kosong ekstra yang nggak perlu. */
+  .booking-modal-overlay .field-label-2line { min-height: 30px; }
   .booking-modal-overlay .field-label-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 6px; }
   .booking-modal-overlay .quickfill-btn {
     font-size: 10px; font-weight: 500; color: var(--h1); background: var(--ink-faint);
@@ -147,6 +164,16 @@
   }
   .booking-modal-overlay .field-grid-peserta.cols-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 0; }
   .booking-modal-overlay .field-grid-bundling { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 0; }
+  /* Label yang kepanjangan (misal "Biaya per Item (Ditagih ke Klien)")
+     sekarang SENGAJA dipaksa turun ke baris ke-2 pas ketemu tanda
+     kurung (<br/> manual di JSX, bukan auto-wrap browser) -- biar
+     potongannya rapi & konsisten, bukan wrap "seadanya" tergantung
+     lebar layar. Label yang PENDEK (misal "Jumlah", nggak ada <br/>)
+     dikasih min-height yang SAMA (2 baris) di sini, biar inputnya
+     tetep sejajar sama kolom sebelahnya yang labelnya 2 baris --
+     TANPA ini, "Jumlah" cuma 1 baris jadi inputnya nongol lebih
+     tinggi dari 2 field sebelahnya. */
+  .booking-modal-overlay .field-grid-bundling .field label { min-height: 30px; }
   .booking-modal-overlay .addon-remove-row { display: flex; justify-content: flex-end; margin-bottom: 5px; margin-top: 10px; }
   .booking-modal-overlay .peserta-remove {
     font-size: 12px; font-weight: 550; color: var(--h8); cursor: pointer; background: var(--notif); border: 1px solid var(--notif);
@@ -242,6 +269,7 @@
   
     .booking-modal-overlay .field-grid-peserta.cols-2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; margin-bottom: 0; }
     .booking-modal-overlay .field-grid-bundling { grid-template-columns: 1fr; gap: 8px; }
+    .booking-modal-overlay .field-grid-bundling .field label { min-height: 0; }
   
     .booking-modal-overlay .quickfill-btn {
       font-size: 10px; font-weight: 500; color: var(--h1); background: var(--ink-faint);

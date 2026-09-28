@@ -207,6 +207,21 @@
    yang beneran tersedia. */
 .booking-detail-overlay .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; margin-top: 5px; min-width: 0; }
 .booking-detail-overlay .field label { font-size: 12px; font-weight: 600; color: var(--ink-soft); margin-bottom: 5px; }
+/* Bungkus label + catatan kecil italic ("*di luar paket bundling")
+   jadi 1 baris sejajar horizontal -- .field sendiri flex-column
+   (label numpuk di atas input), jadi butuh wrapper row terpisah
+   biar label & catatannya bisa nempel di SAMPING, bukan turun baris.
+   margin-bottom label di-reset ke 0 DI DALAM wrapper ini doang (biar
+   nggak dobel sama gap milik .field sendiri). */
+.booking-detail-overlay .field-label-inline { display: flex; align-items: baseline; gap: 6px; }
+.booking-detail-overlay .field-label-inline label { margin-bottom: 0; }
+.booking-detail-overlay .field-note { font-size: 10px; font-style: italic; color: var(--ink-soft); opacity: 0.65; }
+/* Sama alasannya kayak di BookingModal.css -- label "Nama Produk" (1
+   baris) butuh disamain tingginya sama pasangannya "Harga/Biaya per
+   Item (Ditagih ke Klien)" (2 baris, dari <br/> manual). Class
+   ditempel di label-nya sendiri (bukan level grid), biar nggak ikut
+   ngefek ke pasangan field 2-kolom lain di form yang nggak butuh ini. */
+.booking-detail-overlay .field-label-2line { min-height: 30px; }
 .booking-detail-overlay .field input,
 .booking-detail-overlay .field select,
 .booking-detail-overlay .field textarea {
@@ -238,6 +253,11 @@
    di BookingModal.css. Sebelumnya kelewat kecopy pas file ini dibuat,
    makanya jatuh ke tampilan default (numpuk 1 kolom per baris). */
 .booking-detail-overlay .field-grid-bundling { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 0; }
+/* Sama alasannya kayak di BookingModal.css -- label yang labelnya
+   dipaksa <br/> ke baris ke-2 (di JSX) butuh min-height 2 baris di
+   sini juga, biar kolom yang labelnya cuma 1 baris (misal "Jumlah")
+   tetep sejajar inputnya sama 2 kolom sebelahnya. */
+.booking-detail-overlay .field-grid-bundling .field label { min-height: 30px; }
 .booking-detail-overlay .addon-remove-row { display: flex; justify-content: flex-end; margin-bottom: 5px; margin-top: 10px; }
 .booking-detail-overlay .peserta-remove {
   font-size: 12px; font-weight: 550; color: var(--h8); cursor: pointer; background: var(--notif); border: 1px solid var(--notif);
@@ -386,6 +406,7 @@
 
   .booking-detail-overlay .field-grid-peserta.cols-2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; margin-bottom: 0; }
   .booking-detail-overlay .field-grid-bundling { grid-template-columns: 1fr; gap: 8px; }
+  .booking-detail-overlay .field-grid-bundling .field label { min-height: 0; }
   .booking-detail-overlay .toggle-row-rambut { display: flex; gap: 3px; }
 }
 

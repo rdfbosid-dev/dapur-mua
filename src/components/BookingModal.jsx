@@ -846,7 +846,7 @@ export default function BookingModal({ onClose, onSaved }) {
                                 </div>
                                 <div className="field-grid-bundling">
                                   <div className="field"><label>Nama Add On</label><input type="text" placeholder="contoh: Lighting" value={a.nama} onChange={(e) => updateVendorAddOn(i, vi, ai, 'nama', e.target.value)} /></div>
-                                  <div className="field"><label>Biaya (Ditagih ke Klien)</label><input type="text" inputMode="numeric" placeholder="Rp0" value={a.biaya ? `Rp${formatAngkaInput(a.biaya)}` : ''} onChange={(e) => updateVendorAddOn(i, vi, ai, 'biaya', parseAngkaInput(e.target.value))} /></div>
+                                  <div className="field"><label>Biaya<br/>(Ditagih ke Klien)</label><input type="text" inputMode="numeric" placeholder="Rp0" value={a.biaya ? `Rp${formatAngkaInput(a.biaya)}` : ''} onChange={(e) => updateVendorAddOn(i, vi, ai, 'biaya', parseAngkaInput(e.target.value))} /></div>
                                   <div className="field"><label>Komisi untuk MUA</label><input type="text" inputMode="numeric" placeholder="Rp0" value={a.untung ? `Rp${formatAngkaInput(a.untung)}` : ''} onChange={(e) => updateVendorAddOn(i, vi, ai, 'untung', parseAngkaInput(e.target.value))} /></div>
                                 </div>
                               </div>
@@ -948,7 +948,10 @@ export default function BookingModal({ onClose, onSaved }) {
                           Keuangan). */}
                       <div className="field-grid-peserta cols-2">
                         <div className="field">
-                          <label>Add On Item (Sewa)</label>
+                          <div className="field-label-inline">
+                            <label>Add On Item (Sewa)</label>
+                            <span className="field-note">*di luar paket bundling</span>
+                          </div>
                           <div className="toggle-row">
                             <div className={`toggle-opt${!p.adaSewa ? ' sel' : ''}`} onClick={() => updatePeserta(i, 'adaSewa', false)}>Tidak</div>
                             <div className={`toggle-opt${p.adaSewa ? ' sel' : ''}`} onClick={() => updatePeserta(i, 'adaSewa', true)}>Ya</div>
@@ -995,11 +998,11 @@ export default function BookingModal({ onClose, onSaved }) {
                                 />
                               </div>
                               <div className="field">
-                                <label>Biaya (Ditagih ke Klien)</label>
+                                <label>Biaya per Item<br/>(Ditagih ke Klien)</label>
                                 <input type="text" inputMode="numeric" placeholder="Rp0" value={s.biaya ? `Rp${formatAngkaInput(s.biaya)}` : ''} onChange={(e) => updateSewa(i, si, 'biaya', parseAngkaInput(e.target.value))} />
                               </div>
                               <div className="field">
-                                <label>Untung (per Item)</label>
+                                <label>Untung<br/>(per Item)</label>
                                 <input type="text" inputMode="numeric" placeholder="Rp0" value={s.untung ? `Rp${formatAngkaInput(s.untung)}` : ''} onChange={(e) => updateSewa(i, si, 'untung', parseAngkaInput(e.target.value))} />
                               </div>
                             </div>
@@ -1044,12 +1047,12 @@ export default function BookingModal({ onClose, onSaved }) {
                           )}
                           <div className="field-grid-peserta cols-2">
                             <div className="field">
-                              <label>{ai === 0 ? 'Nama Produk' : `Nama Produk ${ai + 1}`}</label>
+                              <label className="field-label-2line">{ai === 0 ? 'Nama Produk' : `Nama Produk ${ai + 1}`}</label>
                               <input type="text" placeholder="contoh: Softlens/Kuku Palsu/Melati/lainnya" value={a.nama} onChange={(e) => updateAddOn(i, ai, 'nama', e.target.value)} />
                             </div>
                             {a.nama.trim() && (
                               <div className="field">
-                                <label>Harga (Ditagih ke Klien)</label>
+                                <label>Harga<br/>(Ditagih ke Klien)</label>
                                 <input type="text" inputMode="numeric" placeholder="Rp0" value={a.biaya ? `Rp${formatAngkaInput(a.biaya)}` : ''} onChange={(e) => updateAddOn(i, ai, 'biaya', parseAngkaInput(e.target.value))} />
                               </div>
                             )}
@@ -1062,7 +1065,7 @@ export default function BookingModal({ onClose, onSaved }) {
                           {a.nama.trim() && (
                             <div className="field-grid-peserta cols-2">
                               <div className="field">
-                                <label>Jumlah</label>
+                                <label className="field-label-2line">Jumlah</label>
                                 <input
                                   type="text"
                                   inputMode="numeric"
@@ -1076,7 +1079,7 @@ export default function BookingModal({ onClose, onSaved }) {
                                 />
                               </div>
                               <div className="field">
-                                <label>Untung (per Item)</label>
+                                <label>Untung<br/>(per Item)</label>
                                 <input type="text" inputMode="numeric" placeholder="Rp0" value={a.keuntungan ? `Rp${formatAngkaInput(a.keuntungan)}` : ''} onChange={(e) => updateAddOn(i, ai, 'keuntungan', parseAngkaInput(e.target.value))} />
                               </div>
                             </div>

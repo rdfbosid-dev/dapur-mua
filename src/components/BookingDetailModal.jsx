@@ -1086,7 +1086,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                                 </div>
                                 <div className="field-grid-bundling">
                                   <div className="field"><label>Nama Add On</label><input type="text" placeholder="contoh: Lighting" value={a.nama} onChange={(e) => updateVendorAddOn(i, vi, ai, 'nama', e.target.value)} /></div>
-                                  <div className="field"><label>Biaya (Ditagih ke Klien)</label><input type="text" inputMode="numeric" placeholder="Rp0" value={a.biaya ? `Rp${formatAngkaInput(a.biaya)}` : ''} onChange={(e) => updateVendorAddOn(i, vi, ai, 'biaya', parseAngkaInput(e.target.value))} /></div>
+                                  <div className="field"><label>Biaya per Item<br/>(Ditagih ke Klien)</label><input type="text" inputMode="numeric" placeholder="Rp0" value={a.biaya ? `Rp${formatAngkaInput(a.biaya)}` : ''} onChange={(e) => updateVendorAddOn(i, vi, ai, 'biaya', parseAngkaInput(e.target.value))} /></div>
                                   <div className="field"><label>Komisi untuk MUA</label><input type="text" inputMode="numeric" placeholder="Rp0" value={a.untung ? `Rp${formatAngkaInput(a.untung)}` : ''} onChange={(e) => updateVendorAddOn(i, vi, ai, 'untung', parseAngkaInput(e.target.value))} /></div>
                                 </div>
                               </div>
@@ -1188,7 +1188,10 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                           Keuangan). */}
                       <div className="field-grid-peserta cols-2">
                         <div className="field">
-                          <label>Add On Item (Sewa)</label>
+                          <div className="field-label-inline">
+                            <label>Add On Item (Sewa)</label>
+                            <span className="field-note">*di luar paket bundling</span>
+                          </div>
                           <div className="toggle-row">
                             <div className={`toggle-opt${!p._adaSewa ? ' sel' : ''}`} onClick={() => updateEditPeserta(i, '_adaSewa', false)}>Tidak</div>
                             <div className={`toggle-opt${p._adaSewa ? ' sel' : ''}`} onClick={() => updateEditPeserta(i, '_adaSewa', true)}>Ya</div>
@@ -1241,11 +1244,11 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                                   />
                                 </div>
                                 <div className="field">
-                                  <label>Biaya (Ditagih ke Klien)</label>
+                                  <label>Biaya per Item<br/>(Ditagih ke Klien)</label>
                                   <input type="text" inputMode="numeric" placeholder="Rp0" value={p[biayaField] ? `Rp${formatAngkaInput(p[biayaField])}` : ''} onChange={(e) => updateEditPeserta(i, biayaField, parseAngkaInput(e.target.value))} />
                                 </div>
                                 <div className="field">
-                                  <label>Untung (per Item)</label>
+                                  <label>Untung<br/>(per Item)</label>
                                   <input type="text" inputMode="numeric" placeholder="Rp0" value={p[untungField] ? `Rp${formatAngkaInput(p[untungField])}` : ''} onChange={(e) => updateEditPeserta(i, untungField, parseAngkaInput(e.target.value))} />
                                 </div>
                               </div>
@@ -1299,12 +1302,12 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                             )}
                             <div className="field-grid-peserta cols-2">
                               <div className="field">
-                                <label>{n === 1 ? 'Nama Produk' : `Nama Produk ${n}`}</label>
+                                <label className="field-label-2line">{n === 1 ? 'Nama Produk' : `Nama Produk ${n}`}</label>
                                 <input type="text" placeholder="contoh: Softlens" value={p[namaField] || ''} onChange={(e) => updateEditPeserta(i, namaField, e.target.value)} />
                               </div>
                               {(p[namaField] || '').trim() && (
                                 <div className="field">
-                                  <label>Harga (Ditagih ke Klien)</label>
+                                  <label>Harga per Item<br/>(Ditagih ke Klien)</label>
                                   <input type="text" inputMode="numeric" placeholder="Rp0" value={p[biayaField] ? `Rp${formatAngkaInput(p[biayaField])}` : ''} onChange={(e) => updateEditPeserta(i, biayaField, parseAngkaInput(e.target.value))} />
                                 </div>
                               )}
@@ -1316,7 +1319,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                             {(p[namaField] || '').trim() && (
                               <div className="field-grid-peserta cols-2">
                                 <div className="field">
-                                  <label>Jumlah</label>
+                                  <label className="field-label-2line">Jumlah</label>
                                   <input
                                     type="text"
                                     inputMode="numeric"
@@ -1330,7 +1333,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                                   />
                                 </div>
                                 <div className="field">
-                                  <label>Untung (per Item)</label>
+                                  <label>Untung<br/>(per Item)</label>
                                   <input type="text" inputMode="numeric" placeholder="Rp0" value={p[untungField] ? `Rp${formatAngkaInput(p[untungField])}` : ''} onChange={(e) => updateEditPeserta(i, untungField, parseAngkaInput(e.target.value))} />
                                 </div>
                               </div>
