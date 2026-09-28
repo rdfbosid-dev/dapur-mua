@@ -79,7 +79,33 @@
 .inv-sub { font-size: 11px; color: var(--ink); margin-top: 1px; }
 .inv-sub-note { font-size: 11px; color: var(--ink-soft); margin-top: 1px; }
 
+/* table-layout: fixed -- SENGAJA, biar lebar tiap kolom KONSISTEN
+   (nggak ngikutin konten terpanjang lagi). Sebelumnya default-nya
+   "auto": kalau teks Layanan/Add On kepanjangan (misal gabungan 2
+   vendor Paket Bundling), browser bakal narik lebar kolom itu SEENAKNYA,
+   nyempitin kolom Klien walau isinya cuma nama pendek. Sekarang lebar
+   per kolom FIKS (persentase), dan teks yang kepanjangan otomatis TURUN
+   BARIS (overflow-wrap) numpuk ke bawah dalam sel yang sama, bukan
+   narik lebar kolom. */
 .inv-table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+/* table-layout: fixed -- SENGAJA, biar lebar tiap kolom KONSISTEN
+   (nggak ngikutin konten terpanjang lagi). Sebelumnya default-nya
+   "auto": kalau teks Layanan/Add On kepanjangan (misal gabungan 2
+   vendor Paket Bundling), browser bakal narik lebar kolom itu SEENAKNYA,
+   nyempitin kolom Klien walau isinya cuma nama pendek. Sekarang lebar
+   per kolom FIKS (persentase), dan teks yang kepanjangan otomatis TURUN
+   BARIS (overflow-wrap) numpuk ke bawah dalam sel yang sama, bukan
+   narik lebar kolom.
+   Scoped ke ".inv-table-3col" doang (BUKAN ".inv-table" polos) --
+   ada 1 tabel lain (fallback Paket Bundling tanpa peserta_id, kasus
+   langka) yang numpang class ".inv-table" tapi cuma 2 kolom; kalau
+   width rule di bawah ini nggak di-scope, bakal salah kepasang di
+   situ juga. */
+.inv-table-3col { table-layout: fixed; }
+.inv-table-3col th:nth-child(1), .inv-table-3col td:nth-child(1) { width: 18%; }
+.inv-table-3col th:nth-child(2), .inv-table-3col td:nth-child(2) { width: 57%; }
+.inv-table-3col th:nth-child(3), .inv-table-3col td:nth-child(3) { width: 25%; }
+.inv-table-3col td { overflow-wrap: break-word; word-break: break-word; }
 .inv-table thead th {
   text-align: left; font-size: 10.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
   color: var(--ink-soft); padding: 8px 4px; border-bottom: 1px solid var(--button-border);

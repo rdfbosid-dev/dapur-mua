@@ -75,7 +75,7 @@ function InvoicePaper({ profile, booking, peserta, payments, bundlingItems = [],
         </div>
       </div>
 
-      <table className="inv-table">
+      <table className="inv-table inv-table-3col">
         <thead>
           <tr>
             <th>Klien</th>
@@ -104,11 +104,22 @@ function InvoicePaper({ profile, booking, peserta, payments, bundlingItems = [],
             const rows = []
             if (vendorsPeserta.length > 0) {
               const totalPaket = Number(p.biaya_makeup || 0) * sesiMakeup + vendorsPeserta.reduce((sum, v) => sum + Number(v.biaya || 0), 0)
-              const labelVendor = vendorsPeserta.map((v) => v.nama).join(' & ')
               rows.push(
                 <tr key={p.id + '-mkp'}>
                   <td>{p.nama_anggota}{p.peran ? ` (${p.peran})` : ''}</td>
-                  <td>Paket Bundling {labelVendor}</td>
+                  <td>
+                    {/* Tiap vendor Paket Bundling ditaruh di BARIS-nya
+                        sendiri (bukan digabung 1 teks panjang pakai
+                        "&" lagi) -- prefix "Paket Bundling" cuma
+                        nempel di vendor PERTAMA doang. v.vendor (field
+                        BARU) digabung ke v.nama kalau ada; data lama
+                        (v.vendor kosong) otomatis fallback nampilin
+                        v.nama doang (yang di data lama emang udah
+                        gabungan 1 teks bebas). */}
+                    {vendorsPeserta.map((v, vidx) => (
+                      <div key={v.id || vidx}>{vidx === 0 ? 'Paket Bundling ' : ''}{v.nama}{v.vendor ? ' ' + v.vendor : ''}</div>
+                    ))}
+                  </td>
                   <td className="right">{formatRupiah(totalPaket)}</td>
                 </tr>
               )
@@ -146,8 +157,15 @@ function InvoicePaper({ profile, booking, peserta, payments, bundlingItems = [],
             // dikasih tau "by <vendor>" biar klien tau itu tambahan
             // dari vendor yang mana.
             vendorsPeserta.forEach((v) => {
-              const handleMatch = v.nama.match(/\(([^)]+)\)/)
-              const labelVendorSingkat = handleMatch ? handleMatch[1] : v.nama
+              // Prioritasin v.vendor (field BARU, bersih) buat label
+              // singkat "by <vendor>" -- fallback ke regex-parsing nama
+              // (pola lama) cuma kalau v.vendor kosong (data booking
+              // lama, sebelum field ini ada).
+              let labelVendorSingkat = v.vendor
+              if (!labelVendorSingkat) {
+                const handleMatch = v.nama.match(/\(([^)]+)\)/)
+                labelVendorSingkat = handleMatch ? handleMatch[1] : v.nama
+              }
               bundlingItems.filter((c) => c.parent_id === v.id).forEach((c) => {
                 rows.push(
                   <tr key={c.id}>

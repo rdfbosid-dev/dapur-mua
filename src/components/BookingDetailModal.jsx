@@ -224,6 +224,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
       vendors: bundlingItems.filter((b) => b.peserta_id === p.id && !b.parent_id).map((v) => ({
         id: v.id,
         nama: v.nama,
+        vendor: v.vendor || '',
         biaya: v.biaya,
         untung: v.keuntungan,
         addOns: bundlingItems.filter((c) => c.parent_id === v.id).map((c) => ({
@@ -330,7 +331,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
     }))
   }
   function addVendor(pesertaIdx) {
-    setEditPeserta((list) => list.map((p, idx) => (idx === pesertaIdx ? { ...p, vendors: [...(p.vendors || []), { nama: '', biaya: '', untung: '', addOns: [] }] } : p)))
+    setEditPeserta((list) => list.map((p, idx) => (idx === pesertaIdx ? { ...p, vendors: [...(p.vendors || []), { nama: '', vendor: '', biaya: '', untung: '', addOns: [] }] } : p)))
   }
   function updateVendor(pesertaIdx, vendorIdx, field, value) {
     setEditPeserta((list) => list.map((p, idx) => {
@@ -572,6 +573,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
           user_id: user.id,
           peserta_id: pesertaId,
           nama: v.nama.trim(),
+          vendor: (v.vendor || '').trim() || null,
           biaya: Number(v.biaya) || 0,
           keuntungan: Number(v.untung) || 0,
         }
@@ -1033,6 +1035,13 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                         )}
                       </div>
 
+                      {/* Sertakan Paket Bundling -- SENGAJA cuma muncul di
+                          Klien 1 (i === 0), sama alasannya kayak di
+                          BookingModal.css. Divider PEMBUKA ikut
+                          dibungkus, divider PENUTUP (misahin ke "Add On
+                          Layanan Rambut") tetep di LUAR, selalu tampil. */}
+                      {i === 0 && (
+                      <>
                       <div className="form-divider"></div>
 
                       {/* Paket Bundling -- toggle TERPISAH dari Kategori
@@ -1062,15 +1071,20 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                       <div>
                         {(p.vendors || []).map((v, vi) => (
                           <div key={v.id || vi}>
+                            <div className="sb-label">{(p.vendors || []).length > 1 ? `Vendor ${vi + 1}` : 'Vendor'}</div>
                             <div className="field-grid-peserta cols-2">
                               <div className="field">
-                                <label>Vendor {vi + 1}</label>
-                                <input type="text" placeholder="contoh: @attirebyjennie" value={v.nama} onChange={(e) => updateVendor(i, vi, 'nama', e.target.value)} />
+                                <label>Jasa/Produk Vendor</label>
+                                <input type="text" placeholder="Contoh: Attire" value={v.nama} onChange={(e) => updateVendor(i, vi, 'nama', e.target.value)} />
+                              </div>
+                              <div className="field">
+                                <label>Nama Vendor</label>
+                                <input type="text" placeholder="Contoh: @attirebyjennie" value={v.vendor} onChange={(e) => updateVendor(i, vi, 'vendor', e.target.value)} />
                               </div>
                             </div>
                             <div className="field-grid-peserta cols-2">
                               <div className="field">
-                                <label>Biaya Vendor {vi + 1}</label>
+                                <label>{(p.vendors || []).length > 1 ? `Biaya Vendor ${vi + 1}` : 'Biaya Vendor'}</label>
                                 <input type="text" inputMode="numeric" placeholder="Rp0" value={v.biaya ? `Rp${formatAngkaInput(v.biaya)}` : ''} onChange={(e) => updateVendor(i, vi, 'biaya', parseAngkaInput(e.target.value))} />
                               </div>
                               <div className="field">
@@ -1082,16 +1096,16 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                             {v.addOns.map((a, ai) => (
                               <div key={a.id || ai}>
                                 <div className="addon-remove-row">
-                                  <button type="button" className="peserta-remove" onClick={() => removeVendorAddOn(i, vi, ai)}>Hapus Add On Vendor {ai + 1}</button>
+                                  <button type="button" className="peserta-remove" onClick={() => removeVendorAddOn(i, vi, ai)}>{(p.vendors || []).length > 1 ? `Hapus Add On Vendor ${vi + 1}` : 'Hapus Add On Vendor'}</button>
                                 </div>
-                                <div className="field-grid-bundling">
+                                <div className="field-grid-bundling field-grid-bundling--vendoraddon">
                                   <div className="field"><label>Nama Add On</label><input type="text" placeholder="contoh: Lighting" value={a.nama} onChange={(e) => updateVendorAddOn(i, vi, ai, 'nama', e.target.value)} /></div>
                                   <div className="field"><label>Biaya per Item<br/>(Ditagih ke Klien)</label><input type="text" inputMode="numeric" placeholder="Rp0" value={a.biaya ? `Rp${formatAngkaInput(a.biaya)}` : ''} onChange={(e) => updateVendorAddOn(i, vi, ai, 'biaya', parseAngkaInput(e.target.value))} /></div>
-                                  <div className="field"><label>Komisi untuk MUA</label><input type="text" inputMode="numeric" placeholder="Rp0" value={a.untung ? `Rp${formatAngkaInput(a.untung)}` : ''} onChange={(e) => updateVendorAddOn(i, vi, ai, 'untung', parseAngkaInput(e.target.value))} /></div>
+                                  <div className="field"><label className="field-label-2line">Komisi untuk MUA</label><input type="text" inputMode="numeric" placeholder="Rp0" value={a.untung ? `Rp${formatAngkaInput(a.untung)}` : ''} onChange={(e) => updateVendorAddOn(i, vi, ai, 'untung', parseAngkaInput(e.target.value))} /></div>
                                 </div>
                               </div>
                             ))}
-                            <button type="button" className="add-peserta" onClick={() => addVendorAddOn(i, vi)}>+ Tambah Add On Vendor {vi + 1}</button>
+                            <button type="button" className="add-peserta" onClick={() => addVendorAddOn(i, vi)}>{(p.vendors || []).length > 1 ? `+ Tambah Add On Vendor ${vi + 1}` : '+ Tambah Add On Vendor'}</button>
 
                             {vi > 0 && (
                             <div className="addon-remove-row">
@@ -1102,6 +1116,8 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                         ))}
                         <button type="button" className="add-peserta" onClick={() => addVendor(i)}>+ Tambah Vendor</button>
                       </div>
+                      )}
+                      </>
                       )}
 
                       <div className="form-divider"></div>
@@ -1187,11 +1203,11 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                           Omzet/Penghasilan -- lihat migrasi SQL + Rincian
                           Keuangan). */}
                       <div className="field-grid-peserta cols-2">
+                        <div className="field-label-inline field-full-width">
+                          <label>Add On Item (Sewa)</label>
+                          <span className="field-note">*di luar paket bundling</span>
+                        </div>
                         <div className="field">
-                          <div className="field-label-inline">
-                            <label>Add On Item (Sewa)</label>
-                            <span className="field-note">*di luar paket bundling</span>
-                          </div>
                           <div className="toggle-row">
                             <div className={`toggle-opt${!p._adaSewa ? ' sel' : ''}`} onClick={() => updateEditPeserta(i, '_adaSewa', false)}>Tidak</div>
                             <div className={`toggle-opt${p._adaSewa ? ' sel' : ''}`} onClick={() => updateEditPeserta(i, '_adaSewa', true)}>Ya</div>
@@ -1226,9 +1242,13 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                             {/* Jumlah, Biaya & Untung digabung 1 baris (3
                                 kolom, numpang .field-grid-bundling) --
                                 Biaya & Untung itu harga PER-UNIT, dikaliin
-                                otomatis. */}
+                                otomatis. Class kedua "field-grid-bundling--sewa"
+                                SENGAJA ditambahin -- biar khusus baris INI
+                                doang yang dipaksa TETEP 3 kolom di mobile,
+                                tanpa ngefek ke Add On Vendor-nya Paket
+                                Bundling yang numpang class dasar yang sama. */}
                             {(p[namaField] || '').trim() && (
-                              <div className="field-grid-bundling">
+                              <div className="field-grid-bundling field-grid-bundling--sewa">
                                 <div className="field">
                                   <label>Jumlah</label>
                                   <input
@@ -1247,7 +1267,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                                   <label>Biaya per Item<br/>(Ditagih ke Klien)</label>
                                   <input type="text" inputMode="numeric" placeholder="Rp0" value={p[biayaField] ? `Rp${formatAngkaInput(p[biayaField])}` : ''} onChange={(e) => updateEditPeserta(i, biayaField, parseAngkaInput(e.target.value))} />
                                 </div>
-                                <div className="field">
+                                <div className="field field-untung-row2">
                                   <label>Untung<br/>(per Item)</label>
                                   <input type="text" inputMode="numeric" placeholder="Rp0" value={p[untungField] ? `Rp${formatAngkaInput(p[untungField])}` : ''} onChange={(e) => updateEditPeserta(i, untungField, parseAngkaInput(e.target.value))} />
                                 </div>

@@ -205,10 +205,18 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
     tambahKePayee(item.vendor, `${item.nama}${peserta.length > 1 ? ' — ' + item.pesertaNama : ''}`, item.jumlah, pengeluaranSewa(item))
   })
   bundlingTop.forEach((item) => {
-    const { role } = splitNamaVendor(item.nama)
-    tambahKePayee(item.nama, role, 1, pengeluaranBundling(item))
+    // item.vendor -- field BARU (bersih, dipisah dari item.nama). Kalau
+    // ADA, itu yang dipakai buat identitas pengelompokan (lebih akurat,
+    // nggak perlu nebak lewat regex lagi) -- item.nama sekarang murni
+    // "Jasa/Produk Vendor" doang (misal "Attire"), dipakai sebagai
+    // "role"/label jasa apa adanya. Data booking LAMA (sebelum field
+    // vendor ini ada) fallback ke cara lama: nama masih gabungan 1
+    // teks, di-urai pakai splitNamaVendor.
+    const identitySource = item.vendor || item.nama
+    const role = item.vendor ? item.nama : splitNamaVendor(item.nama).role
+    tambahKePayee(identitySource, role, 1, pengeluaranBundling(item))
     bundlingItems.filter((c) => c.parent_id === item.id).forEach((child) => {
-      tambahKePayee(item.nama, child.nama, 1, pengeluaranBundling(child))
+      tambahKePayee(identitySource, child.nama, 1, pengeluaranBundling(child))
     })
   })
 
@@ -474,9 +482,9 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
                   {(activeCard !== 'pengeluaran' || pengeluaranBundling(item) > 0) && (
                     <div className="rincian-row">
                       <div className="rincian-nama-grup">
-                        <span>{highlightKurung(item.nama)}</span>
-                        {activeCard === 'pengeluaran' && item.nama && item.nama.trim() && (
-                          <button type="button" className="btn-ra rincian-ra-btn" onClick={() => setSelectedPayeeKey(splitNamaVendor(item.nama).key)}>Buat Remittance Advice</button>
+                        <span>{item.vendor ? <>{item.nama} (<span className="rincian-metim">{item.vendor}</span>)</> : highlightKurung(item.nama)}</span>
+                        {activeCard === 'pengeluaran' && (item.vendor || item.nama).trim() && (
+                          <button type="button" className="btn-ra rincian-ra-btn" onClick={() => setSelectedPayeeKey(splitNamaVendor(item.vendor || item.nama).key)}>Buat Remittance Advice</button>
                         )}
                       </div>
                       <div className="rincian-nilai-wrap">

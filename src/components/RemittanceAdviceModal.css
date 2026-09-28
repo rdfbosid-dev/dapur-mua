@@ -19,3 +19,16 @@
 
 .invoice-print-portal .ra-payment-line { color: #4a5490; }
 .invoice-print-portal .ra-payment-value { color: #3f4ca2; }
+
+/* Versi cetak (.invoice-print-portal) pakai font JAUH lebih gede buat
+   .inv-title (40px) & .inv-studio (30px) dari sononya -- itu didesain
+   buat teks pendek kayak "INVOICE" (7 huruf). "REMITTANCE ADVICE" (17
+   huruf) & nama brand yang agak panjang (misal "Makeup by Sufina")
+   kepanjangan di ukuran segitu, jadinya kepotong turun 2 baris --
+   padahal di preview modal (yang fontnya lebih kecil, 22px/18px) 2-2nya
+   masih muat 1 baris. Class ".ra-paper" (nempel di elemen .invoice-paper
+   RA doang, lihat RemittanceAdviceModal.jsx) dipake biar override ini
+   CUMA ngefek ke Remittance Advice, Invoice (yang numpang class .inv-title/
+   .inv-studio yang SAMA) nggak ikut kesentuh/mengecil. */
+.invoice-print-portal .ra-paper .inv-title { font-size: 26px; }
+.invoice-print-portal .ra-paper .inv-studio { font-size: 22px; }

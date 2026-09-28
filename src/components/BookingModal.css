@@ -86,6 +86,19 @@
      (label numpuk di atas input), jadi butuh wrapper row terpisah
      biar label & catatannya bisa nempel di SAMPING, bukan turun baris. */
   .booking-modal-overlay .field-label-inline { display: flex; align-items: baseline; gap: 6px; }
+  /* Label di dalam sini SAMA PERSIS nilainya kayak ".field label" (baris
+     83) -- soalnya sejak field-label-inline dipisah jadi grid-item
+     sendiri (bukan turunan .field lagi), dia nggak ke-cover rule itu,
+     jadi harus ditulis ulang manual di sini biar visualnya seragam. */
+  .booking-modal-overlay .field-label-inline label { font-size: 12px; font-weight: 600; color: var(--ink-soft); }
+  /* "Add On Item (Sewa)" + catatan italic-nya -- SENGAJA dipaksa full
+     width (nembus 2 kolom .field-grid-peserta.cols-2, biar nggak
+     ke-jatah cuma setengah lebar layar mobile) + white-space:nowrap
+     (nggak boleh wrap sama sekali), biar tetep 1 baris utuh: "Add On
+     Item (Sewa) *di luar paket bundling". Font size dikecilin dikit
+     KHUSUS di mobile (lihat media query di bawah) biar muat. */
+  .booking-modal-overlay .field-full-width { grid-column: 1 / -1; }
+  .booking-modal-overlay .field-label-inline { white-space: nowrap; }
   .booking-modal-overlay .field-note { font-size: 10px; font-style: italic; color: var(--ink-soft); opacity: 0.65; }
   /* Label "Nama Produk" itu SELALU 1 baris, tapi pasangannya di
      sebelah ("Harga/Biaya per Item (Ditagih ke Klien)") dipaksa 2
@@ -270,6 +283,37 @@
     .booking-modal-overlay .field-grid-peserta.cols-2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; margin-bottom: 0; }
     .booking-modal-overlay .field-grid-bundling { grid-template-columns: 1fr; gap: 8px; }
     .booking-modal-overlay .field-grid-bundling .field label { min-height: 0; }
+    /* Khusus baris Jumlah/Biaya/Untung Add On (Sewa) -- class kedua
+       ".field-grid-bundling--sewa" bikin selector-nya 2-class, otomatis
+       menang lawan 2 rule polos ".field-grid-bundling" di atas
+       (spesifisitas CSS), TANPA harus sentuh Add On Vendor-nya Paket
+       Bundling yang cuma numpang class dasarnya doang. Tetep 3 kolom
+       + label tetep dipaksa 2 baris (bukan di-reset ke 0 kayak yang
+       umum), sesuai diminta. */
+    .booking-modal-overlay .field-grid-bundling.field-grid-bundling--sewa { grid-template-columns: 1fr 1fr; gap: 6px; }
+    .booking-modal-overlay .field-grid-bundling.field-grid-bundling--sewa .field label { min-height: 30px; }
+    /* Untung (per Item) diposisiin EKSPLISIT ke kolom ke-2 -- baris 1
+       udah kepake abis sama Jumlah (kolom 1) + Biaya per Item (kolom
+       2), jadi Untung otomatis "kelempar" ke baris ke-2, tapi tetep
+       nempel PAS di bawah Biaya per Item (bukan di bawah Jumlah). */
+    .booking-modal-overlay .field-grid-bundling.field-grid-bundling--sewa .field-untung-row2 { grid-column: 2; }
+
+    /* Add On Vendor (dalam Paket Bundling) -- "Nama Add On" (field
+       PERTAMA) tetep 1 baris penuh (nembus 2 kolom), sementara Biaya &
+       Komisi untuk MUA disandingin 2 kolom di baris ke-2. Beda dari
+       .field-grid-bundling--sewa (yang 3 field-nya semua kebagian
+       kolom eksplisit) -- di sini cuma field PERTAMA doang yang perlu
+       ditandain full-width, 2 field sisanya otomatis ngisi baris
+       berikutnya sendiri-sendiri, nggak perlu class tambahan lagi. */
+    .booking-modal-overlay .field-grid-bundling.field-grid-bundling--vendoraddon { grid-template-columns: 1fr 1fr; gap: 6px; }
+    .booking-modal-overlay .field-grid-bundling.field-grid-bundling--vendoraddon .field:first-child { grid-column: 1 / -1; }
+    /* Rule polos ".field-grid-bundling .field label { min-height: 0 }"
+       barusan di atas (buat collapse 1-kolom yang UMUM) kebetulan
+       spesifisitasnya (3 class) lebih tinggi dari ".field-label-2line"
+       (2 class) -- nge-reset min-height Komisi balik ke 0 walau class-
+       nya udah ditempel. Baris ini nulis ulang selector-nya lebih
+       spesifik (4+ class) khusus konteks --vendoraddon, biar menang. */
+    .booking-modal-overlay .field-grid-bundling.field-grid-bundling--vendoraddon .field .field-label-2line { min-height: 30px; }
   
     .booking-modal-overlay .quickfill-btn {
       font-size: 10px; font-weight: 500; color: var(--h1); background: var(--ink-faint);

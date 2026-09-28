@@ -214,7 +214,18 @@
    margin-bottom label di-reset ke 0 DI DALAM wrapper ini doang (biar
    nggak dobel sama gap milik .field sendiri). */
 .booking-detail-overlay .field-label-inline { display: flex; align-items: baseline; gap: 6px; }
-.booking-detail-overlay .field-label-inline label { margin-bottom: 0; }
+/* "Add On Item (Sewa)" + catatan italic-nya -- dipaksa full width +
+   nowrap, sama alasannya kayak di BookingModal.css. */
+.booking-detail-overlay .field-full-width { grid-column: 1 / -1; }
+.booking-detail-overlay .field-label-inline { white-space: nowrap; }
+/* Label di sini SAMA PERSIS nilainya kayak ".field label" (baris 209)
+   -- soalnya sejak field-label-inline dipisah jadi grid-item sendiri
+   (bukan turunan .field lagi), dia nggak ke-cover rule itu, jadi harus
+   ditulis ulang manual di sini biar visualnya seragam. margin-bottom
+   TETEP di-reset ke 0 (beda dari .field label yang 5px) -- di sini
+   label+catatan sejajar horizontal (align-items:baseline), bukan
+   ditumpuk, jadi nggak butuh margin-bottom itu. */
+.booking-detail-overlay .field-label-inline label { font-size: 12px; font-weight: 600; color: var(--ink-soft); margin-bottom: 0; }
 .booking-detail-overlay .field-note { font-size: 10px; font-style: italic; color: var(--ink-soft); opacity: 0.65; }
 /* Sama alasannya kayak di BookingModal.css -- label "Nama Produk" (1
    baris) butuh disamain tingginya sama pasangannya "Harga/Biaya per
@@ -407,6 +418,21 @@
   .booking-detail-overlay .field-grid-peserta.cols-2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; margin-bottom: 0; }
   .booking-detail-overlay .field-grid-bundling { grid-template-columns: 1fr; gap: 8px; }
   .booking-detail-overlay .field-grid-bundling .field label { min-height: 0; }
+  /* Khusus baris Jumlah/Biaya/Untung Add On (Sewa) -- sama alasannya
+     kayak di BookingModal.css. */
+  .booking-detail-overlay .field-grid-bundling.field-grid-bundling--sewa { grid-template-columns: 1fr 1fr; gap: 6px; }
+  .booking-detail-overlay .field-grid-bundling.field-grid-bundling--sewa .field label { min-height: 30px; }
+  .booking-detail-overlay .field-grid-bundling.field-grid-bundling--sewa .field-untung-row2 { grid-column: 2; }
+  /* Add On Vendor -- sama alasannya kayak di BookingModal.css: "Nama
+     Add On" (field pertama) tetep full-width, Biaya & Komisi untuk
+     MUA disandingin 2 kolom di baris ke-2. */
+  .booking-detail-overlay .field-grid-bundling.field-grid-bundling--vendoraddon { grid-template-columns: 1fr 1fr; gap: 6px; }
+  .booking-detail-overlay .field-grid-bundling.field-grid-bundling--vendoraddon .field:first-child { grid-column: 1 / -1; }
+  /* Sama alasannya kayak di BookingModal.css -- rule reset umum
+     ".field-grid-bundling .field label { min-height: 0 }" menang
+     spesifisitas lawan ".field-label-2line" polos, jadi ditulis ulang
+     lebih spesifik khusus konteks --vendoraddon di sini. */
+  .booking-detail-overlay .field-grid-bundling.field-grid-bundling--vendoraddon .field .field-label-2line { min-height: 30px; }
   .booking-detail-overlay .toggle-row-rambut { display: flex; gap: 3px; }
 }
 

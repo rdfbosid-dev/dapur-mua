@@ -299,7 +299,7 @@ export default function BookingModal({ onClose, onSaved }) {
   // nested di sini, baru di-"ratain" jadi baris bundling_items yang
   // saling terhubung lewat parent_id + peserta_id pas nyimpen.
   function addVendor(pesertaIdx) {
-    setPesertaList((list) => list.map((p, idx) => (idx === pesertaIdx ? { ...p, vendors: [...p.vendors, { nama: '', biaya: '', untung: '', addOns: [] }] } : p)))
+    setPesertaList((list) => list.map((p, idx) => (idx === pesertaIdx ? { ...p, vendors: [...p.vendors, { nama: '', vendor: '', biaya: '', untung: '', addOns: [] }] } : p)))
   }
   function updateVendor(pesertaIdx, vendorIdx, field, value) {
     setPesertaList((list) => list.map((p, idx) => {
@@ -476,6 +476,7 @@ export default function BookingModal({ onClose, onSaved }) {
         user_id: user.id,
         peserta_id: pesertaId,
         nama: v.nama.trim(),
+        vendor: (v.vendor || '').trim() || null,
         biaya: Number(v.biaya) || 0,
         keuntungan: Number(v.untung) || 0,
       }))
@@ -792,6 +793,17 @@ export default function BookingModal({ onClose, onSaved }) {
                         )}
                       </div>
 
+                      {/* Sertakan Paket Bundling -- SENGAJA cuma muncul di
+                          Klien 1 (i === 0). Konsepnya emang lebih ke "ada
+                          vendor luar buat ACARA ini" (1 booking), bukan
+                          per-klien -- jadi klien 2 dst nggak perlu
+                          ditawarin section ini lagi. Divider PEMBUKA
+                          (796) ikut dibungkus di sini biar klien 2+ nggak
+                          nyisain 2 garis dobel kosong -- divider PENUTUP
+                          (yang misahin ke "Add On Layanan Rambut") tetep
+                          di LUAR wrapper ini, selalu tampil apa adanya. */}
+                      {i === 0 && (
+                      <>
                       <div className="form-divider"></div>
 
                       {/* Paket Bundling -- SEKARANG toggle TERPISAH dari
@@ -822,15 +834,28 @@ export default function BookingModal({ onClose, onSaved }) {
                       <div>
                         {p.vendors.map((v, vi) => (
                           <div key={vi}>
+                            {/* Judul "Vendor" DINAMIS -- polos (nggak ada
+                                angka) kalau cuma 1 vendor doang, begitu
+                                nambah jadi 2+ SEMUANYA (termasuk yang
+                                pertama) ikut kebagian angka urutan.
+                                Beda dari pola "Nama Produk"/dst di
+                                tempat lain (yang slot pertamanya SELALU
+                                polos apapun total slot-nya) -- ini
+                                sengaja beda sesuai yang diminta. */}
+                            <div className="sb-label">{p.vendors.length > 1 ? `Vendor ${vi + 1}` : 'Vendor'}</div>
                             <div className="field-grid-peserta cols-2">
                               <div className="field">
-                                <label>Vendor {vi + 1}</label>
-                                <input type="text" placeholder="contoh: @attirebyjennie" value={v.nama} onChange={(e) => updateVendor(i, vi, 'nama', e.target.value)} />
+                                <label>Jasa/Produk Vendor</label>
+                                <input type="text" placeholder="Contoh: Attire" value={v.nama} onChange={(e) => updateVendor(i, vi, 'nama', e.target.value)} />
+                              </div>
+                              <div className="field">
+                                <label>Nama Vendor</label>
+                                <input type="text" placeholder="Contoh: @attirebyjennie" value={v.vendor} onChange={(e) => updateVendor(i, vi, 'vendor', e.target.value)} />
                               </div>
                             </div>
                             <div className="field-grid-peserta cols-2">
                               <div className="field">
-                                <label>Biaya Vendor {vi + 1}</label>
+                                <label>{p.vendors.length > 1 ? `Biaya Vendor ${vi + 1}` : 'Biaya Vendor'}</label>
                                 <input type="text" inputMode="numeric" placeholder="Rp0" value={v.biaya ? `Rp${formatAngkaInput(v.biaya)}` : ''} onChange={(e) => updateVendor(i, vi, 'biaya', parseAngkaInput(e.target.value))} />
                               </div>
                               <div className="field">
@@ -842,16 +867,16 @@ export default function BookingModal({ onClose, onSaved }) {
                             {v.addOns.map((a, ai) => (
                               <div key={ai}>
                                 <div className="addon-remove-row">
-                                  <button type="button" className="peserta-remove" onClick={() => removeVendorAddOn(i, vi, ai)}>Hapus Add On Vendor {ai + 1}</button>
+                                  <button type="button" className="peserta-remove" onClick={() => removeVendorAddOn(i, vi, ai)}>{p.vendors.length > 1 ? `Hapus Add On Vendor ${vi + 1}` : 'Hapus Add On Vendor'}</button>
                                 </div>
-                                <div className="field-grid-bundling">
+                                <div className="field-grid-bundling field-grid-bundling--vendoraddon">
                                   <div className="field"><label>Nama Add On</label><input type="text" placeholder="contoh: Lighting" value={a.nama} onChange={(e) => updateVendorAddOn(i, vi, ai, 'nama', e.target.value)} /></div>
                                   <div className="field"><label>Biaya<br/>(Ditagih ke Klien)</label><input type="text" inputMode="numeric" placeholder="Rp0" value={a.biaya ? `Rp${formatAngkaInput(a.biaya)}` : ''} onChange={(e) => updateVendorAddOn(i, vi, ai, 'biaya', parseAngkaInput(e.target.value))} /></div>
-                                  <div className="field"><label>Komisi untuk MUA</label><input type="text" inputMode="numeric" placeholder="Rp0" value={a.untung ? `Rp${formatAngkaInput(a.untung)}` : ''} onChange={(e) => updateVendorAddOn(i, vi, ai, 'untung', parseAngkaInput(e.target.value))} /></div>
+                                  <div className="field"><label className="field-label-2line">Komisi untuk MUA</label><input type="text" inputMode="numeric" placeholder="Rp0" value={a.untung ? `Rp${formatAngkaInput(a.untung)}` : ''} onChange={(e) => updateVendorAddOn(i, vi, ai, 'untung', parseAngkaInput(e.target.value))} /></div>
                                 </div>
                               </div>
                             ))}
-                            <button type="button" className="add-peserta" onClick={() => addVendorAddOn(i, vi)}>+ Tambah Add On Vendor {vi + 1}</button>
+                            <button type="button" className="add-peserta" onClick={() => addVendorAddOn(i, vi)}>{p.vendors.length > 1 ? `+ Tambah Add On Vendor ${vi + 1}` : '+ Tambah Add On Vendor'}</button>
 
                             {vi > 0 && (
                             <div className="addon-remove-row">
@@ -862,6 +887,8 @@ export default function BookingModal({ onClose, onSaved }) {
                         ))}
                         <button type="button" className="add-peserta" onClick={() => addVendor(i)}>+ Tambah Vendor</button>
                       </div>
+                      )}
+                      </>
                       )}
 
                       <div className="form-divider"></div>
@@ -947,11 +974,11 @@ export default function BookingModal({ onClose, onSaved }) {
                           Omzet/Penghasilan -- lihat migrasi SQL + Rincian
                           Keuangan). */}
                       <div className="field-grid-peserta cols-2">
+                        <div className="field-label-inline field-full-width">
+                          <label>Add On Item (Sewa)</label>
+                          <span className="field-note">*di luar paket bundling</span>
+                        </div>
                         <div className="field">
-                          <div className="field-label-inline">
-                            <label>Add On Item (Sewa)</label>
-                            <span className="field-note">*di luar paket bundling</span>
-                          </div>
                           <div className="toggle-row">
                             <div className={`toggle-opt${!p.adaSewa ? ' sel' : ''}`} onClick={() => updatePeserta(i, 'adaSewa', false)}>Tidak</div>
                             <div className={`toggle-opt${p.adaSewa ? ' sel' : ''}`} onClick={() => updatePeserta(i, 'adaSewa', true)}>Ya</div>
@@ -980,9 +1007,14 @@ export default function BookingModal({ onClose, onSaved }) {
                               kolom, numpang .field-grid-bundling) -- Biaya
                               & Untung yang diisi itu harga PER-UNIT,
                               dikaliin otomatis di Invoice/Rincian
-                              Keuangan. */}
+                              Keuangan. Class kedua "field-grid-bundling--sewa"
+                              SENGAJA ditambahin -- biar khusus baris INI
+                              doang yang dipaksa TETEP 3 kolom di mobile
+                              (nggak numpuk kayak .field-grid-bundling biasa),
+                              tanpa ngefek ke Add On Vendor-nya Paket
+                              Bundling yang numpang class dasar yang sama. */}
                           {s.nama.trim() && (
-                            <div className="field-grid-bundling">
+                            <div className="field-grid-bundling field-grid-bundling--sewa">
                               <div className="field">
                                 <label>Jumlah</label>
                                 <input
@@ -1001,7 +1033,7 @@ export default function BookingModal({ onClose, onSaved }) {
                                 <label>Biaya per Item<br/>(Ditagih ke Klien)</label>
                                 <input type="text" inputMode="numeric" placeholder="Rp0" value={s.biaya ? `Rp${formatAngkaInput(s.biaya)}` : ''} onChange={(e) => updateSewa(i, si, 'biaya', parseAngkaInput(e.target.value))} />
                               </div>
-                              <div className="field">
+                              <div className="field field-untung-row2">
                                 <label>Untung<br/>(per Item)</label>
                                 <input type="text" inputMode="numeric" placeholder="Rp0" value={s.untung ? `Rp${formatAngkaInput(s.untung)}` : ''} onChange={(e) => updateSewa(i, si, 'untung', parseAngkaInput(e.target.value))} />
                               </div>

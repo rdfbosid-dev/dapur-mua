@@ -65,7 +65,7 @@ const METODE_OPTIONS = ['Transfer Bank', 'E-wallet', 'QRIS', 'Cash']
 //   nggak punya status, murni bukti).
 function RemittanceAdvicePaper({ profile, booking, payee, tanggalKirim, metodePembayaran }) {
   return (
-    <div className="invoice-paper">
+    <div className="invoice-paper ra-paper">
       <div className="inv-header">
         <div>
           <div className="inv-studio">{profile?.studio_name || 'Studio Saya'}</div>
