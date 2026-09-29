@@ -50,7 +50,7 @@
 .logo-actions-row { display: flex; gap: 8px; margin-bottom: 6px; }
 .logo-actions-row .btn-ghost-small { margin-bottom: 0; }
 .btn-ghost-danger { color: var(--h8); background: var(--notif); }
-.btn-ghost-danger:hover { background: color-mix(in srgb, var(--notif) 85%, black) }
+.btn-ghost-danger:hover { background: color-mix(in srgb, var(--notif) 85%, black); }
 
 /* Tombol mata (tampilkan/sembunyikan kata sandi) -- beda struktur dari
    Auth.css (di sini label-nya nggak mengambang/nggak ngandelin selector
@@ -66,6 +66,26 @@
 .field-toggle-pw:hover { color: var(--h3); }
 .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .field-hint { font-size: 11px; color: var(--ink); }
+/* Catatan kecil italic di bawah sebuah label -- dipake buat "Nomor
+   Rekening" (nunjukkin ke mana rekening ini bakal ditampilin), tapi
+   ditulis generik (bukan .rekening-note) biar bisa dipake ulang buat
+   field lain kalau nanti butuh catatan serupa. */
+.field-note-italic { font-size: 11px; font-style: italic; color: var(--ink-soft); opacity: 0.75; margin-bottom: 8px; margin-top: -3px; }
+
+/* Rekening -- daftar baris (Bank + Nomor) yang bisa ditambah/dihapus.
+   Bank dikasih lebar TETAP (numpang flex-basis) soalnya nama bank
+   pendek-pendek ("BCA", "BRI"), Nomor Rekening ngambil sisa ruang yang
+   lebih lebar (nomornya lebih panjang). Tombol hapus (x) kotak kecil
+   di ujung kanan, nggak ikut nyusut. */
+.rekening-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
+.rekening-input-bank { flex: 0 0 110px; min-width: 0; }
+.rekening-input-nomor { flex: 1; min-width: 0; }
+.rekening-hapus {
+  flex: 0 0 auto; width: 34px; height: 34px; border-radius: 9px; border: none;
+  background: var(--notif); color: var(--h7); cursor: pointer; font-family: inherit;
+  display: flex; align-items: center; justify-content: center; transition: background 0.15s, color 0.15s; padding: 0;
+}
+.rekening-hapus:hover { background: color-mix(in srgb, var(--notif) 85%, black);; color: var(--h7); }
 
 .btn-primary {
   background: var(--button-prm-hover); color: var(--button-tx-hover); border: none; border-radius: 11px;
@@ -92,6 +112,7 @@
 .btn-keluar-ghost:hover { background: color-mix(in srgb, var(--notif) 85%, black); border: 1px solid color-mix(in srgb, var(--notif) 85%, black); }
 
 @media (max-width: 700px) {
+  .rekening-input-bank { flex: 0 0 65px; }
   .field-row { grid-template-columns: 1fr; }
   .card-pengaturan { border: 1px solid var(--line-box); }
   .logo-upload-row { gap: 12px; }

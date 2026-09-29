@@ -21,7 +21,7 @@ export function AuthProvider({ children }) {
     if (!userId) return
     const { data, error } = await supabase
       .from('profiles')
-      .select('studio_name, kode_prefix, instagram, whatsapp, logo_url, kode_kalender, trial_ends_at, subscription_status, subscription_ends_at, kalender_synced_at')
+      .select('studio_name, kode_prefix, instagram, whatsapp, logo_url, kode_kalender, trial_ends_at, subscription_status, subscription_ends_at, kalender_synced_at, rekening')
       .eq('id', userId)
       .maybeSingle() // beda dari .single() -- nggak error kalau 0 baris, cuma balikin null
 
@@ -47,11 +47,12 @@ export function AuthProvider({ children }) {
     const fallback = {
       studio_name: '', kode_prefix: '', instagram: '', whatsapp: '', logo_url: null, kode_kalender: null,
       trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), subscription_status: 'trial', kalender_synced_at: null,
+      rekening: [],
     }
     const { data: created } = await supabase
       .from('profiles')
       .upsert({ id: userId, ...fallback })
-      .select('studio_name, kode_prefix, instagram, whatsapp, logo_url, kode_kalender, trial_ends_at, subscription_status, subscription_ends_at, kalender_synced_at')
+      .select('studio_name, kode_prefix, instagram, whatsapp, logo_url, kode_kalender, trial_ends_at, subscription_status, subscription_ends_at, kalender_synced_at, rekening')
       .single()
 
     setProfile(created || fallback) // tetap kasih nilai walau upsert-nya somehow gagal juga

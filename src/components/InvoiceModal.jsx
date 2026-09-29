@@ -33,6 +33,15 @@ function IconIG() {
     </svg>
   )
 }
+function IconBank() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" width="15" height="15">
+      <path d="M2 9.5 12 4l10 5.5" />
+      <path d="M4 9.5V20M9 9.5V20M15 9.5V20M20 9.5V20" />
+      <path d="M2 20h20" />
+    </svg>
+  )
+}
 
 // `variant` bedain 2 mode render: 'screen' (default, tampilan di dalam
 // modal/app -- TETEP presis kayak sebelumnya, teks "WA:"/"IG:" polos)
@@ -51,6 +60,9 @@ function InvoicePaper({ profile, booking, peserta, payments, bundlingItems = [],
           )}
           {profile?.instagram && (
             <div className="inv-studio-meta"><IconIG />{profile.instagram}</div>
+          )}
+          {profile?.rekening && profile.rekening.length > 0 && (
+            <div className="inv-studio-meta"><IconBank />{profile.rekening.map((r) => `${r.bank} ${r.nomor}`).join(' / ')}</div>
           )}
         </div>
         <div className="inv-title-block">

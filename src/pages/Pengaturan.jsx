@@ -15,6 +15,11 @@ export default function Pengaturan() {
   const [kodePrefix, setKodePrefix] = useState('')
   const [instagram, setInstagram] = useState('')
   const [whatsapp, setWhatsapp] = useState('')
+  // Rekening -- array of {bank, nomor}, BISA lebih dari 1 (beda dari
+  // field lain di atas yang cuma 1 nilai). Selalu ada minimal 1 baris
+  // kosong di form biar user langsung liat input-nya, walau profile-nya
+  // belum ada rekening sama sekali.
+  const [rekening, setRekening] = useState([{ bank: '', nomor: '' }])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState(null) // { type: 'success' | 'error', text }
@@ -37,6 +42,10 @@ export default function Pengaturan() {
       setKodePrefix(profile.kode_prefix || '')
       setInstagram(profile.instagram || '')
       setWhatsapp(profile.whatsapp || '')
+      // Kalau profile.rekening kosong/belum ada, tetep pasang 1 baris
+      // kosong (bukan array kosong beneran) -- biar form-nya langsung
+      // ada tempat buat isi, bukan cuma tombol "+ Tambah" doang.
+      setRekening(profile.rekening && profile.rekening.length > 0 ? profile.rekening : [{ bank: '', nomor: '' }])
       setLoading(false)
     }
   }, [profile])
@@ -60,12 +69,27 @@ export default function Pengaturan() {
     }
   }, [profile, user, refreshProfile])
 
+  function updateRekening(idx, field, value) {
+    setRekening((list) => list.map((r, i) => (i === idx ? { ...r, [field]: value } : r)))
+  }
+  function addRekening() {
+    setRekening((list) => [...list, { bank: '', nomor: '' }])
+  }
+  function removeRekening(idx) {
+    setRekening((list) => list.filter((_, i) => i !== idx))
+  }
+
   async function handleSaveProfile(e) {
     e.preventDefault()
     setSaving(true)
     setMessage(null)
 
     const cleanPrefix = kodePrefix.trim().toUpperCase().slice(0, 5) || 'Book'
+    // Baris yang bank ATAU nomornya masih kosong nggak disimpen -- filter
+    // rekening yang beneran keisi doang (2-2nya, bank & nomor).
+    const cleanRekening = rekening
+      .map((r) => ({ bank: r.bank.trim(), nomor: r.nomor.trim() }))
+      .filter((r) => r.bank && r.nomor)
 
     // upsert (bukan update) -- jaga-jaga kalau baris profiles ternyata
     // belum ada, update() akan diam-diam nggak ngapa-ngapain tanpa error.
@@ -77,10 +101,12 @@ export default function Pengaturan() {
         kode_prefix: cleanPrefix,
         instagram: instagram.trim(),
         whatsapp: whatsapp.trim(),
+        rekening: cleanRekening,
       })
 
     setSaving(false)
     setKodePrefix(cleanPrefix)
+    setRekening(cleanRekening.length > 0 ? cleanRekening : [{ bank: '', nomor: '' }])
 
     if (error) {
       setMessage({ type: 'error', text: error.message })
@@ -270,6 +296,28 @@ export default function Pengaturan() {
                     <input type="text" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="085xxxxxxx" />
                   </div>
                 </div>
+
+                {/* Rekening -- BISA lebih dari 1 (beda dari field lain di
+                    atas yang 1 nilai doang), makanya dirender sebagai
+                    daftar baris yang bisa ditambah/dihapus. Ditaruh di
+                    BAWAH Nomor WhatsApp, sesuai diminta. */}
+                <div className="field">
+                  <label>Nomor Rekening</label>
+                  <div className="field-note-italic">*jika diisi, akan ditampilkan di lembar Invoice dan Remittance Advice sebagai informasi ke klien</div>
+                  {rekening.map((r, idx) => (
+                    <div className="rekening-row" key={idx}>
+                      <input type="text" value={r.bank} onChange={(e) => updateRekening(idx, 'bank', e.target.value)} placeholder="contoh: BCA" className="rekening-input-bank" />
+                      <input type="text" inputMode="numeric" value={r.nomor} onChange={(e) => updateRekening(idx, 'nomor', e.target.value.replace(/[^0-9]/g, ''))} placeholder="Nomor rekening" className="rekening-input-nomor" />
+                      {rekening.length > 1 && (
+                        <button type="button" className="rekening-hapus" onClick={() => removeRekening(idx)} aria-label="Hapus rekening ini">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" width="14" height="14"><path d="M6 6l12 12M18 6L6 18" /></svg>
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                  <button type="button" className="btn-ghost-small" onClick={addRekening}>+ Tambah Rekening</button>
+                </div>
+
                 <button className="btn-primary" type="submit" disabled={saving}>
                   {saving ? 'Menyimpan...' : 'Simpan Perubahan'}
                 </button>
