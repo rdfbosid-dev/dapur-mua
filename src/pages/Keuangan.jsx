@@ -90,7 +90,7 @@ export default function Keuangan() {
       setError('')
       const [bookingRes, pesertaRes, bundlingRes] = await Promise.all([
         supabase.from('booking_summary').select('*'),
-        supabase.from('peserta').select('booking_id, dikerjakan_oleh_makeup, biaya_makeup, komisi_makeup_tim, dikerjakan_oleh_tambahan, biaya_tambahan, komisi_tambahan, layanan_lainnya, biaya_lainnya, keuntungan_lainnya, layanan_lainnya_2, biaya_lainnya_2, keuntungan_lainnya_2, layanan_lainnya_3, biaya_lainnya_3, keuntungan_lainnya_3, layanan_lainnya_4, biaya_lainnya_4, keuntungan_lainnya_4, layanan_lainnya_5, biaya_lainnya_5, keuntungan_lainnya_5'),
+        supabase.from('peserta').select('booking_id, dikerjakan_oleh_makeup, biaya_makeup, komisi_makeup_tim, dikerjakan_oleh_tambahan, biaya_tambahan, komisi_tambahan, layanan_lainnya, biaya_lainnya, keuntungan_lainnya, layanan_lainnya_2, biaya_lainnya_2, keuntungan_lainnya_2, layanan_lainnya_3, biaya_lainnya_3, keuntungan_lainnya_3, layanan_lainnya_4, biaya_lainnya_4, keuntungan_lainnya_4, layanan_lainnya_5, biaya_lainnya_5, keuntungan_lainnya_5, nama_sewa, biaya_sewa, jumlah_sewa, untung_sewa, nama_sewa_2, biaya_sewa_2, jumlah_sewa_2, untung_sewa_2, nama_sewa_3, biaya_sewa_3, jumlah_sewa_3, untung_sewa_3, nama_sewa_4, biaya_sewa_4, jumlah_sewa_4, untung_sewa_4, nama_sewa_5, biaya_sewa_5, jumlah_sewa_5, untung_sewa_5'),
         supabase.from('bundling_items').select('booking_id, biaya, keuntungan'),
       ])
       if (bookingRes.error) setError(bookingRes.error.message)
@@ -160,6 +160,7 @@ export default function Keuangan() {
 
     const pembayaranTim = Array(12).fill(0)
     const belanjaProduk = Array(12).fill(0)
+    const pembayaranVendor = Array(12).fill(0)
     pesertaAll.forEach((p) => {
       const bulan = bulanByBookingId[p.booking_id]
       if (bulan === undefined) return
@@ -183,9 +184,26 @@ export default function Keuangan() {
         const untung = Number(p[`keuntungan_lainnya${suffix}`]) || 0
         belanjaProduk[bulan] += Math.max(0, biaya - untung)
       }
+
+      // Add On (Sewa) -- SEBELUMNYA kelewat sama sekali di sini (query
+      // peserta belum nyertain kolom nama_sewa/biaya_sewa/dst), padahal
+      // rumus "Bayar ke Vendor" di kartu Pengeluaran Rincian Keuangan
+      // per booking udah jelas nyebut Sewa itu masuk kategori "Bayar ke
+      // Vendor" (bareng Paket Bundling), BUKAN "Belanja Produk". Biaya &
+      // Untung yang kesimpen itu harga PER-UNIT, makanya dikaliin
+      // jumlah dulu (pola sama persis kayak pengeluaranSewa() di
+      // RincianKeuanganModal.jsx).
+      for (let n = 1; n <= 5; n++) {
+        const suffix = n === 1 ? '' : `_${n}`
+        const namaSewa = (p[`nama_sewa${suffix}`] || '').trim()
+        if (!namaSewa) continue
+        const jumlah = Math.max(1, Number(p[`jumlah_sewa${suffix}`]) || 1)
+        const biayaSewa = (Number(p[`biaya_sewa${suffix}`]) || 0) * jumlah
+        const untungSewa = (Number(p[`untung_sewa${suffix}`]) || 0) * jumlah
+        pembayaranVendor[bulan] += Math.max(0, biayaSewa - untungSewa)
+      }
     })
 
-    const pembayaranVendor = Array(12).fill(0)
     bundlingAll.forEach((item) => {
       const bulan = bulanByBookingId[item.booking_id]
       if (bulan === undefined) return
