@@ -306,7 +306,7 @@ export default function Pengaturan() {
                   <div className="field-note-italic">*jika diisi, akan ditampilkan di lembar Invoice dan Remittance Advice sebagai informasi ke klien</div>
                   {rekening.map((r, idx) => (
                     <div className="rekening-row" key={idx}>
-                      <input type="text" value={r.bank} onChange={(e) => updateRekening(idx, 'bank', e.target.value)} placeholder="contoh: BCA" className="rekening-input-bank" />
+                      <input type="text" value={r.bank} onChange={(e) => updateRekening(idx, 'bank', e.target.value)} placeholder="BCA/BRI/BNI" className="rekening-input-bank" />
                       <input type="text" inputMode="numeric" value={r.nomor} onChange={(e) => updateRekening(idx, 'nomor', e.target.value.replace(/[^0-9]/g, ''))} placeholder="Nomor rekening" className="rekening-input-nomor" />
                       {rekening.length > 1 && (
                         <button type="button" className="rekening-hapus" onClick={() => removeRekening(idx)} aria-label="Hapus rekening ini">
