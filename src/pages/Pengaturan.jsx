@@ -307,7 +307,7 @@ export default function Pengaturan() {
                   {rekening.map((r, idx) => (
                     <div className="rekening-row" key={idx}>
                       <input type="text" value={r.bank} onChange={(e) => updateRekening(idx, 'bank', e.target.value)} placeholder="BCA/BRI/BNI" className="rekening-input-bank" />
-                      <input type="text" inputMode="numeric" value={r.nomor} onChange={(e) => updateRekening(idx, 'nomor', e.target.value.replace(/[^0-9]/g, ''))} placeholder="Nomor rekening" className="rekening-input-nomor" />
+                      <input type="text" inputMode="numeric" value={r.nomor} onChange={(e) => updateRekening(idx, 'nomor', e.target.value.replace(/[^0-9]/g, ''))} placeholder="Nomor Rekening" className="rekening-input-nomor" />
                       {rekening.length > 1 && (
                         <button type="button" className="rekening-hapus" onClick={() => removeRekening(idx)} aria-label="Hapus rekening ini">
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" width="14" height="14"><path d="M6 6l12 12M18 6L6 18" /></svg>
