@@ -236,7 +236,14 @@ export default function Dashboard() {
   const penghasilanBulanIni = bookingBulanIni.reduce((sum, b) => sum + (Number(b.penghasilan) || 0), 0)
   const belanjaKlienBulanIni = bookingBulanIni.reduce((sum, b) => sum + (Number(b.belanja_klien) || 0), 0)
   const transportBulanIni = bookingBulanIni.reduce((sum, b) => sum + (Number(b.biaya_transport) || 0), 0)
-  const komisiTimBulanIni = omzetBulanIni - penghasilanBulanIni
+  // SEBELUMNYA "omzetBulanIni - penghasilanBulanIni" -- itu SALAH.
+  // komisi_makeup_tim & komisi_tambahan_tim itu ada di rumus omzet MAUPUN
+  // penghasilan (VIEW booking_summary) dengan koefisien yang SAMA, jadi
+  // kalau dikurangin, dua-duanya JUSTRU SALING CORET (bukan kehitung).
+  // Hasil pengurangan yang lama itu sebenarnya Transport + Belanja Produk
+  // + Bayar ke Vendor Bundling -- bukan Komisi dari Tim sama sekali.
+  // Sekarang dijumlahin LANGSUNG dari kolom yang emang udah ada di VIEW.
+  const komisiTimBulanIni = bookingBulanIni.reduce((sum, b) => sum + (Number(b.komisi_makeup_tim) || 0) + (Number(b.komisi_tambahan_tim) || 0), 0)
   const belumLunas = bookingBulanIni.filter((b) => b.status_pembayaran === 'Belum Lunas')
   const bookingHariIni = bookings.filter(isToday)
 
@@ -285,8 +292,8 @@ export default function Dashboard() {
   // Warna garis tren dibedain per tema -- versi terang butuh warna gelap
   // biar kebaca di atas kartu putih, versi dark butuh warna cerah biar
   // nggak "ilang" ketelen background gelap.
-  const trendColorA = isDark ? '#6eb4ceff' : '#6eb4ce'
-  const trendColorB = isDark ? '#b79ae0' : '#b79ae0'
+  const trendColorA = isDark ? '#6eb4ceff' : '#3d4a9a'
+  const trendColorB = isDark ? '#F5C368' : '#E7A33D'
 
   // 1 hook per kartu chart -- masing-masing punya ref & status "lagi
   // kelihatan di layar apa nggak" SENDIRI-SENDIRI (IntersectionObserver),
