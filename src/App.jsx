@@ -13,10 +13,12 @@ import Klien from './pages/Klien'
 import Keuangan from './pages/Keuangan'
 import Laporan from './pages/Laporan'
 import Pengaturan from './pages/Pengaturan'
+import Langganan from './pages/Langganan'
 import TrialHabis from './pages/TrialHabis'
 import Panduan from './pages/Panduan'
 import AdminDashboard from './pages/AdminDashboard'
 import AdminUsers from './pages/AdminUsers'
+import AdminLangganan from './pages/AdminLangganan'
 
 function ProtectedRoute({ children }) {
   const { user, loading, isLocked, isAdmin } = useAuth()
@@ -189,6 +191,14 @@ export default function App() {
               }
             />
             <Route
+              path="/langganan"
+              element={
+                <ProtectedRoute>
+                  <Langganan />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/panduan"
               element={
                 <ProtectedRoute>
@@ -209,6 +219,14 @@ export default function App() {
               element={
                 <AdminRoute>
                   <AdminUsers />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/admin/langganan"
+              element={
+                <AdminRoute>
+                  <AdminLangganan />
                 </AdminRoute>
               }
             />

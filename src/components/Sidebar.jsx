@@ -24,6 +24,7 @@ const navRekapan = [
 const navUtamaAdmin = [
   { to: '/admin', label: 'Dashboard', icon: 'grid' },
   { to: '/admin/users', label: 'Kelola User', icon: 'shield' },
+  { to: '/admin/langganan', label: 'Langganan', icon: 'card' },
 ]
 
 // Sisa hari sampai trial/langganan habis -- pola & pembulatan (Math.ceil)
@@ -62,6 +63,8 @@ function Icon({ name }) {
       return <svg {...common}><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>
     case 'shield':
       return <svg {...common}><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3Z"/><path d="m9 12 2 2 4-4"/></svg>
+    case 'card':
+      return <svg {...common}><rect x="2" y="5" width="20" height="14" rx="2.5"/><path d="M2 10h20"/><path d="M6 15h4"/></svg>
     case 'logout':
       return <svg {...common}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
     default:
@@ -191,6 +194,11 @@ export default function Sidebar({ headerAction = null }) {
               <Icon name="help" />
               Bantuan
             </button>
+
+            <NavLink to="/langganan" className={({ isActive }) => 'nav-item' + (isActive ? ' active' : '')}>
+              <Icon name="card" />
+              Langganan
+            </NavLink>
 
             <NavLink to="/pengaturan" className={({ isActive }) => 'nav-item nav-item-pengaturan' + (isActive ? ' active' : '')} style={{ marginBottom: 12 }}>
               <Icon name="settings" />

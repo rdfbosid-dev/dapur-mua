@@ -1,0 +1,73 @@
+.langganan-layout { display: flex; flex-direction: column; gap: 18px; max-width: 640px; }
+
+/* Class-class umum ini SENGAJA didupliksi di sini (bukan ngandelin
+   kebetulan ke-load dari file lain) -- pola yang sama kayak di
+   Kalender.css/Pengaturan.css/BookingList.css, biar file ini nggak
+   diem-diem bergantung ke urutan import CSS halaman lain. */
+.status-pill { font-size: 11px; font-weight: 700; padding: 6px 12px; border-radius: 20px; white-space: nowrap; display: inline-block; }
+.status-pill.lunas { background: var(--pill-alt); color: var(--h7); }
+.status-pill.belum { background: var(--pill); color: var(--h8); }
+.msg-error { background: var(--pill); color: var(--h8); font-size: 12.5px; padding: 10px 14px; border-radius: 10px; margin-bottom: 14px; }
+.btn-primary {
+  background: var(--button-prm-hover); color: var(--button-tx-hover); border: none; border-radius: 11px;
+  padding: 10px 20px; font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer;
+  display: flex; align-items: center; gap: 6px; text-decoration: none;
+  transition: all 0.3s ease, box-shadow 0.12s;
+}
+.btn-primary:hover { background: var(--h3); }
+.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.card-langganan { background: color-mix(in srgb, var(--box-dashboard) 90%, transparent); border-radius: 20px; padding: 24px; border: 1px solid var(--line-box); box-shadow: var(--shadow-card); }
+.card-head-langganan h3 { font-size: 16px; margin-bottom: 18px; color: var(--ink-soft); }
+
+.langganan-status-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.langganan-status-tanggal { font-size: 13px; color: var(--ink-soft); }
+.langganan-pending-text { font-size: 13.5px; color: var(--ink-soft); line-height: 1.6; }
+.langganan-kosong { font-size: 13px; color: var(--ink-soft); opacity: 0.75; font-style: italic; padding: 10px 0; }
+
+/* 3 kartu paket -- <button>, pola visual mirip .rincian-summary-item
+   di RincianKeuanganModal.css (kartu yang bisa diklik, versi terpilih
+   nyala lebih jelas dari yang nggak). */
+.paket-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+.paket-card {
+  text-align: left; font-family: inherit; cursor: pointer; border-radius: 14px; padding: 16px 14px;
+  border: 1.5px solid var(--button-border); background: var(--field); transition: border-color 0.15s, background 0.15s, transform 0.15s;
+}
+.paket-card:hover { border-color: color-mix(in srgb, var(--h3) 60%, transparent); }
+.paket-card.sel { border-color: var(--h3); background: color-mix(in srgb, var(--h3) 12%, var(--field)); transform: translateY(-2px); }
+.paket-label { font-size: 13px; font-weight: 700; color: var(--ink-soft); margin-bottom: 6px; }
+.paket-harga { font-family: 'Poppins', sans-serif; font-size: 18px; font-weight: 700; color: var(--h5); }
+.paket-period { font-size: 11px; color: var(--ink-soft); opacity: 0.8; margin-top: 2px; }
+
+/* Toggle metode bayar -- numpang pola visual .toggle-row/.toggle-opt
+   yang dipakai di form Booking, biar bahasa visual "pilih 1 dari 2
+   opsi" konsisten di seluruh app. */
+.metode-toggle-row { display: flex; gap: 8px; margin-bottom: 16px; }
+.metode-opt {
+  flex: 1; text-align: center; padding: 10px; border-radius: 10px; font-size: 13px; font-weight: 600;
+  background: var(--field); color: var(--ink-soft); cursor: pointer; border: 1.5px solid var(--button-border);
+  font-family: inherit; transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.metode-opt:hover { background: color-mix(in srgb, var(--button-prm-hover) 30%, transparent); }
+.metode-opt.sel { background: var(--h3); color: #fff; border-color: transparent; }
+
+.rekening-pilih-list { display: flex; flex-direction: column; gap: 8px; }
+.rekening-pilih-item {
+  display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 11px;
+  border: 1.5px solid var(--button-border); background: var(--field); cursor: pointer; font-family: inherit;
+  text-align: left; transition: border-color 0.15s, background 0.15s;
+}
+.rekening-pilih-item:hover { border-color: color-mix(in srgb, var(--h3) 60%, transparent); }
+.rekening-pilih-item.sel { border-color: var(--h3); background: color-mix(in srgb, var(--h3) 12%, var(--field)); }
+.rekening-pilih-bank { font-size: 12.5px; font-weight: 700; color: var(--ink-soft); min-width: 60px; }
+.rekening-pilih-nomor { font-size: 13px; color: var(--ink); font-family: monospace; }
+
+.qris-preview-wrap { display: flex; justify-content: center; padding: 10px 0; }
+.qris-preview-img { width: 220px; height: 220px; object-fit: contain; border-radius: 12px; border: 1.5px solid var(--line-box); background: #fff; padding: 10px; }
+
+.bukti-preview-img { display: block; width: 160px; border-radius: 10px; margin-top: 12px; border: 1.5px solid var(--line-box); }
+
+@media (max-width: 700px) {
+  .paket-grid { grid-template-columns: 1fr; }
+  .card-langganan { border: 1px solid var(--line-box); }
+}
