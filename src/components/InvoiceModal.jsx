@@ -82,7 +82,10 @@ function InvoicePaper({ profile, booking, peserta, payments, bundlingItems = [],
         <div>
           <div className="inv-label">Detail Acara</div>
           <div className="inv-sub-event">{booking.event}</div>
-          <div className="inv-sub-date">{formatTanggal(booking.tanggal_acara)}{booking.jam_start_makeup ? ` · ${booking.jam_start_makeup.slice(0, 5)} WIB` : ''}</div>
+          <div className="inv-sub-date">{formatTanggal(booking.tanggal_acara)}</div>
+          {booking.jam_start_makeup && (
+            <div className="inv-sub-date">{booking.jam_start_makeup.slice(0, 5)} WIB{booking.jam_selesai ? ` - ${booking.jam_selesai.slice(0, 5)} WIB` : ''}</div>
+          )}
           {booking.lokasi && <div className="inv-sub-loc">{booking.lokasi}</div>}
         </div>
       </div>
