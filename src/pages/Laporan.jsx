@@ -182,7 +182,7 @@ export default function Laporan() {
                       <>
                         <DonutChart
                           data={paketCounts} colors={paketCounts.map(([label], i) => chartColor(label, i))}
-                          centerValue={pesertaTahunIni.length} centerLabel="PESERTA"
+                          centerValue={pesertaTahunIni.length} centerLabel="KLIEN"
                           mounted={inViewDonutPaket}
                         />
                         <div className="legend">
