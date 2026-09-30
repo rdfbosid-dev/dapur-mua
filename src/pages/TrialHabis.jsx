@@ -1,11 +1,16 @@
 import { Link, Navigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { useTheme } from '../context/ThemeContext'
 import { openAdminWhatsApp } from '../lib/whatsapp'
 import ThemeToggleButton from '../components/ThemeToggleButton'
 import '../pages/Auth.css'
 
 export default function TrialHabis() {
   const { profile, isLocked, signOut } = useAuth()
+  // Pola SAMA PERSIS kayak di Login.jsx/Sidebar.jsx -- logo brand ganti
+  // otomatis ngikutin Mode Gelap/Terang yang lagi aktif.
+  const { theme } = useTheme()
+  const logoSrc = theme === 'dark' ? '/icon-512-dark.png' : '/icon-512-light.png'
 
   // Kalau ternyata akunnya nggak/belum kekunci (misal user coba buka
   // /trial-habis langsung padahal masih aktif), lempar balik ke
@@ -22,12 +27,12 @@ export default function TrialHabis() {
     <div className="auth-page">
       <div className="auth-page-toggle"><ThemeToggleButton /></div>
       <div className="auth-card">
-        <div className="auth-brand">
-          <div className="auth-brand-mark"></div>
+        <div className="auth-brand auth-brand-centered">
+          <div className="auth-brand-mark"><img src={logoSrc} alt="Dapur MUA" /></div>
           <div className="auth-brand-name">Dapur MUA</div>
         </div>
 
-        <div className="auth-title">Masa coba gratis kamu udah habis</div>
+        <div className="auth-title-trial">Masa coba gratis kamu udah habis</div>
         <div className="auth-subtitle">
           Data booking, klien, dan keuangan kamu tetap aman kok, cuma belum bisa diakses
           sementara.<br />

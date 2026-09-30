@@ -29,6 +29,14 @@
   margin-bottom: 28px;
 }
 
+/* KHUSUS buat TrialHabis.jsx (class tambahan, bukan ngubah .auth-brand
+   polos) -- biar logo + teks "Dapur MUA" rata tengah, TANPA ikut
+   ngefek ke Login/Register yang numpang class .auth-brand yang sama
+   tapi rata kiri (sesuai desain awal). */
+.auth-brand-centered {
+  justify-content: center;
+}
+
 .auth-brand-mark {
   width: 50px;
   height: 50px;
@@ -56,6 +64,14 @@
   font-size: 20px;
   font-weight: 600;
   margin-bottom: 4px;
+}
+
+.auth-title-trial {
+  font-family: 'Poppins', sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: var(--h5);
 }
 
 .auth-subtitle {
