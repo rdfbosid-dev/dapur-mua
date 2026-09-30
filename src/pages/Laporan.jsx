@@ -163,7 +163,7 @@ export default function Laporan() {
                     <DonutChart
                       data={eventCounts}
                       colors={eventCounts.map(([label], i) => chartColor(label, i))}
-                      centerValue={totalBooking} centerLabel="ORDER"
+                      centerValue={totalBooking} centerLabel="BOOKING"
                       mounted={inViewDonutEvent}
                     />
                     <div className="legend">
@@ -202,7 +202,7 @@ export default function Laporan() {
                     <DonutChart
                       data={sumberCounts}
                       colors={sumberCounts.map(([label], i) => sumberColor(label, i))}
-                      centerValue={totalBooking} centerLabel="ORDER"
+                      centerValue={totalBooking} centerLabel="BOOKING"
                       mounted={inViewDonutSumber}
                     />
                     <div className="legend">

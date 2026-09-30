@@ -292,8 +292,8 @@ export default function Dashboard() {
   // Warna garis tren dibedain per tema -- versi terang butuh warna gelap
   // biar kebaca di atas kartu putih, versi dark butuh warna cerah biar
   // nggak "ilang" ketelen background gelap.
-  const trendColorA = isDark ? '#6eb4ceff' : '#6eb4ceff'
-  const trendColorB = isDark ? '#F5C368' : '#F5C368'
+  const trendColorA = isDark ? '#6eb4ce' : '#6eb4ce'
+  const trendColorB = isDark ? '#b79ae0' : '#b79ae0'
 
   // 1 hook per kartu chart -- masing-masing punya ref & status "lagi
   // kelihatan di layar apa nggak" SENDIRI-SENDIRI (IntersectionObserver),
@@ -641,7 +641,7 @@ export default function Dashboard() {
                       data={eventCounts}
                       colors={eventCounts.map(([label], i) => chartColor(label, i))}
                       centerValue={bookingBulanIni.length}
-                      centerLabel="ORDER"
+                      centerLabel="BOOKING"
                       mounted={inViewDonutEvent}
                     />
                     <div className="legend">
