@@ -145,6 +145,9 @@
 
 .auth-btn {
   width: 100%;
+  display: block;
+  text-align: center;
+  text-decoration: none;
   background: var(--button-prm-hover);
   color: var(--button-tx-hover);
   border: 1.5px solid color-mix(in srgb, var(--button-border) var(--mix-border), transparent);

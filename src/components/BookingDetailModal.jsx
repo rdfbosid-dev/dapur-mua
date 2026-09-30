@@ -121,6 +121,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
   const [sumber, setSumber] = useState('')
   const [tanggalAcara, setTanggalAcara] = useState('')
   const [jamStartMakeup, setJamStartMakeup] = useState('')
+  const [jamSelesai, setJamSelesai] = useState('')
   const [lokasi, setLokasi] = useState('')
   const [event, setEvent] = useState('')
   const [eventCustom, setEventCustom] = useState('')
@@ -199,6 +200,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
     setSumber(liveBooking.sumber || 'Instagram')
     setTanggalAcara(liveBooking.tanggal_acara || '')
     setJamStartMakeup(liveBooking.jam_start_makeup ? liveBooking.jam_start_makeup.slice(0, 5) : '')
+    setJamSelesai(liveBooking.jam_selesai ? liveBooking.jam_selesai.slice(0, 5) : '')
     setLokasi(liveBooking.lokasi || '')
     if (EVENT_OPTIONS.includes(liveBooking.event)) {
       setEvent(liveBooking.event)
@@ -457,6 +459,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
         sumber,
         tanggal_acara: tanggalAcara,
         jam_start_makeup: jamStartMakeup || null,
+        jam_selesai: jamSelesai || null,
         lokasi: lokasi.trim(),
         event: event === EVENT_CUSTOM_SENTINEL ? (eventCustom.trim() || 'Lainnya') : event,
         biaya_transport: Number(biayaTransport) || 0,
@@ -717,6 +720,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                 <div><span className="detail-label">Event</span><div>{liveBooking.event}</div></div>
                 <div><span className="detail-label">Tanggal Acara</span><div>{formatTanggal(liveBooking.tanggal_acara)}</div></div>
                 <div><span className="detail-label">Jam Mulai</span><div>{liveBooking.jam_start_makeup ? liveBooking.jam_start_makeup.slice(0, 5) : '-'}</div></div>
+                <div><span className="detail-label">Jam Selesai</span><div>{liveBooking.jam_selesai ? liveBooking.jam_selesai.slice(0, 5) : '-'}</div></div>
                 <div><span className="detail-label">Lokasi</span><div>{liveBooking.lokasi || '-'}</div></div>
                 <div><span className="detail-label">Nomor WhatsApp</span><div>{liveBooking.nomor_whatsapp || '-'}</div></div>
                 <div><span className="detail-label">Sumber Kanal Booking</span><div>{liveBooking.sumber || '-'}</div></div>
@@ -870,6 +874,10 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                 <div className="field">
                   <label>Jam Mulai</label>
                   <CustomTimePicker value={jamStartMakeup} onChange={setJamStartMakeup} variant="modal" />
+                </div>
+                <div className="field">
+                  <label>Jam Selesai</label>
+                  <CustomTimePicker value={jamSelesai} onChange={setJamSelesai} variant="modal" />
                 </div>
                 <div className="field">
                   <label>Event</label>

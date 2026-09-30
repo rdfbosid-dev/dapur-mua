@@ -113,6 +113,7 @@ export default function BookingModal({ onClose, onSaved }) {
   const [sumber, setSumber] = useState('Instagram')
   const [tanggalAcara, setTanggalAcara] = useState('')
   const [jamStartMakeup, setJamStartMakeup] = useState('')
+  const [jamSelesai, setJamSelesai] = useState('')
   const [lokasi, setLokasi] = useState('')
   const [event, setEvent] = useState(EVENT_OPTIONS[0])
   const [eventCustom, setEventCustom] = useState('')
@@ -374,6 +375,7 @@ export default function BookingModal({ onClose, onSaved }) {
         sumber,
         tanggal_acara: tanggalAcara,
         jam_start_makeup: jamStartMakeup || null,
+        jam_selesai: jamSelesai || null,
         lokasi: lokasi.trim(),
         event: event === EVENT_CUSTOM_SENTINEL ? (eventCustom.trim() || 'Lainnya') : event,
         biaya_transport: Number(biayaTransport) || 0,
@@ -583,6 +585,10 @@ export default function BookingModal({ onClose, onSaved }) {
               <div className="field">
                 <label>Jam Mulai</label>
                 <CustomTimePicker value={jamStartMakeup} onChange={setJamStartMakeup} variant="modal" />
+              </div>
+              <div className="field">
+                <label>Jam Selesai</label>
+                <CustomTimePicker value={jamSelesai} onChange={setJamSelesai} variant="modal" />
               </div>
               <div className="field">
                 <label>Event</label>

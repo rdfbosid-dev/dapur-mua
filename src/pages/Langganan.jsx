@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Navigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import Sidebar from '../components/Sidebar'
@@ -31,7 +32,7 @@ function sisaHari(dateStr) {
 }
 
 export default function Langganan() {
-  const { user, profile } = useAuth()
+  const { user, profile, isAdmin } = useAuth()
 
   const [platformSettings, setPlatformSettings] = useState(null)
   const [pendingRequest, setPendingRequest] = useState(null)
@@ -123,6 +124,16 @@ export default function Langganan() {
 
   const tanggalLangganan = profile?.subscription_status === 'active' ? profile?.subscription_ends_at : profile?.trial_ends_at
   const sisa = sisaHari(tanggalLangganan)
+
+  // Halaman ini SENGAJA numpang TrialGateRoute (bukan ProtectedRoute) di
+  // App.jsx, biar user isLocked tetep bisa masuk -- tapi itu berarti
+  // guard isAdmin dari ProtectedRoute juga ikut kelewat. Dijaga manual
+  // di sini -- akun admin nggak punya konsep langganan buat dirinya
+  // sendiri, jadi kalau somehow nyasar ke sini, lempar ke /admin.
+  // Ditaruh SETELAH semua hooks (bukan di atas fungsi), biar nggak
+  // ngelanggar Rules of Hooks React (hooks harus selalu kepanggil
+  // dalam urutan yang sama, nggak boleh ke-skip kondisional).
+  if (isAdmin) return <Navigate to="/admin" replace />
 
   return (
     <div className="app-shell">

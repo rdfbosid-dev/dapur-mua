@@ -193,7 +193,7 @@
 .booking-detail-overlay .field-grid-booking { display: grid; gap: 8px; margin-bottom: 5px; }
 
 .booking-detail-overlay .field-grid-booking.cols-tanggal-nama-wa { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.3fr) minmax(0, 0.8fr); }
-.booking-detail-overlay .field-grid-booking.cols-tanggal-jam-event { grid-template-columns: minmax(0, 0.9fr) minmax(0, 0.6fr) minmax(0, 1.5fr); }
+.booking-detail-overlay .field-grid-booking.cols-tanggal-jam-event { grid-template-columns: minmax(0, 0.9fr) minmax(0, 0.5fr) minmax(0, 0.5fr) minmax(0, 1.1fr); }
 .booking-detail-overlay .field-grid-booking.cols-lokasi-sumber { grid-template-columns: 2fr 1fr; }
 .booking-detail-overlay .field-grid-booking.cols-transport-catatan { grid-template-columns: 1fr 2fr; }
 
@@ -381,15 +381,23 @@
   /* Baris 1: Tanggal Booking setengah lebar (kolom kanannya sengaja
      kosong). Baris 2 & 3: Nama Klien & Nomor WhatsApp, masing-masing
      full-width di barisnya sendiri. */
-  .booking-detail-overlay .field-grid-booking.cols-tanggal-nama-wa { grid-template-columns: 1fr 1fr; }
+  /* Sama alasannya kayak di BookingModal.css -- grid-template-columns-nya
+     ditulis SAMA PERSIS kayak .cols-tanggal-jam-event (2fr 1.2fr 1.2fr),
+     biar lebar kolom pertama (Tanggal Booking) PAS SAMA kayak lebar
+     kolom pertama Tanggal Acara. */
+  .booking-detail-overlay .field-grid-booking.cols-tanggal-nama-wa { grid-template-columns: minmax(0, 2fr) minmax(0, 1.2fr) minmax(0, 1.2fr); }
   .booking-detail-overlay .field-grid-booking.cols-tanggal-nama-wa > .field:nth-child(1) { grid-column: 1 / 2; }
   .booking-detail-overlay .field-grid-booking.cols-tanggal-nama-wa > .field:nth-child(2) { grid-column: 1 / -1; }
   .booking-detail-overlay .field-grid-booking.cols-tanggal-nama-wa > .field:nth-child(3) { grid-column: 1 / 2; }
 
   /* Baris 4: Tanggal Acara & Jam Mulai berbagi 1 baris (2 kolom sama
      rata). Baris 5: Event full-width sendiri di bawahnya. */
-  .booking-detail-overlay .field-grid-booking.cols-tanggal-jam-event { grid-template-columns: 1fr 1fr; }
-  .booking-detail-overlay .field-grid-booking.cols-tanggal-jam-event > .field:nth-child(3) { grid-column: 1 / -1; }
+  /* Sama alasannya kayak di BookingModal.css -- Tanggal Acara dikasih
+     jatah PALING lebar (2.4fr), ngedeketin lebar Tanggal Booking, Jam
+     Mulai & Jam Selesai kebagian sisanya tapi tetep sama rata (1fr :
+     1fr). Event full-width sendiri di baris bawahnya. */
+  .booking-detail-overlay .field-grid-booking.cols-tanggal-jam-event { grid-template-columns: minmax(0, 2fr) minmax(0, 1.2fr) minmax(0, 1.2fr); }
+  .booking-detail-overlay .field-grid-booking.cols-tanggal-jam-event > .field:nth-child(4) { grid-column: 1 / -1; }
 
   /* Baris 6 & 7: Lokasi & Sumber Kanal Booking, masing-masing full-width
      di barisnya sendiri-sendiri. */

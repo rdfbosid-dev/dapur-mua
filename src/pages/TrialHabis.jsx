@@ -1,4 +1,4 @@
-import { Navigate } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { openAdminWhatsApp } from '../lib/whatsapp'
 import ThemeToggleButton from '../components/ThemeToggleButton'
@@ -35,10 +35,17 @@ export default function TrialHabis() {
           Yuk lanjut berlangganan biar bisa lanjut kelola Dapur MUA kamu lagi.
         </div>
 
-        <button className="auth-btn" type="button" onClick={handleHubungiAdmin}>
-          Hubungi Admin buat Berlangganan
-        </button>
+        {/* Rute /langganan SENGAJA numpang TrialGateRoute (lihat App.jsx)
+            -- bukan ProtectedRoute -- biar user yang isLocked kayak di
+            halaman ini beneran bisa masuk ke situ, bukan kelempar balik
+            ke sini terus. */}
+        <Link className="auth-btn" to="/langganan">
+          Pilih Paket &amp; Bayar Langganan
+        </Link>
 
+        <div className="auth-switch">
+          <a href="#" onClick={(e) => { e.preventDefault(); handleHubungiAdmin() }}>Butuh bantuan? Hubungi Admin</a>
+        </div>
         <div className="auth-switch">
           <a href="#" onClick={(e) => { e.preventDefault(); signOut() }}>Keluar dari akun ini</a>
         </div>

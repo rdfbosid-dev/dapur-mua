@@ -60,14 +60,14 @@
 .cdate-cell.selected { background: color-mix(in srgb, var(--h3) 70%, transparent); color: #fff; font-weight: 700; }
 
 .ctime-panel {
-  position: absolute; top: calc(100% + 6px); left: 0; z-index: 30; min-width: 70px;
+  position: absolute; top: calc(100% + 6px); left: 0; z-index: 30; width: 100%;
   background: var(--field); border: 1px solid color-mix(in srgb, var(--button-border) 70%, transparent);
   border-radius: 12px; padding: 6px; box-shadow: var(--shadow-modal);
   display: flex; gap: 4px;
 }
-.ctime-col { max-height: 180px; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; padding: 2px; }
+.ctime-col { flex: 1; min-width: 0; max-height: 180px; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; padding: 2px; }
 .ctime-opt {
-  padding: 6px 12px; border-radius: 8px; font-size: 12px; color: var(--ink-soft); cursor: pointer; text-align: center;
+  padding: 6px 4px; border-radius: 8px; font-size: 12px; color: var(--ink-soft); cursor: pointer; text-align: center;
   transition: background 0.12s, color 0.12s;
 }
 .ctime-opt:hover { background: color-mix(in srgb, var(--h3) 18%, transparent); }

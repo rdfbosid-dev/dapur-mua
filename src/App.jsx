@@ -190,12 +190,19 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
+            {/* SENGAJA numpang TrialGateRoute (bukan ProtectedRoute) --
+                halaman ini justru paling dibutuhin sama user yang LAGI
+                isLocked (trial/langganan abis, mau bayar buat buka
+                kunci). ProtectedRoute otomatis nolak/ngelempar user
+                isLocked ke /trial-habis buat SEMUA rute lain -- kalau
+                dipasang di sini juga, orangnya nggak akan PERNAH bisa
+                nyampe halaman ini pas paling butuh. */}
             <Route
               path="/langganan"
               element={
-                <ProtectedRoute>
+                <TrialGateRoute>
                   <Langganan />
-                </ProtectedRoute>
+                </TrialGateRoute>
               }
             />
             <Route
