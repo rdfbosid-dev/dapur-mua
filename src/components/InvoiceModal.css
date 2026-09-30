@@ -127,10 +127,15 @@
    panjang tanggal/metode-nya beda-beda. Grid kolom tetap jamin ketiganya
    selalu sejajar rapi, berapapun panjang teksnya. */
 .inv-pay-row {
-  display: grid; grid-template-columns: 130px 1fr auto; gap: 10px;
+  display: grid; grid-template-columns: var(--pay-date-col, 140px) 1fr auto; gap: 10px;
   font-size: 12.5px; color: var(--ink-soft); padding: 5px 0; border-bottom: 1px solid color-mix(in srgb, var(--button-border) 30%, transparent);
 }
 .inv-pay-row > span:nth-child(3) { text-align: right; }
+/* Kolom tanggal DIKUNCI satu baris (nowrap) -- lebar kolomnya (var
+   --pay-date-col) dihitung buat format terpanjang: "30 September 2026"
+   (September = nama bulan terpanjang secara lebar teks). Tanpa nowrap,
+   tanggal yang kelebaran bakal turun jadi 2 baris. */
+.inv-pay-row > span:nth-child(1) { white-space: nowrap; }
 
 /* Wrapper baris Catatan + badge LUNAS -- flex row, badge-nya rata ke
    bawah (align-items:flex-end) biar posisinya nempel deket baris
@@ -295,7 +300,7 @@
 .invoice-print-portal .inv-summary-final span { color: var(--pi-primary); font-weight: 700; font-size: 16px; }
 .invoice-print-portal .inv-summary-final b { color: var(--pi-primary); font-size: 22px; }
 
-.invoice-print-portal .inv-pay-row { font-size: 13.5px; color: var(--pi-text); padding: 7px 0; border-bottom: 1.5px solid var(--pi-line); }
+.invoice-print-portal .inv-pay-row { --pay-date-col: 155px; font-size: 13.5px; color: var(--pi-text); padding: 7px 0; border-bottom: 1.5px solid var(--pi-line); }
 
 .invoice-print-portal .inv-note-row { margin-top: 22px; }
 .invoice-print-portal .inv-lunas-badge {
