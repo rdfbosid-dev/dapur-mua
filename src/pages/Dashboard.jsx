@@ -194,6 +194,13 @@ export default function Dashboard() {
     .sort((a, b) => new Date(a.tanggal_acara) - new Date(b.tanggal_acara))
 
   const isAkhirBulan = new Date(curYear, curMonth + 1, 0).getDate() === today.getDate()
+  // Notif laporan muncul 2 hari: tanggal TERAKHIR bulan (laporan bulan
+  // ini) DAN tanggal 1 bulan baru (laporan bulan KEMARIN) -- biar nggak
+  // kelewat kalau user nggak buka app pas tanggal terakhir.
+  const isTanggalSatu = today.getDate() === 1
+  const laporanBulan = isTanggalSatu ? (curMonth === 0 ? 11 : curMonth - 1) : curMonth
+  const laporanTahun = isTanggalSatu && curMonth === 0 ? curYear - 1 : curYear
+  const namaLaporanBulan = new Date(laporanTahun, laporanBulan, 1).toLocaleDateString('id-ID', { month: 'long' })
 
   const notifications = [
     ...perluInvoice.map((b) => ({
@@ -223,10 +230,17 @@ export default function Dashboard() {
       lokasi: b.lokasi || null,
       booking: b,
     })),
-    ...(isAkhirBulan ? [{
+    ...((isAkhirBulan || isTanggalSatu) ? [{
       type: 'laporan',
-      id: 'laporan-bulan',
-      title: 'Laporan bulan ini udah lengkap',
+      // ID WAJIB nyertain bulan & tahun laporannya. SEBELUMNYA statis
+      // 'laporan-bulan' -- bulan lalu udah dibaca, bulan ini ID-nya sama
+      // persis, jadi titik merah lonceng nggak nyala. Tanggal terakhir &
+      // tanggal 1 SENGAJA berbagi ID yang sama (laporannya sama), jadi
+      // kalau udah dibaca pas tanggal terakhir, nggak nyala lagi besoknya.
+      id: `laporan-bulan-${laporanTahun}-${laporanBulan + 1}`,
+      bulan: laporanBulan,
+      tahun: laporanTahun,
+      title: `Laporan bulan ${namaLaporanBulan} ${laporanTahun} udah lengkap`,
       desc: 'Cek rekap Keuangan & Laporan sekarang.',
     }] : []),
   ]
@@ -402,7 +416,7 @@ export default function Dashboard() {
                   onClick={() => {
                     setNotifOpen(false)
                     if (n.type === 'booking' || n.type === 'invoice') setSelectedBooking(n.booking)
-                    else navigate('/keuangan', { state: { highlightBulan: curMonth, highlightTahun: curYear } })
+                    else navigate('/keuangan', { state: { highlightBulan: n.bulan, highlightTahun: n.tahun } })
                   }}
                 >
                   <div className={`notif-icon ${n.type}`}>
