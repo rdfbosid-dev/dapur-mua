@@ -245,11 +245,15 @@ function InvoicePaper({ profile, booking, peserta, payments, bundlingItems = [],
           {/* SENGAJA selalu ditampilin, walau nilainya Rp0 -- itu jadi
               bukti eksplisit ke klien & arsip user kalau transport-nya
               MEMANG Rp0 (gratis/nggak ada ongkos), bukan kelupaan diisi.
-              Baris kosong itu beda maknanya sama baris "Rp0". */}
+              Baris kosong itu beda maknanya sama baris "Rp0".
+              Nilainya = Biaya Transport (punya MUA) + Fee Transport Tim
+              (transport_tim_total dari VIEW) -- SENGAJA digabung 1 baris,
+              soalnya dari sisi klien yang penting total ongkos transport
+              yang dia bayar, bukan pembagiannya ke siapa. */}
           <tr>
             <td></td>
             <td>Transport</td>
-            <td className="right">{formatRupiah(booking.biaya_transport)}</td>
+            <td className="right">{formatRupiah((Number(booking.biaya_transport) || 0) + (Number(booking.transport_tim_total) || 0))}</td>
           </tr>
         </tbody>
       </table>

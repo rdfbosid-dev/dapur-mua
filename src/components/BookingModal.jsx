@@ -86,11 +86,16 @@ function blankPeserta(nama = '') {
     kategoriMakeup: 'Regular', jenisPaket: '', dikerjakanOlehMakeup: 'Me',
     pakaiPaketBundling: false,
     biayaMakeup: '', komisiMakeup: '', namaTimMakeup: '',
+    // Fee Transport Tim -- ongkos transport yang ditagih ke klien &
+    // diteruskan PENUH ke tim (masuk Belanja Klien & Pengeluaran, BUKAN
+    // Omzet/Penghasilan). Terpisah buat tim Makeup & tim Layanan
+    // Tambahan, biar nempel ke nama tim masing-masing.
+    transportTimMakeup: '',
     // Retouch -- JASA (sekelas Makeup), bukan produk. Selalu Me,
     // nggak ada Komisi/Nama Tim.
     retouch: false, biayaRetouch: '',
     layananTambahan: 'Tidak Ada', dikerjakanOlehTambahan: 'Me',
-    biayaTambahan: '', komisiTambahan: '', namaTimTambahan: '',
+    biayaTambahan: '', komisiTambahan: '', namaTimTambahan: '', transportTimTambahan: '',
     // Add On Item (Beli) -- SEKARANG dikasih toggle Tidak/Ya juga,
     // sama pola persis kayak Add On Item (Sewa) di bawah, defaultnya
     // nggak aktif.
@@ -193,10 +198,12 @@ export default function BookingModal({ onClose, onSaved }) {
       if (field === 'dikerjakanOlehMakeup' && value === 'Me') {
         updated.komisiMakeup = ''
         updated.namaTimMakeup = ''
+        updated.transportTimMakeup = ''
       }
       if (field === 'dikerjakanOlehTambahan' && value === 'Me') {
         updated.komisiTambahan = ''
         updated.namaTimTambahan = ''
+        updated.transportTimTambahan = ''
       }
       // BUG YANG BARU DIBENERIN (sama kasusnya kayak yang kejadian di
       // BookingDetailModal.jsx): begitu Layanan Tambahan di-toggle
@@ -208,6 +215,7 @@ export default function BookingModal({ onClose, onSaved }) {
         updated.biayaTambahan = ''
         updated.komisiTambahan = ''
         updated.namaTimTambahan = ''
+        updated.transportTimTambahan = ''
         updated.jumlahSesiTambahan = 1
       }
       if (field === 'retouch' && value === false) {
@@ -421,6 +429,7 @@ export default function BookingModal({ onClose, onSaved }) {
       // yang baru kena masalah yang sama sejak awal.
       komisi_makeup_tim: p.dikerjakanOlehMakeup === 'Tim' ? (Number(p.komisiMakeup) || 0) : 0,
       nama_tim_makeup: p.dikerjakanOlehMakeup === 'Tim' ? (p.namaTimMakeup.trim() || null) : null,
+      transport_tim_makeup: p.dikerjakanOlehMakeup === 'Tim' ? (Number(p.transportTimMakeup) || 0) : 0,
       retouch: p.retouch,
       biaya_retouch: p.retouch ? (Number(p.biayaRetouch) || 0) : 0,
       layanan_tambahan: p.layananTambahan,
@@ -432,6 +441,7 @@ export default function BookingModal({ onClose, onSaved }) {
       biaya_tambahan: p.layananTambahan !== 'Tidak Ada' ? (Number(p.biayaTambahan) || 0) : 0,
       komisi_tambahan: (p.layananTambahan !== 'Tidak Ada' && p.dikerjakanOlehTambahan === 'Tim') ? (Number(p.komisiTambahan) || 0) : 0,
       nama_tim_tambahan: (p.layananTambahan !== 'Tidak Ada' && p.dikerjakanOlehTambahan === 'Tim') ? (p.namaTimTambahan.trim() || null) : null,
+      transport_tim_tambahan: (p.layananTambahan !== 'Tidak Ada' && p.dikerjakanOlehTambahan === 'Tim') ? (Number(p.transportTimTambahan) || 0) : 0,
       ...addOnsToRow(p.addOnLainnya),
       ...sewaToRow(p.sewaLainnya),
     }))
@@ -772,7 +782,11 @@ export default function BookingModal({ onClose, onSaved }) {
                       </div>
                       {p.dikerjakanOlehMakeup === 'Tim' && (
                       <div className="field-grid-peserta cols-2">
-                        <div className="field" style={{ gridColumn: 2 }}>
+                        <div className="field">
+                          <label>Fee Transport Tim</label>
+                          <input type="text" inputMode="numeric" placeholder="Rp0" value={p.transportTimMakeup ? `Rp${formatAngkaInput(p.transportTimMakeup)}` : ''} onChange={(e) => updatePeserta(i, 'transportTimMakeup', parseAngkaInput(e.target.value))} />
+                        </div>
+                        <div className="field">
                           <label>Nama Tim</label>
                           <input type="text" placeholder="contoh: makeupbyjennie" value={p.namaTimMakeup} onChange={(e) => updatePeserta(i, 'namaTimMakeup', e.target.value)} />
                         </div>
@@ -965,6 +979,14 @@ export default function BookingModal({ onClose, onSaved }) {
                           <input type="text" placeholder="contoh: hairdobycarmen" value={p.namaTimTambahan} onChange={(e) => updatePeserta(i, 'namaTimTambahan', e.target.value)} />
                         </div>
                         )}
+                      </div>
+                      )}
+                      {p.layananTambahan !== 'Tidak Ada' && p.dikerjakanOlehTambahan === 'Tim' && (
+                      <div className="field-grid-peserta cols-2">
+                        <div className="field">
+                          <label>Fee Transport Tim</label>
+                          <input type="text" inputMode="numeric" placeholder="Rp0" value={p.transportTimTambahan ? `Rp${formatAngkaInput(p.transportTimTambahan)}` : ''} onChange={(e) => updatePeserta(i, 'transportTimTambahan', parseAngkaInput(e.target.value))} />
+                        </div>
                       </div>
                       )}
 

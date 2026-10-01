@@ -297,10 +297,12 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
       if (field === 'dikerjakan_oleh_makeup' && value === 'Me') {
         updated.komisi_makeup_tim = 0
         updated.nama_tim_makeup = ''
+        updated.transport_tim_makeup = 0
       }
       if (field === 'dikerjakan_oleh_tambahan' && value === 'Me') {
         updated.komisi_tambahan = 0
         updated.nama_tim_tambahan = ''
+        updated.transport_tim_tambahan = 0
       }
       // BUG YANG BARU DIBENERIN: field ini yang KELEWAT waktu Add On &
       // Komisi/Nama Tim di atas dibenerin -- begitu Layanan Tambahan
@@ -315,6 +317,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
         updated.biaya_tambahan = 0
         updated.komisi_tambahan = 0
         updated.nama_tim_tambahan = ''
+        updated.transport_tim_tambahan = 0
         updated.jumlah_sesi_tambahan = 1
       }
       if (field === 'retouch' && value === false) {
@@ -379,8 +382,8 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
     setEditPeserta((list) => [...list, {
       nama_anggota: '', peran: '', jumlah_sesi_makeup: 1, jumlah_sesi_tambahan: 1, kategori_makeup: 'Regular', jenis_paket: '', dikerjakan_oleh_makeup: 'Me',
       pakai_paket_bundling: false,
-      biaya_makeup: 0, komisi_makeup_tim: 0, nama_tim_makeup: '', retouch: false, biaya_retouch: 0, layanan_tambahan: 'Tidak Ada',
-      dikerjakan_oleh_tambahan: 'Me', biaya_tambahan: 0, komisi_tambahan: 0, nama_tim_tambahan: '',
+      biaya_makeup: 0, komisi_makeup_tim: 0, nama_tim_makeup: '', transport_tim_makeup: 0, retouch: false, biaya_retouch: 0, layanan_tambahan: 'Tidak Ada',
+      dikerjakan_oleh_tambahan: 'Me', biaya_tambahan: 0, komisi_tambahan: 0, nama_tim_tambahan: '', transport_tim_tambahan: 0,
       layanan_lainnya: '', biaya_lainnya: 0, keuntungan_lainnya: 0, jumlah_lainnya: 1,
       layanan_lainnya_2: '', biaya_lainnya_2: 0, keuntungan_lainnya_2: 0, jumlah_lainnya_2: 1,
       layanan_lainnya_3: '', biaya_lainnya_3: 0, keuntungan_lainnya_3: 0, jumlah_lainnya_3: 1,
@@ -510,6 +513,9 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
         // Nama Tim yang baru kena masalah sama.
         komisi_makeup_tim: p.dikerjakan_oleh_makeup === 'Tim' ? (Number(p.komisi_makeup_tim) || 0) : 0,
         nama_tim_makeup: p.dikerjakan_oleh_makeup === 'Tim' ? ((p.nama_tim_makeup || '').trim() || null) : null,
+        // Fee Transport Tim -- sama pola-nya kayak Komisi/Nama Tim: cuma
+        // berlaku kalau beneran dikerjain Tim, selain itu dipaksa 0.
+        transport_tim_makeup: p.dikerjakan_oleh_makeup === 'Tim' ? (Number(p.transport_tim_makeup) || 0) : 0,
         retouch: !!p.retouch,
         biaya_retouch: p.retouch ? (Number(p.biaya_retouch) || 0) : 0,
         layanan_tambahan: p.layanan_tambahan,
@@ -523,6 +529,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
         biaya_tambahan: p.layanan_tambahan !== 'Tidak Ada' ? (Number(p.biaya_tambahan) || 0) : 0,
         komisi_tambahan: (p.layanan_tambahan !== 'Tidak Ada' && p.dikerjakan_oleh_tambahan === 'Tim') ? (Number(p.komisi_tambahan) || 0) : 0,
         nama_tim_tambahan: (p.layanan_tambahan !== 'Tidak Ada' && p.dikerjakan_oleh_tambahan === 'Tim') ? ((p.nama_tim_tambahan || '').trim() || null) : null,
+        transport_tim_tambahan: (p.layanan_tambahan !== 'Tidak Ada' && p.dikerjakan_oleh_tambahan === 'Tim') ? (Number(p.transport_tim_tambahan) || 0) : 0,
         // Jumlah Sesi Layanan Tambahan -- TERPISAH dari Jumlah Sesi
         // Makeup di atas, sama alasannya kayak biaya_tambahan.
         jumlah_sesi_tambahan: p.layanan_tambahan !== 'Tidak Ada' ? Math.max(1, Number(p.jumlah_sesi_tambahan) || 1) : 1,
@@ -822,6 +829,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                     <div className="b-name">{p.nama_anggota} {p.peran ? `— (${p.peran})` : ''}</div>
                     <div className="b-meta">
                       {`${p.jenis_paket || p.kategori_makeup} (${p.dikerjakan_oleh_makeup}${p.dikerjakan_oleh_makeup === 'Tim' && p.nama_tim_makeup ? ' - ' + p.nama_tim_makeup : ''})${p.jumlah_sesi_makeup > 1 ? ` (${p.jumlah_sesi_makeup}x sesi)` : ''} — ${formatRupiah(Number(p.biaya_makeup) * (p.jumlah_sesi_makeup || 1))}`}
+                      {p.dikerjakan_oleh_makeup === 'Tim' && Number(p.transport_tim_makeup) > 0 ? ` | Fee Transport Tim ${formatRupiah(p.transport_tim_makeup)}` : ''}
                       {p.pakai_paket_bundling
                         ? bundlingItems.filter((b) => b.peserta_id === p.id && !b.parent_id).map((v) => {
                             const addOns = bundlingItems.filter((c) => c.parent_id === v.id)
@@ -829,6 +837,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                           }).join('')
                         : ''}
                       {p.layanan_tambahan !== 'Tidak Ada' ? ` | ${p.layanan_tambahan} (${p.dikerjakan_oleh_tambahan}${p.dikerjakan_oleh_tambahan === 'Tim' && p.nama_tim_tambahan ? ' - ' + p.nama_tim_tambahan : ''})${p.jumlah_sesi_tambahan > 1 ? ` (${p.jumlah_sesi_tambahan}x sesi)` : ''} ${formatRupiah(Number(p.biaya_tambahan) * (p.jumlah_sesi_tambahan || 1))}` : ''}
+                      {p.layanan_tambahan !== 'Tidak Ada' && p.dikerjakan_oleh_tambahan === 'Tim' && Number(p.transport_tim_tambahan) > 0 ? ` | Fee Transport Tim ${formatRupiah(p.transport_tim_tambahan)}` : ''}
                       {p.retouch ? ` | Retouch ${formatRupiah(p.biaya_retouch)}` : ''}
                       {[1, 2, 3, 4, 5].map((n) => {
                         const suffix = n === 1 ? '' : `_${n}`
@@ -1014,7 +1023,11 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                       </div>
                       {p.dikerjakan_oleh_makeup === 'Tim' && (
                       <div className="field-grid-peserta cols-2">
-                        <div className="field" style={{ gridColumn: 2 }}>
+                        <div className="field">
+                          <label>Fee Transport Tim</label>
+                          <input type="text" inputMode="numeric" placeholder="Rp0" value={p.transport_tim_makeup ? `Rp${formatAngkaInput(p.transport_tim_makeup)}` : ''} onChange={(e) => updateEditPeserta(i, 'transport_tim_makeup', parseAngkaInput(e.target.value))} />
+                        </div>
+                        <div className="field">
                           <label>Nama Tim</label>
                           <input type="text" placeholder="contoh: makeupbyjennie" value={p.nama_tim_makeup || ''} onChange={(e) => updateEditPeserta(i, 'nama_tim_makeup', e.target.value)} />
                         </div>
@@ -1194,6 +1207,14 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                           <input type="text" placeholder="contoh: hairdobycarmen" value={p.nama_tim_tambahan || ''} onChange={(e) => updateEditPeserta(i, 'nama_tim_tambahan', e.target.value)} />
                         </div>
                         )}
+                      </div>
+                      )}
+                      {p.layanan_tambahan !== 'Tidak Ada' && p.dikerjakan_oleh_tambahan === 'Tim' && (
+                      <div className="field-grid-peserta cols-2">
+                        <div className="field">
+                          <label>Fee Transport Tim</label>
+                          <input type="text" inputMode="numeric" placeholder="Rp0" value={p.transport_tim_tambahan ? `Rp${formatAngkaInput(p.transport_tim_tambahan)}` : ''} onChange={(e) => updateEditPeserta(i, 'transport_tim_tambahan', parseAngkaInput(e.target.value))} />
+                        </div>
                       </div>
                       )}
 

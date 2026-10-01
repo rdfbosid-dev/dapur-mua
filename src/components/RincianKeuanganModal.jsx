@@ -76,6 +76,24 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
     }
   })
 
+  // Fee Transport Tim -- ongkos transport yang ditagih ke klien &
+  // diteruskan PENUH ke tim (per peserta, nempel ke nama tim Makeup
+  // atau tim Layanan Tambahan-nya). Masuk Belanja Klien & Pengeluaran
+  // doang -- BUKAN Omzet/Penghasilan (itu bukan uang MUA). Cuma
+  // dihitung kalau beneran dikerjain Tim, sama kayak filter di VIEW
+  // booking_summary (transport_tim_total).
+  const transportTimRows = []
+  peserta.forEach((p) => {
+    const feeMakeup = Number(p.transport_tim_makeup) || 0
+    if (p.dikerjakan_oleh_makeup === 'Tim' && feeMakeup > 0) {
+      transportTimRows.push({ nama: p.nama_anggota, jenis: 'Makeup', namaTim: p.nama_tim_makeup, fee: feeMakeup })
+    }
+    const feeTambahan = Number(p.transport_tim_tambahan) || 0
+    if (punyaTambahan(p) && p.dikerjakan_oleh_tambahan === 'Tim' && feeTambahan > 0) {
+      transportTimRows.push({ nama: p.nama_anggota, jenis: p.layanan_tambahan, namaTim: p.nama_tim_tambahan, fee: feeTambahan })
+    }
+  })
+
   const addOnItems = []
   peserta.forEach((p) => {
     for (let n = 1; n <= 5; n++) {
@@ -151,7 +169,8 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
   const totalPengeluaranAddOn = addOnItems.reduce((s, i) => s + pengeluaranAddOn(i), 0)
   const totalPengeluaranSewa = sewaRows.reduce((s, i) => s + pengeluaranSewa(i), 0)
   const totalPengeluaranBundling = bundlingItems.reduce((s, i) => s + pengeluaranBundling(i), 0)
-  const totalPengeluaran = totalPengeluaranMakeup + totalPengeluaranTambahan + totalPengeluaranAddOn + totalPengeluaranSewa + totalPengeluaranBundling
+  const totalPengeluaranTransportTim = transportTimRows.reduce((s, r) => s + r.fee, 0)
+  const totalPengeluaran = totalPengeluaranMakeup + totalPengeluaranTambahan + totalPengeluaranAddOn + totalPengeluaranSewa + totalPengeluaranBundling + totalPengeluaranTransportTim
   // Baris yang beneran ditampilin di section "Pengeluaran" -- CUMA yang
   // nilainya > 0 (baris Me/item tanpa selisih nggak usah nongol, biar
   // nggak berisik nampilin "Rp0" di mana-mana).
@@ -201,6 +220,9 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
   tambahanRows.forEach((r) => {
     if (r.tim) tambahKePayee(r.namaTim, `${r.jenis} — ${r.nama}`, r.sesi, pengeluaranMakeupTambahan(r))
   })
+  transportTimRows.forEach((r) => {
+    tambahKePayee(r.namaTim, `Transport — ${r.nama}`, 1, r.fee)
+  })
   sewaRows.forEach((item) => {
     tambahKePayee(item.vendor, `${item.nama}${peserta.length > 1 ? ' — ' + item.pesertaNama : ''}`, item.jumlah, pengeluaranSewa(item))
   })
@@ -234,6 +256,7 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
     sewaRows.length > 0 && 'Biaya Add On (Sewa)',
     bundlingTop.length > 0 && 'Biaya Paket Bundling',
     transport > 0 && 'Biaya Transport',
+    transportTimRows.length > 0 && 'Fee Transport Tim',
   ].filter(Boolean).join(' + ')
 
   const rumusOmzet = [
@@ -269,6 +292,7 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
   // soalnya rumusnya numpang Paket Bundling, bukan Add On biasa.
   const rumusPengeluaran = [
     (pengeluaranMakeupRows.length > 0 || pengeluaranTambahanRows.length > 0) && 'Bayar ke Tim (Makeup/Layanan Tambahan)',
+    transportTimRows.length > 0 && 'Fee Transport Tim',
     pengeluaranAddOnRows.length > 0 && 'Belanja Produk (Add On)',
     (pengeluaranSewaRows.length > 0 || pengeluaranBundlingTop.length > 0) && 'Bayar ke Vendor (Add On Sewa/Paket Bundling)',
   ].filter(Boolean).join(' + ')
@@ -515,13 +539,34 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
               Penghasilan emang nggak masukin Transport sama sekali
               (bukan Rp0, tapi beneran nggak dihitung), jadi baris ini
               disembunyiin total biar nggak nyesatin. */}
-          {transport > 0 && activeCard !== 'penghasilan' && activeCard !== 'pengeluaran' && (
+          {/* Fee Transport Tim -- CUMA nampil pas kartu Belanja Klien
+              (ditagih ke klien) & Pengeluaran (diteruskan penuh ke tim).
+              Di Omzet/Penghasilan nggak nongol karena itu bukan uang MUA.
+              Kalau 2-duanya ada pas Belanja Klien, nampil 1 section
+              "Transport" bareng Biaya Transport punya MUA. */}
+          {((transport > 0 && (activeCard === 'belanja' || activeCard === 'omzet')) || (transportTimRows.length > 0 && (activeCard === 'belanja' || activeCard === 'pengeluaran'))) && (
             <div className="rincian-section">
               <div className="rincian-section-title">Transport</div>
-              <div className="rincian-row">
-                <span>Biaya Transport</span>
-                <b>{formatRupiah(transport)}</b>
-              </div>
+              {transport > 0 && (activeCard === 'belanja' || activeCard === 'omzet') && (
+                <div className="rincian-row">
+                  <span>Biaya Transport</span>
+                  <b>{formatRupiah(transport)}</b>
+                </div>
+              )}
+              {(activeCard === 'belanja' || activeCard === 'pengeluaran') && transportTimRows.map((r, idx) => (
+                <div className="rincian-row" key={idx}>
+                  <div className="rincian-nama-grup">
+                    <span>Fee Transport Tim — {r.nama} ({r.jenis} | <span className="rincian-metim">{`Tim${r.namaTim ? ' - ' + r.namaTim : ''}`}</span>)</span>
+                    {activeCard === 'pengeluaran' && r.namaTim && r.namaTim.trim() && (
+                      <button type="button" className="btn-ra rincian-ra-btn" onClick={() => setSelectedPayeeKey(splitNamaVendor(r.namaTim).key)}>Buat Remittance Advice</button>
+                    )}
+                  </div>
+                  <div className="rincian-nilai-wrap">
+                    <b>{formatRupiah(r.fee)}</b>
+                    {activeCard === 'pengeluaran' && <span className="rincian-keterangan">Ke tim</span>}
+                  </div>
+                </div>
+              ))}
             </div>
           )}
 
@@ -540,10 +585,10 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
 
             <div className="rincian-note-title">Penjelasan</div>
             <div className="rincian-penjelasan"><b>Remittance Advice/Pemberitahuan Pembayaran</b> = Dokumen pemberitahuan pembayaran yang dikirimkan MUA kepada tim/vendor/penyedia jasa yang berkaitan dengan booking-an ini, setelah acara selesai/tanggungjawab selesai dilaksanakan.</div>
-            <div className="rincian-penjelasan"><b>Belanja Klien</b> = total semua yang ditagihkan ke klien dalam sebuah booking. Apapun jenisnya dan siapapun yang mengerjakan. Termasuk biaya Retouch, seluruh harga Add On (Beli), biaya Add On (Sewa), dan biaya Paket Bundling, jika ada.</div>
+            <div className="rincian-penjelasan"><b>Belanja Klien</b> = total semua yang ditagihkan ke klien dalam sebuah booking. Apapun jenisnya dan siapapun yang mengerjakan. Termasuk biaya Retouch, seluruh harga Add On (Beli), biaya Add On (Sewa), biaya Paket Bundling, dan Fee Transport Tim, jika ada.</div>
             <div className="rincian-penjelasan"><b>Omzet</b> = total pemasukan dalam sebuah booking yang terdiri dari biaya jasa/layanan yang dikerjain sendiri (Me) dihitung penuh, yang dikerjain Tim cuma dihitung komisinya (jika ada), ditambah biaya Retouch (selalu penuh), harga penuh dari Add On (Beli), untung dari Add On (Sewa) dan untung dari Paket Bundling (jika ada), dan biaya transport.</div>
             <div className="rincian-penjelasan"><b>Penghasilan</b> = bagian yang beneran jadi keuntungan bagi MUA. Sama kayak Omzet, tapi Add On (Beli) cuma dihitung untungnya (bukan biaya penuh), Add On (Sewa) dan Paket Bundling cuma dihitung untung/komisinya, biaya Retouch tetap dihitung penuh, dan biaya transport nggak dihitung sama sekali (karena biaya transport itu ongkos, bukan keuntungan).</div>
-            <div className="rincian-penjelasan"><b>Pengeluaran</b> = bagian dari Belanja Klien yang KELUAR LAGI ke tim/vendor luar, bukan masuk kantong MUA. Selisih antara biaya penuh yang ditagih ke klien dan komisi/untung yang di-set user, dari Makeup/Layanan Tambahan yang dikerjain Tim, Add On (Beli), Add On (Sewa), dan Paket Bundling.</div>
+            <div className="rincian-penjelasan"><b>Pengeluaran</b> = bagian dari Belanja Klien yang KELUAR LAGI ke tim/vendor luar, bukan masuk kantong MUA. Selisih antara biaya penuh yang ditagih ke klien dan komisi/untung yang di-set user, dari Makeup/Layanan Tambahan yang dikerjain Tim, Add On (Beli), Add On (Sewa), dan Paket Bundling. Ditambah Fee Transport Tim (jika ada), yang diteruskan penuh ke tim.</div>
           </div>
         </div>
 
