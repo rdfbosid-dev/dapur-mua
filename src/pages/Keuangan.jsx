@@ -90,7 +90,7 @@ export default function Keuangan() {
       setError('')
       const [bookingRes, pesertaRes, bundlingRes] = await Promise.all([
         supabase.from('booking_summary').select('*'),
-        supabase.from('peserta').select('booking_id, dikerjakan_oleh_makeup, biaya_makeup, komisi_makeup_tim, jumlah_sesi_makeup, transport_tim_makeup, layanan_tambahan, dikerjakan_oleh_tambahan, biaya_tambahan, komisi_tambahan, jumlah_sesi_tambahan, transport_tim_tambahan, layanan_lainnya, biaya_lainnya, keuntungan_lainnya, layanan_lainnya_2, biaya_lainnya_2, keuntungan_lainnya_2, layanan_lainnya_3, biaya_lainnya_3, keuntungan_lainnya_3, layanan_lainnya_4, biaya_lainnya_4, keuntungan_lainnya_4, layanan_lainnya_5, biaya_lainnya_5, keuntungan_lainnya_5, nama_sewa, biaya_sewa, jumlah_sewa, untung_sewa, nama_sewa_2, biaya_sewa_2, jumlah_sewa_2, untung_sewa_2, nama_sewa_3, biaya_sewa_3, jumlah_sewa_3, untung_sewa_3, nama_sewa_4, biaya_sewa_4, jumlah_sewa_4, untung_sewa_4, nama_sewa_5, biaya_sewa_5, jumlah_sewa_5, untung_sewa_5'),
+        supabase.from('peserta').select('booking_id, dikerjakan_oleh_makeup, biaya_makeup, komisi_makeup_tim, jumlah_sesi_makeup, dikerjakan_oleh_tambahan, biaya_tambahan, komisi_tambahan, jumlah_sesi_tambahan, layanan_lainnya, biaya_lainnya, keuntungan_lainnya, layanan_lainnya_2, biaya_lainnya_2, keuntungan_lainnya_2, layanan_lainnya_3, biaya_lainnya_3, keuntungan_lainnya_3, layanan_lainnya_4, biaya_lainnya_4, keuntungan_lainnya_4, layanan_lainnya_5, biaya_lainnya_5, keuntungan_lainnya_5, nama_sewa, biaya_sewa, jumlah_sewa, untung_sewa, nama_sewa_2, biaya_sewa_2, jumlah_sewa_2, untung_sewa_2, nama_sewa_3, biaya_sewa_3, jumlah_sewa_3, untung_sewa_3, nama_sewa_4, biaya_sewa_4, jumlah_sewa_4, untung_sewa_4, nama_sewa_5, biaya_sewa_5, jumlah_sewa_5, untung_sewa_5'),
         supabase.from('bundling_items').select('booking_id, biaya, keuntungan'),
       ])
       if (bookingRes.error) setError(bookingRes.error.message)
@@ -119,7 +119,10 @@ export default function Keuangan() {
         booking: bulanBookings.length,
         klien: bulanBookings.reduce((s, b) => s + (Number(b.total_klien) || 0), 0),
         belanja: bulanBookings.reduce((s, b) => s + (Number(b.belanja_klien) || 0), 0),
-        transport: bulanBookings.reduce((s, b) => s + (Number(b.biaya_transport) || 0), 0),
+        // Total ONGKOS transport dari klien = Biaya Transport (punya MUA)
+        // + Fee Transport Tim (transport_tim_total dari VIEW). Dua-duanya
+        // dianggap ongkos, bukan penghasilan & bukan pengeluaran.
+        transport: bulanBookings.reduce((s, b) => s + (Number(b.biaya_transport) || 0) + (Number(b.transport_tim_total) || 0), 0),
         omzet: bulanBookings.reduce((s, b) => s + (Number(b.omzet) || 0), 0),
         // SEBELUMNYA rumusnya `omzet - penghasilan` -- keliatannya masuk akal,
         // tapi ternyata itu SELALU balik jadi biaya_transport doang (buka
@@ -181,16 +184,6 @@ export default function Keuangan() {
       if (p.dikerjakan_oleh_tambahan === 'Tim') {
         const sesiTambahan = Math.max(1, Number(p.jumlah_sesi_tambahan) || 1)
         pembayaranTim[bulan] += Math.max(0, ((Number(p.biaya_tambahan) || 0) - (Number(p.komisi_tambahan) || 0)) * sesiTambahan)
-      }
-      // Fee Transport Tim -- diteruskan PENUH ke tim (nggak ada komisi,
-      // nggak dikali sesi). Filter-nya sama persis kayak VIEW
-      // booking_summary (transport_tim_total) & RincianKeuanganModal:
-      // cuma dihitung kalau beneran dikerjain Tim.
-      if (p.dikerjakan_oleh_makeup === 'Tim') {
-        pembayaranTim[bulan] += Number(p.transport_tim_makeup) || 0
-      }
-      if (p.dikerjakan_oleh_tambahan === 'Tim' && p.layanan_tambahan && p.layanan_tambahan !== 'Tidak Ada') {
-        pembayaranTim[bulan] += Number(p.transport_tim_tambahan) || 0
       }
 
       for (let n = 1; n <= 5; n++) {
@@ -480,6 +473,10 @@ export default function Keuangan() {
                   format={formatRupiah}
                   mounted={inViewBarTransport}
                 />
+                {/* Keterangan -- angka ini GABUNGAN Biaya Transport (Me) + Fee
+                    Transport Tim, posisinya disejajarin sama legend chart
+                    "Pembayaran ke Tim" di sebelahnya. */}
+                <div className="chart-keterangan-keuangan">Gabungan semua biaya transport yang diterima dari klien (Me &amp; Tim)</div>
               </div>
 
               <div className="card-keuangan" ref={refBarTim}>
