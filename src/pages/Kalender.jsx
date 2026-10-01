@@ -234,7 +234,13 @@ export default function Kalender() {
             <div className="kalender-grid">
               {grid.map((cell, i) => {
                 const dayBookings = bookingsOn(cell.date)
-                const count = dayBookings.length
+                // Kepadatan dihitung dari JUMLAH PESERTA (total_klien dari VIEW
+                // booking_summary = count(*) baris peserta per booking), BUKAN
+                // jumlah booking -- 1 booking isi 3 peserta = 3 orang yang
+                // di-makeup, sama capeknya kayak 3 booking terpisah.
+                // Math.max(1, ...) jaga-jaga booking tanpa peserta (total_klien
+                // 0) tetep kehitung 1, biar tanggalnya nggak keliatan kosong.
+                const count = dayBookings.reduce((sum, b) => sum + Math.max(1, Number(b.total_klien) || 0), 0)
                 const isSelected = sameDate(cell.date, selectedDate)
                 const isToday = sameDate(cell.date, today)
                 const density = count === 0 ? 0 : count === 1 ? 1 : count === 2 ? 2 : count === 3 ? 3 : 4

@@ -42,15 +42,17 @@ export default function CustomDatePicker({ value, onChange, placeholder = 'Pilih
   const [viewMonth, setViewMonth] = useState((selected || today).getMonth())
   const ref = useRef(null)
 
-  // Peta "tanggal ISO -> jumlah booking" -- dipakai buat nentuin warna
-  // kepadatan tiap sel, SAMA PERSIS logika threshold-nya kayak density
-  // di Kalender.jsx (0/1/2/3/4+), biar konsisten. bookingDates isinya
-  // array tanggal_acara mentah dari BookingModal (lewat props), di-itung
-  // di sini aja (bukan di parent) -- lebih deket ke tempat dipakainya.
+  // Peta "tanggal ISO -> jumlah PESERTA" -- dipakai buat nentuin warna
+  // kepadatan tiap sel, SAMA PERSIS logika & threshold-nya kayak density
+  // di Kalender.jsx (0/1/2/3/4+, dihitung per peserta bukan per booking),
+  // biar konsisten. bookingDates isinya array { tanggal, peserta } dari
+  // BookingModal/BookingDetailModal (lewat props), di-itung di sini aja
+  // (bukan di parent) -- lebih deket ke tempat dipakainya.
+  // Math.max(1, ...) jaga-jaga booking tanpa peserta tetep kehitung 1.
   const densityByDate = {}
-  bookingDates.forEach((iso) => {
-    if (!iso) return
-    densityByDate[iso] = (densityByDate[iso] || 0) + 1
+  bookingDates.forEach(({ tanggal, peserta }) => {
+    if (!tanggal) return
+    densityByDate[tanggal] = (densityByDate[tanggal] || 0) + Math.max(1, Number(peserta) || 0)
   })
   function densityOf(count) {
     return count === 0 ? 0 : count === 1 ? 1 : count === 2 ? 2 : count === 3 ? 3 : 4

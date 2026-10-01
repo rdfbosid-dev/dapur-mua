@@ -105,11 +105,11 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
   useEffect(() => {
     async function loadBookingDates() {
       const { data } = await supabase
-        .from('bookings')
-        .select('tanggal_acara')
+        .from('booking_summary')
+        .select('tanggal_acara, total_klien')
         .eq('user_id', user.id)
 
-      if (data) setBookingDates(data.map((b) => b.tanggal_acara))
+      if (data) setBookingDates(data.map((b) => ({ tanggal: b.tanggal_acara, peserta: b.total_klien })))
     }
     if (user) loadBookingDates()
   }, [user])
