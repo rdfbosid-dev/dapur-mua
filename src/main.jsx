@@ -5,6 +5,7 @@ import { Analytics } from '@vercel/analytics/react'
 import './index.css'
 import './theme.css'
 import App from './App.jsx'
+import ErrorBoundary from './components/ErrorBoundary'
 
 // Ngecek update versi app lebih agresif -- ini yang paling kerasa buat
 // user iOS, soalnya Safari nggak seagresif Chrome/Android dalam
@@ -59,7 +60,13 @@ function PwaUpdater() {
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <App />
+    {/* ErrorBoundary: kalau satu halaman error saat digambar, tampil layar
+        darurat (Muat ulang / Reset aplikasi), BUKAN layar kosong. PwaUpdater
+        sengaja di LUAR -- biar tombol "Ada pembaruan baru" tetap muncul walau
+        halamannya error (pembaruan bisa jadi yang memperbaikinya). */}
+    <ErrorBoundary>
+      <App />
+    </ErrorBoundary>
     <PwaUpdater />
     <Analytics />
   </StrictMode>,

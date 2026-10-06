@@ -32,6 +32,189 @@
   </head>
   <body>
     <div id="root"></div>
+    <!-- PENJAGA STARTUP -- jaring pengaman buat kasus aplikasi gagal tampil SAMA
+         SEKALI (layar kosong): cache PWA rusak/setengah terbarui, file JS gagal
+         dimuat, atau error sebelum React sempat jalan. Ditaruh di sini (script
+         biasa, BUKAN bagian bundel) biar tetap jalan walau bundel-nya yang rusak.
+         Cara kerja: kalau setelah 10 detik (atau 3 detik setelah ada error) #root
+         MASIH KOSONG, panel pemulihan ditampilkan. Kalau online & belum pernah
+         reset otomatis dalam 30 menit terakhir, reset dilakukan OTOMATIS satu kali
+         (hapus service worker + cache, lalu muat ulang) -- user nggak perlu apa-apa.
+         Kalau aplikasi akhirnya tampil, panelnya hilang sendiri.
+         Ditulis dengan sintaks lama (ES5) biar jalan di iPhone versi lawas juga.
+         Salinan logika "pulihkan" yang sama ada di src/lib/pulihkanAplikasi.js. -->
+    <script>
+      (function () {
+        var BATAS_MS = 10000
+        var BATAS_SETELAH_ERROR_MS = 3000
+        var JEDA_RESET_OTOMATIS_MS = 30 * 60 * 1000
+        var KUNCI_CAP = 'dapurmua:reset-otomatis'
+        var panel = null
+        var pesanError = ''
+        var timer = null
+        var timerAt = 0
+
+        function aman(fn) { try { return fn() } catch (e) { return undefined } }
+        function rootKosong() {
+          var r = document.getElementById('root')
+          return !r || r.childNodes.length === 0
+        }
+
+        // Hapus service worker + cache (lengkap = true: hapus juga data login).
+        function pulihkan(lengkap, lanjut) {
+          var tugas = []
+          aman(function () {
+            if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+              tugas.push(navigator.serviceWorker.getRegistrations().then(function (daftar) {
+                return Promise.all(daftar.map(function (r) { return r.unregister() }))
+              }))
+            }
+          })
+          aman(function () {
+            if (window.caches && window.caches.keys) {
+              tugas.push(window.caches.keys().then(function (kunci) {
+                return Promise.all(kunci.map(function (k) { return window.caches['delete'](k) }))
+              }))
+            }
+          })
+          if (lengkap) {
+            aman(function () { window.localStorage.clear() })
+            aman(function () { window.sessionStorage.clear() })
+          }
+          Promise.all(tugas.map(function (t) { return t['catch'](function () {}) })).then(lanjut, lanjut)
+        }
+
+        // Boleh reset otomatis? Harus online, halaman lagi DIKENDALIKAN service
+        // worker (yang dicurigai itu cache-nya -- kalau nggak ada service worker,
+        // menghapus cache nggak ada gunanya & user yang baru pertama buka di
+        // koneksi lambat nggak perlu diganggu), penyimpanan browser bisa dipakai
+        // (buat nyatet cap waktu -- pengaman biar nggak muter terus), dan belum
+        // ada reset otomatis dalam 30 menit terakhir.
+        function bolehResetOtomatis() {
+          if (navigator.onLine === false) return false
+          if (!(navigator.serviceWorker && navigator.serviceWorker.controller)) return false
+          return !!aman(function () {
+            var terakhir = Number(window.localStorage.getItem(KUNCI_CAP)) || 0
+            return Date.now() - terakhir > JEDA_RESET_OTOMATIS_MS
+          })
+        }
+        function catatResetOtomatis() {
+          return !!aman(function () { window.localStorage.setItem(KUNCI_CAP, String(Date.now())); return true })
+        }
+
+        function hapusPanel() {
+          if (panel && panel.parentNode) panel.parentNode.removeChild(panel)
+          panel = null
+        }
+
+        function elemen(tag, gaya, teks) {
+          var el = document.createElement(tag)
+          if (gaya) el.style.cssText = gaya
+          if (teks) el.appendChild(document.createTextNode(teks))
+          return el
+        }
+        function tombol(teks, gaya, aksi) {
+          var b = elemen('button', gaya, teks)
+          b.type = 'button'
+          b.onclick = aksi
+          return b
+        }
+
+        function tampilkanPanel(mode) {
+          hapusPanel()
+          var G_TOMBOL = 'border:none;border-radius:12px;padding:12px 16px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;'
+          panel = elemen('div', 'position:fixed;top:0;right:0;bottom:0;left:0;z-index:100000;background:#1f2433;overflow-y:auto;display:flex;align-items:center;justify-content:center;padding:20px;font-family:"Plus Jakarta Sans",system-ui,-apple-system,sans-serif;')
+          panel.id = 'dm-pemulih'
+          panel.setAttribute('role', 'alert')
+          panel.setAttribute('data-mode', mode)
+          var kartu = elemen('div', 'background:#fff;color:#24203a;border-radius:18px;padding:26px 22px;max-width:420px;width:100%;box-sizing:border-box;box-shadow:0 20px 50px -12px rgba(0,0,0,.5);')
+          if (mode === 'otomatis') {
+            kartu.appendChild(elemen('h1', 'font-size:18px;font-weight:700;margin:0 0 8px;', 'Memulihkan aplikasi...'))
+            kartu.appendChild(elemen('p', 'font-size:14px;line-height:1.55;margin:0;color:#4a4560;', 'Aplikasi belum bisa tampil, jadi kami membersihkan cache-nya. Sebentar ya, halaman akan dimuat ulang otomatis. Data kamu aman.'))
+          } else {
+            kartu.appendChild(elemen('h1', 'font-size:18px;font-weight:700;margin:0 0 8px;', 'Aplikasi belum bisa tampil'))
+            kartu.appendChild(elemen('p', 'font-size:14px;line-height:1.55;margin:0 0 18px;color:#4a4560;',
+              navigator.onLine === false
+                ? 'Sepertinya kamu sedang tidak terhubung ke internet. Nyalakan internet lalu muat ulang. Data kamu aman.'
+                : 'Coba muat ulang dulu. Kalau masih kosong, tekan Reset aplikasi. Data kamu tetap aman di server.'))
+            var baris = elemen('div', 'display:flex;flex-direction:column;gap:10px;')
+            baris.appendChild(tombol('Muat ulang', G_TOMBOL + 'background:#5b68bb;color:#fff;', function () { window.location.reload() }))
+            baris.appendChild(tombol('Reset aplikasi', G_TOMBOL + 'background:#eceaf6;color:#3b3670;', function () {
+              if (navigator.onLine === false && !window.confirm('Kamu sedang tidak terhubung ke internet. Kalau di-reset sekarang, aplikasi baru bisa dibuka lagi setelah internet menyala. Tetap reset?')) return
+              pulihkan(false, function () { window.location.reload() })
+            }))
+            kartu.appendChild(baris)
+            if (pesanError) {
+              var detail = elemen('details', 'margin-top:14px;font-size:12px;color:#6a6485;')
+              detail.appendChild(elemen('summary', '', 'Detail teknis (untuk dikirim ke admin)'))
+              detail.appendChild(elemen('pre', 'background:#f3f2f9;border-radius:8px;padding:10px;margin-top:8px;white-space:pre-wrap;word-break:break-word;font-size:11.5px;color:#3b3670;max-height:140px;overflow-y:auto;', pesanError))
+              kartu.appendChild(detail)
+            }
+            kartu.appendChild(tombol('Masih bermasalah? Reset lengkap (perlu login ulang)',
+              'background:none;border:none;color:#6a6485;font-size:12.5px;text-decoration:underline;cursor:pointer;margin-top:14px;padding:0;font-family:inherit;',
+              function () {
+                if (!window.confirm('Reset lengkap akan mengeluarkan kamu dari akun, jadi perlu login lagi. Lanjutkan?')) return
+                pulihkan(true, function () { window.location.reload() })
+              }))
+          }
+          panel.appendChild(kartu)
+          document.body.appendChild(panel)
+        }
+
+        function periksa() {
+          timer = null
+          if (!rootKosong()) return
+          if (bolehResetOtomatis() && catatResetOtomatis()) {
+            tampilkanPanel('otomatis')
+            setTimeout(function () { pulihkan(false, function () { window.location.reload() }) }, 1200)
+          } else {
+            tampilkanPanel('manual')
+          }
+        }
+
+        // Jadwalkan pengecekan; kalau sudah ada jadwal yang LEBIH CEPAT, biarkan.
+        function jadwalkan(ms) {
+          var target = Date.now() + ms
+          if (timer && timerAt <= target) return
+          if (timer) clearTimeout(timer)
+          timerAt = target
+          timer = setTimeout(periksa, ms)
+        }
+
+        // Error sebelum aplikasi tampil -> cek lebih cepat (3 detik, bukan 10).
+        // HANYA untuk error dari file aplikasi sendiri (satu alamat asal):
+        //  - <script> milik aplikasi gagal dimuat, atau
+        //  - exception dari kode aplikasi.
+        // SENGAJA nggak menghitung stylesheet/font (misal Google Fonts yang gagal
+        // di koneksi buruk), skrip pihak ketiga, atau ekstensi browser -- itu
+        // bukan tanda aplikasinya rusak, dan bundel yang besar wajar butuh waktu
+        // lebih lama di koneksi lambat. Fase capture biar error pemuatan <script>
+        // (yang nggak "menggelembung") tetap ketangkap.
+        function asalSama(url) { return !!url && String(url).indexOf(window.location.origin) === 0 }
+        window.addEventListener('error', function (e) {
+          if (!rootKosong() || !e) return
+          var el = e.target
+          var gagalMuatScript = el && el.tagName === 'SCRIPT' && asalSama(el.src)
+          var exceptionAplikasi = !el || el === window ? asalSama(e.filename) : false
+          if (!gagalMuatScript && !exceptionAplikasi) return
+          pesanError = e.message || (gagalMuatScript ? 'Gagal memuat: ' + el.src : '') || pesanError
+          jadwalkan(BATAS_SETELAH_ERROR_MS)
+        }, true)
+
+        // Aplikasi akhirnya tampil (misal koneksi lambat) -> panel hilang sendiri.
+        function awasRoot() {
+          var r = document.getElementById('root')
+          if (!r || !window.MutationObserver) return
+          var pengamat = new MutationObserver(function () {
+            if (!rootKosong()) { hapusPanel(); if (timer) { clearTimeout(timer); timer = null } pengamat.disconnect() }
+          })
+          pengamat.observe(r, { childList: true })
+        }
+
+        aman(awasRoot)
+        jadwalkan(BATAS_MS)
+      })()
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

@@ -547,9 +547,9 @@ export default function Keuangan() {
               </button>
               <div className="banding-penjelasan" id="banding-penjelasan-isi" hidden={!penjelasanBuka}>
                 <ul>
-                  <li><b>Penghasilan</b> adalah keuntungan kamu dari semua booking. Angkanya sudah bersih karena sudah dikurangi untuk bayar ke tim, bayar ke vendor, bayar produk Add On (sewa), dan modal produk add on (beli), serta tidak termasuk ongkos transport.</li>
+                  <li><b>Penghasilan</b> adalah keuntungan kamu dari semua booking. Angkanya sudah bersih karena sudah dikurangi untuk bayar ke tim, bayar ke vendor, bayar produk Add On (Sewa), dan modal produk Add On (Beli), serta tidak termasuk ongkos transport.</li>
                   <li><b>Pengeluaran Bisnis</b> adalah biaya bisnis di luar booking yang kamu catat di halaman Pengeluaran, misalnya belanja alat, portofolio, pelatihan, iklan, dan lainnya.</li>
-                  <li><b>Pengeluaran dalam Booking</b> (grafik Tren Pengeluaran dalam Booking di bawah) adalah biaya yang dikeluarkan untuk bayar ke tim, bayar ke vendor, bayar produk Add On (sewa), dan modal produk Add On (beli). Dihitung otomatis dari data booking dan <b>tidak digabung</b> dengan Pengeluaran Bisnis.</li>
+                  <li><b>Pengeluaran dalam Booking</b> (grafik Tren Pengeluaran dalam Booking di bawah) adalah biaya yang dikeluarkan untuk bayar ke tim, bayar ke vendor, bayar produk Add On (Sewa), dan modal produk Add On (Beli). Dihitung otomatis dari data booking dan <b>tidak digabung</b> dengan Pengeluaran Bisnis.</li>
                   <li><b>Dapur MUA tidak menghitung Laba Bersih untukmu.</b> Untuk perkiraan kasar, Laba Bersih ≈ Penghasilan − Pengeluaran Bisnis.</li>
                   <li>Hati-hati dengan barang yang kamu jual lagi ke klien lewat Add On (Beli): modalnya sudah terpotong dari Penghasilan, jadi kalau pembelian barang yang sama juga kamu catat di Pengeluaran Bisnis, modalnya <b>terhitung dua kali</b>.</li>
                   <li>Penghasilan dihitung berdasarkan <b>tanggal acara</b> booking, sedangkan Pengeluaran Bisnis berdasarkan <b>tanggal pengeluaran</b>.</li>
