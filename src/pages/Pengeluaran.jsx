@@ -4,6 +4,7 @@ import Sidebar from '../components/Sidebar'
 import CustomSelect from '../components/CustomSelect'
 import PengeluaranModal from '../components/PengeluaranModal'
 import PengeluaranDetailModal from '../components/PengeluaranDetailModal'
+import { useInViewAnimate } from '../hooks/useInViewAnimate'
 import './Pengeluaran.css'
 
 const BULAN_SINGKAT = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des']
@@ -35,6 +36,10 @@ export default function Pengeluaran() {
   // total & jumlah_item). RLS-nya nempel dari tabel asli
   // (security_invoker), jadi otomatis cuma punya user ini.
   const [pengeluaranList, setPengeluaranList] = useState([])
+  // Animasi bar per kategori -- polanya SAMA kayak bar "Top 10 Lokasi" di Laporan:
+  // bar tumbuh dari 0 begitu kartu ringkasan masuk layar (dan tumbuh lagi tiap
+  // masuk layar lagi), tiap baris jalan bergantian (jeda 0,08 detik).
+  const [refRingkasan, inViewRingkasan] = useInViewAnimate()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -196,7 +201,7 @@ export default function Pengeluaran() {
 
         {!loading && !error && (
           <>
-            <div className="pgl-card pgl-ringkasan">
+            <div className="pgl-card pgl-ringkasan" ref={refRingkasan}>
               {/* Judul + badge periode SEBARIS -- badge nempel di ujung kanan
                   teks judul (bukan di bawahnya). */}
               <div className="pgl-ringkasan-judul">
@@ -207,14 +212,20 @@ export default function Pengeluaran() {
 
               {perKategori.length > 0 && (
                 <div className="pgl-kategori-list">
-                  {perKategori.map(([nama, jumlah]) => (
+                  {perKategori.map(([nama, jumlah], i) => (
                     <div className="pgl-kategori-row" key={nama}>
                       <div className="pgl-kategori-info">
                         <span>{nama}</span>
                         <b>{formatRupiah(jumlah)}</b>
                       </div>
                       <div className="pgl-kategori-track">
-                        <div className="pgl-kategori-fill" style={{ width: `${totalFiltered > 0 ? Math.max(2, (jumlah / totalFiltered) * 100) : 0}%` }}></div>
+                        <div
+                          className="pgl-kategori-fill"
+                          style={{
+                            width: inViewRingkasan ? `${totalFiltered > 0 ? Math.max(2, (jumlah / totalFiltered) * 100) : 0}%` : '0%',
+                            transitionDelay: `${i * 0.08}s`,
+                          }}
+                        ></div>
                       </div>
                     </div>
                   ))}

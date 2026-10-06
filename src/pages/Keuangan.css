@@ -239,7 +239,8 @@
 .keu-kat-info span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .keu-kat-info b { white-space: nowrap; }
 .keu-kat-track { height: 6px; border-radius: 999px; background: color-mix(in srgb, var(--ink-faint) 70%, transparent); overflow: hidden; }
-.keu-kat-fill { height: 100%; border-radius: 999px; background: var(--pill); }
+/* transition-nya SAMA persis kayak .bar-fill (bar "Top 10 Lokasi" di Laporan): 0,7 detik, easing yang sama. */
+.keu-kat-fill { height: 100%; border-radius: 999px; background: var(--pill); transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1); }
 /* Baris gabungan "Kategori lainnya (N)" -- warnanya dibikin lebih pudar biar kebeda dari kategori asli. */
 .keu-kat-fill.gabungan { background: color-mix(in srgb, var(--pill) 55%, transparent); }
 

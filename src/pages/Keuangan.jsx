@@ -280,6 +280,8 @@ export default function Keuangan() {
   // posisinya di bawah (belum kelihatan pas halaman baru dibuka), dan
   // animasinya jalan ULANG tiap discroll keluar-masuk viewport lagi.
   const [refTrenPengeluaran, inViewTrenPengeluaran] = useInViewAnimate()
+  // Animasi bar kategori Pengeluaran Bisnis (sama kayak bar "Top 10 Lokasi" di Laporan).
+  const [refKategori, inViewKategori] = useInViewAnimate()
   const [refBarPembayaran, inViewBarPembayaran] = useInViewAnimate()
   const [refBarTransport, inViewBarTransport] = useInViewAnimate()
   const [refBarTim, inViewBarTim] = useInViewAnimate()
@@ -583,20 +585,26 @@ export default function Keuangan() {
 
               {/* Pengeluaran Bisnis per KATEGORI (non-booking) -- diinput di halaman
                   Pengeluaran, di sini cuma rekap porsinya per kategori. */}
-              <div className="card-keuangan">
+              <div className="card-keuangan" ref={refKategori}>
                 <div className="card-head-keuangan"><h3>Pengeluaran Bisnis per Kategori <TahunBadge tahun={filterTahun} /></h3></div>
                 {kategoriPengeluaranUsaha.length === 0 ? (
                   <div className="empty-state">Belum ada pengeluaran bisnis di tahun ini.</div>
                 ) : (
                   <div className="keu-kat-list">
-                    {kategoriTampil.map((k) => (
+                    {kategoriTampil.map((k, i) => (
                       <div className="keu-kat-row" key={k.kunci}>
                         <div className="keu-kat-info">
                           <span>{k.nama}</span>
                           <b>{formatRupiah(k.jumlah)}</b>
                         </div>
                         <div className="keu-kat-track">
-                          <div className={`keu-kat-fill${k.gabungan ? ' gabungan' : ''}`} style={{ width: `${totalPengeluaranUsaha > 0 ? Math.max(2, (k.jumlah / totalPengeluaranUsaha) * 100) : 0}%` }}></div>
+                          <div
+                            className={`keu-kat-fill${k.gabungan ? ' gabungan' : ''}`}
+                            style={{
+                              width: inViewKategori ? `${totalPengeluaranUsaha > 0 ? Math.max(2, (k.jumlah / totalPengeluaranUsaha) * 100) : 0}%` : '0%',
+                              transitionDelay: `${i * 0.08}s`,
+                            }}
+                          ></div>
                         </div>
                       </div>
                     ))}

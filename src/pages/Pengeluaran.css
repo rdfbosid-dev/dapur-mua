@@ -54,7 +54,8 @@
 .pgl-kategori-info span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pgl-kategori-info b { white-space: nowrap; }
 .pgl-kategori-track { height: 6px; border-radius: 999px; background: color-mix(in srgb, var(--ink-faint) 70%, transparent); overflow: hidden; }
-.pgl-kategori-fill { height: 100%; border-radius: 999px; background: var(--pill); }
+/* transition-nya SAMA persis kayak .bar-fill (bar "Top 10 Lokasi" di Laporan): 0,7 detik, easing yang sama. */
+.pgl-kategori-fill { height: 100%; border-radius: 999px; background: var(--pill); transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1); }
 
 /* Kosong / gagal muat */
 .pgl-kosong { font-size: 13.5px; color: var(--ink-soft); line-height: 1.6; text-align: center; padding: 28px 22px; }
@@ -95,14 +96,14 @@
   .pgl-search { max-width: none; flex: 1 1 100%; }
   .pgl-filter-select { flex: 1 1 calc(50% - 6px); width: auto; }
   .pgl-kategori-list { grid-template-columns: minmax(0, 1fr); }
-  .pgl-hint { font-size: 10px; }
+  .pgl-hint { font-size: 11px; }
 }
 @media (max-width: 640px) {
   .pgl-bulan { padding: 16px; }
   .pgl-total { font-size: 22px; }
-  .pgl-hint { font-size: 10px; }
+  .pgl-hint { font-size: 11px; }
 }
 @media (max-width: 480px) {
   .pgl-search { padding: 8px 12px; }
-  .pgl-hint { font-size: 10px; }
+  .pgl-hint { font-size: 11px; }
 }
