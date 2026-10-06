@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import CustomSelect from './CustomSelect'
@@ -22,6 +22,9 @@ import './BookingModal.css'
 import './BookingDetailModal.css'
 import InvoiceModal from './InvoiceModal'
 import RincianKeuanganModal from './RincianKeuanganModal'
+import IconClose from './IconClose'
+import { cariAngkaTakWajar, itemKewajaranRow } from '../lib/validasiBooking'
+import PeringatanKewajaran from './PeringatanKewajaran'
 
 function formatRupiah(n) {
   const num = Number(n) || 0
@@ -439,9 +442,52 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
     setEditPeserta((list) => list.filter((_, idx) => idx !== i))
   }
 
+  // Ref area isian (.modal-body) -- dipakai tolakSimpan buat nggulir ke
+  // pesan error / peringatan.
+  const bodyRef = useRef(null)
+
+  // Tolak simpan karena isian nggak valid. Banner error ada di BAGIAN
+  // ATAS area isian, sementara tombol Simpan ada di bawah -- kalau user
+  // lagi di tengah/bawah form, pesannya nggak kelihatan & kesannya
+  // "tombol Simpan nggak jalan". Makanya area isian digulir otomatis:
+  // ke kotak peringatan di kartu klien (keKartu) atau ke paling atas
+  // (nama klien / tanggal acara). requestAnimationFrame biar gulirnya
+  // jalan SETELAH banner error-nya ke-render. (Sama persis kayak di
+  // BookingModal.jsx.)
+  function tolakSimpan(pesan, { keKartu = false } = {}) {
+    setError(pesan)
+    requestAnimationFrame(() => {
+      const body = bodyRef.current
+      if (!body) return
+      const target = keKartu ? body.querySelector('.peringatan-kewajaran') : null
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      else body.scrollTo({ top: 0, behavior: 'smooth' })
+    })
+  }
+
   async function handleSaveEdit() {
-    setSaving(true)
     setError('')
+
+    // WAJIB diisi: Nama Klien & Tanggal Acara. SEBELUMNYA form Edit ini
+    // nggak ngecek sama sekali (beda dari form Booking Baru), jadi
+    // keduanya bisa dikosongin lalu disimpan. Kolom biaya/komisi dll
+    // BOLEH kosong (dianggap Rp0) -- itu sengaja nggak dicek di sini.
+    if (!namaKlien.trim()) { tolakSimpan('Nama klien wajib diisi.'); return }
+    if (!tanggalAcara) { tolakSimpan('Tanggal acara wajib diisi.'); return }
+
+    // Angka yang nggak masuk akal (komisi/untung > biayanya) DITOLAK.
+    // Detailnya udah kelihatan di kotak peringatan tiap kartu klien
+    // (lihat PeringatanKewajaran); aturannya di lib/validasiBooking.js.
+    const kartuBermasalah = editPeserta
+      .map((p, i) => ({ i, masalah: cariAngkaTakWajar(itemKewajaranRow(p)) }))
+      .filter((k) => k.masalah.length > 0)
+    if (kartuBermasalah.length > 0) {
+      const daftarKlien = kartuBermasalah.map((k) => `Klien ${k.i + 1}`).join(', ')
+      tolakSimpan(`Perubahan belum bisa disimpan: ada angka yang tidak masuk akal (komisi/untung lebih besar dari biayanya) di ${daftarKlien}. Cek kotak peringatan merah di kartu klien tersebut.`, { keKartu: true })
+      return
+    }
+
+    setSaving(true)
 
     let klienId
     try {
@@ -703,10 +749,10 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
       <div className="modal">
         <div className="modal-head">
           <h2>{editMode ? 'Edit Booking' : liveBooking.nama_klien}</h2>
-          <button className="modal-close" onClick={onClose} type="button">&times;</button>
+          <button className="modal-close" onClick={onClose} type="button" aria-label="Tutup"><IconClose /></button>
         </div>
 
-        <div className="modal-body">
+        <div className="modal-body" ref={bodyRef}>
           {error && <div className="modal-error">{error}</div>}
           {loading && <div className="empty-state">Memuat detail...</div>}
 
@@ -1393,6 +1439,9 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                       {p._adaAddOn && p._addonCount < 5 && (
                         <button type="button" className="add-peserta" onClick={() => addAddOnSlot(i)}>+ Tambah Add On Item (Beli)</button>
                       )}
+
+                      {/* Peringatan langsung kalau komisi/untung > biayanya. */}
+                      <PeringatanKewajaran daftar={cariAngkaTakWajar(itemKewajaranRow(p))} />
                     </div>
                   </div>
                 )

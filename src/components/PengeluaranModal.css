@@ -1,77 +1,180 @@
 /* Semua selector di file ini di-scope di bawah .pengeluaran-modal-overlay --
    pola yang sama kayak file modal lain di project ini (BookingModal.css,
    RincianKeuanganModal.css, dst), biar nama class umum (.modal, .field,
-   .btn-ghost) nggak bentrok antar file. */
+   .btn-ghost) nggak bentrok antar file.
+
+   Ukuran (lebar modal, garis bawah judul, tinggi field 40px, font 12px,
+   tombol footer) SENGAJA disamain PERSIS sama BookingModal.css --
+   diduplikasi di sini (bukan di-share), biar form Pengeluaran kerasa satu
+   keluarga sama form Booking tanpa bergantung ke urutan import file lain. */
 
 .pengeluaran-modal-overlay {
   position: fixed; inset: 0; background: rgb(36, 55, 62, 0.45);
-  display: flex; align-items: center; justify-content: center; padding: 24px;
+  display: flex; align-items: center; justify-content: center; padding: 26px;
   z-index: 95;
+  -webkit-text-size-adjust: 100%; text-size-adjust: 100%;
 }
 .pengeluaran-modal-overlay .modal {
-  background: var(--table-body); border-radius: 24px; width: 100%; max-width: 480px;
+  background: var(--table-body); border-radius: 24px; width: 100%; max-width: 600px;
   max-height: 88vh; display: flex; flex-direction: column; overflow: hidden;
   box-shadow: 0 24px 60px -12px var(--shadow-modal);
 }
+/* <form> ngebungkus body + foot -- WAJIB ikut flex column & min-height 0,
+   kalau nggak .modal-body nggak bisa scroll (ikut memanjang ngikutin isi)
+   dan tombol Simpan kedorong keluar layar pas item-nya banyak. */
+.pengeluaran-modal-overlay .pengeluaran-form { display: flex; flex-direction: column; flex: 1; min-height: 0; }
 .pengeluaran-modal-overlay .modal-head {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 16px 16px; flex-shrink: 0;
+  padding: 26px 26px 10px; flex-shrink: 0;
 }
-.pengeluaran-modal-overlay .modal-head h2 { font-size: 18px; color: var(--ink-soft); }
+.pengeluaran-modal-overlay .modal-head h2 { font-size: 18px; position: relative; padding-bottom: 5px; color: var(--ink-soft); }
+.pengeluaran-modal-overlay .modal-head h2::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: 0;
+  height: 4px; border-radius: 2px; background: var(--line-animation);
+}
 .pengeluaran-modal-overlay .modal-close {
   width: 32px; height: 32px; border-radius: 10px; border: none; background: color-mix(in srgb, var(--h3) 20%, transparent);
   color: var(--h3); font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center;
   transition: background 0.15s;
 }
 .pengeluaran-modal-overlay .modal-close:hover { background: color-mix(in srgb, var(--h3) 50%, transparent); }
-.pengeluaran-modal-overlay .modal-body { padding: 5px 16px 8px; overflow-y: auto; flex: 1; -webkit-overflow-scrolling: touch; }
-.pengeluaran-modal-overlay .modal-foot { display: flex; justify-content: flex-end; gap: 8px; padding: 14px 16px; flex-shrink: 0; }
+.pengeluaran-modal-overlay .modal-body {
+  padding: 10px 26px; overflow-y: auto; flex: 1; min-height: 0; -webkit-overflow-scrolling: touch;
+}
+.pengeluaran-modal-overlay .modal-foot {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 16px 26px; flex-shrink: 0;
+}
+.pengeluaran-modal-overlay .foot-right { display: flex; gap: 10px; margin-left: auto; }
 
-.pengeluaran-modal-overlay .field-grid-pengeluaran { display: grid; gap: 10px; margin-bottom: 12px; }
-.pengeluaran-modal-overlay .field-grid-pengeluaran.cols-2 { grid-template-columns: 1fr 1fr; }
-.pengeluaran-modal-overlay .field-grid-pengeluaran.cols-1 { grid-template-columns: 1fr; }
-.pengeluaran-modal-overlay .field { display: flex; flex-direction: column; gap: 4px; }
-.pengeluaran-modal-overlay .field label { font-size: 12.5px; font-weight: 600; color: var(--ink-soft); }
+.pengeluaran-modal-overlay .pengeluaran-info { padding: 8px; background: color-mix(in srgb, var(--button-prm-hover) 30%, transparent); border-radius: 10px; font-size: 12px; line-height: 1.5; color: var(--h9); opacity: 0.85; margin: 4px 0 14px; }
+
+/* ---------- Field -- nilai SAMA PERSIS kayak BookingModal.css ---------- */
+.pengeluaran-modal-overlay .field-grid-pengeluaran { display: grid; gap: 8px; margin-bottom: 5px; }
+.pengeluaran-modal-overlay .field-grid-pengeluaran.cols-2 { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.pengeluaran-modal-overlay .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; margin-top: 5px; min-width: 0; }
+.pengeluaran-modal-overlay .field label { font-size: 12px; font-weight: 600; color: var(--ink-soft); }
 .pengeluaran-modal-overlay .field input,
 .pengeluaran-modal-overlay .field textarea {
-  padding: 10px 12px; border-radius: 10px; border: 1.5px solid var(--button-border);
-  background: var(--table-body); color: var(--ink-soft); font-size: 14px; font-family: inherit;
-  outline: none; transition: border-color 0.15s;
+  border: 1.5px solid color-mix(in srgb, var(--button-border) 70%, transparent); border-radius: 11px; padding: 10px 10px;
+  font-size: 12px; font-family: inherit; color: var(--ink-soft); background: var(--field);
+  height: 40px; min-width: 0; width: 100%; box-sizing: border-box;
 }
-.pengeluaran-modal-overlay .field textarea { resize: vertical; min-height: 44px; }
+.pengeluaran-modal-overlay .field textarea { height: auto; resize: vertical; min-height: 56px; }
+.pengeluaran-modal-overlay .field input::placeholder,
+.pengeluaran-modal-overlay .field textarea::placeholder { color: var(--placeholder); opacity: 1; }
 .pengeluaran-modal-overlay .field input:focus,
-.pengeluaran-modal-overlay .field textarea:focus { border-color: var(--h3); }
-
-.pengeluaran-modal-overlay .toggle-row { display: flex; gap: 6px; }
-.pengeluaran-modal-overlay .toggle-opt {
-  flex: 1; text-align: center; padding: 9px 10px; border-radius: 10px; border: 1.5px solid var(--button-border);
-  background: var(--table-body); color: var(--ink-soft); font-size: 13.5px; font-weight: 600; cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+.pengeluaran-modal-overlay .field textarea:focus {
+  outline: none; border-color: var(--h3); box-shadow: 0 0 0 3px color-mix(in srgb, var(--h3) 18%, transparent);
 }
-.pengeluaran-modal-overlay .toggle-opt:not(.sel):hover { background: color-mix(in srgb, var(--ink-faint) 50%, transparent); }
-.pengeluaran-modal-overlay .toggle-opt.sel { background: var(--h3); color: #fff; border-color: transparent; }
+/* Dropdown Kategori (CustomSelect) & Tanggal (CustomDatePicker) --
+   dua-duanya pakai tombol .cselect-trigger, tingginya disamain 40px. */
+.pengeluaran-modal-overlay .cselect-trigger { height: 40px; }
 
-.pengeluaran-modal-overlay .btn-ghost {
-  padding: 9px 16px; border-radius: 10px; border: 1.5px solid var(--button-border); background: var(--table-body);
-  font-size: 14px; font-weight: 600; color: var(--ink-soft); cursor: pointer; font-family: inherit;
-  transition: background 0.15s;
+.pengeluaran-modal-overlay .form-divider { height: 1px; background: color-mix(in srgb, var(--button-border) 45%, transparent); margin: 8px 0; }
+
+.pengeluaran-modal-overlay .item-section-title { display: block; font-size: 12px; font-weight: 700; color: var(--ink-soft); margin: 10px 0 8px; }
+
+/* Saran item -- tombol kecil, klik = isi/nambah baris item. */
+.pengeluaran-modal-overlay .saran-wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 10px; }
+.pengeluaran-modal-overlay .saran-label { font-size: 11.5px; color: var(--ink-soft); opacity: 0.85; margin-right: 2px; }
+.pengeluaran-modal-overlay .saran-chip {
+  font-family: inherit; font-size: 11.5px; font-weight: 600; padding: 5px 10px; border-radius: 999px; cursor: pointer;
+  border: 1px solid color-mix(in srgb, var(--h3) 45%, transparent); background: color-mix(in srgb, var(--h3) 10%, transparent);
+  color: var(--h9); transition: background 0.15s;
 }
-.pengeluaran-modal-overlay .btn-ghost:hover { background: color-mix(in srgb, var(--button-prm-hover) 50%, transparent); }
+.pengeluaran-modal-overlay .saran-chip:hover { background: color-mix(in srgb, var(--h3) 22%, transparent); }
+
+/* Kartu item -- 2 lapis, nilai SAMA PERSIS kayak kartu Klien di
+   BookingModal.css (.peserta-card = lapis luar berwarna, .peserta-head =
+   judul + tombol Hapus, .peserta-body = lapis dalam putih). */
+.pengeluaran-modal-overlay .item-card {
+  background: color-mix(in srgb, var(--button-prm-hover) 60%, transparent); border-radius: 16px; padding: 10px;
+  margin-bottom: 10px;
+}
+.pengeluaran-modal-overlay .item-card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.pengeluaran-modal-overlay .item-title { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: var(--ink-soft); }
+.pengeluaran-modal-overlay .item-body { background: var(--table-body); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; }
+.pengeluaran-modal-overlay .item-num {
+  width: 22px; height: 22px; border-radius: 50%; background: var(--h3); color: #fff;
+  display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0;
+}
+.pengeluaran-modal-overlay .item-remove {
+  font-family: inherit; font-size: 12px; font-weight: 550; color: var(--h8); cursor: pointer; background: var(--notif); border: none;
+  padding: 4px 8px; border-radius: 7px; transition: background 0.15s;
+}
+.pengeluaran-modal-overlay .item-remove:hover { background: color-mix(in srgb, var(--notif) 85%, black); }
+/* Kategori dropdown (opsiItem): Nama Item | field tambahan -- 2 kolom
+   sama lebar, jadi Nama Item = setengah lebar. Kalau opsinya nggak punya
+   field tambahan, kolom kanan dibiarin kosong (Nama Item tetep setengah). */
+.pengeluaran-modal-overlay .field-grid-item-nama { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
+/* Field tambahan kedua (misal Toko/Tempat Servis) -- dipaksa ke kolom
+   kanan, jadi otomatis turun ke baris 2 tepat di bawah field tambahan
+   pertama (kolom kiri baris 2 dibiarin kosong). */
+.pengeluaran-modal-overlay .field-grid-item-nama .field-detail2 { grid-column: 2; }
+/* Jumlah | Harga Satuan | Subtotal -- Jumlah sengaja paling sempit. */
+.pengeluaran-modal-overlay .field-grid-item { display: grid; grid-template-columns: minmax(0, 0.6fr) minmax(0, 1.2fr) minmax(0, 1fr); gap: 8px; }
+/* Opsi tanpa Jumlah (misal Transport): Biaya | Subtotal -- dibagi 2 sama
+   lebar, jadi field Biaya sejajar sama Nama Item di atasnya. */
+.pengeluaran-modal-overlay .field-grid-item.tanpa-jumlah { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.pengeluaran-modal-overlay .item-subtotal {
+  height: 40px; display: flex; align-items: center; padding: 0 2px;
+  font-size: 12px; font-weight: 700; color: var(--ink-soft);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.pengeluaran-modal-overlay .item-loading { font-size: 12px; color: var(--ink-soft); padding: 8px 0; }
+
+.pengeluaran-modal-overlay .add-item {
+  font-family: inherit; text-align: center; padding: 8px; border-radius: 10px; width: 100%;
+  background: var(--button-prm-hover); color: var(--button-tx-hover); border: none; font-size: 12px; font-weight: 600; cursor: pointer;
+  transition: background 0.15s; margin-bottom: 10px;
+}
+.pengeluaran-modal-overlay .add-item:hover { background: var(--h3); }
+
+.pengeluaran-modal-overlay .total-row {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+  padding: 10px 2px; margin-bottom: 5px;
+  border-top: none;
+  border-bottom: 1.5px solid color-mix(in srgb, var(--button-border) 60%, transparent);
+}
+.pengeluaran-modal-overlay .total-row span { font-size: 12px; font-weight: 600; color: var(--ink-soft); }
+.pengeluaran-modal-overlay .total-row b { font-size: 14px; color: var(--h5); }
+/* Baris Catatan -- padding & margin DISAMAIN PERSIS sama .total-row di
+   atasnya (padding 10px 2px, margin-bottom 5px, tanpa margin-top), biar
+   jarak dari garis & posisi teks "Catatan" sejajar "Total Pengeluaran".
+   Selector 3 class sengaja, biar menang lawan .field (margin 5px/10px). */
+.pengeluaran-modal-overlay .field.field-catatan { padding: 10px 2px; margin: 0 0 5px; }
+
+/* ---------- Tombol footer -- nilai SAMA PERSIS kayak BookingModal.css ---------- */
 .pengeluaran-modal-overlay .btn-primary-pengeluaran {
   padding: 10px 18px; border-radius: 11px; border: 1.5px solid var(--button-prm-hover); background: var(--button-prm-hover);
   font-size: 13.5px; font-weight: 600; color: var(--button-tx-hover); cursor: pointer; font-family: inherit;
   transition: background 0.15s, border-color 0.15s;
 }
-.pengeluaran-modal-overlay .btn-primary-pengeluaran:hover { background: var(--h3); border-color: var(--h3); }
-.pengeluaran-modal-overlay .btn-primary-pengeluaran:disabled { opacity: 0.6; cursor: default; }
-
-.pengeluaran-error {
-  background: color-mix(in srgb, var(--h8) 12%, transparent); border: 1px solid color-mix(in srgb, var(--h8) 40%, transparent);
-  color: var(--h8); font-size: 12.5px; padding: 8px 10px; border-radius: 8px; margin-bottom: 10px;
+.pengeluaran-modal-overlay .btn-primary-pengeluaran:hover { background: var(--h3); }
+.pengeluaran-modal-overlay .btn-ghost {
+  padding: 10px 18px; border-radius: 11px; border: 1.5px solid color-mix(in srgb, var(--button-border) 70%, transparent); background: var(--box-dashboard);
+  font-size: 13.5px; font-weight: 600; color: var(--ink-soft); cursor: pointer; font-family: inherit;
+  transition: background 0.15s, border-color 0.15s;
 }
+.pengeluaran-modal-overlay .btn-ghost:hover { background: color-mix(in srgb, var(--button-prm-hover) 50%, transparent); border: 1.5px solid color-mix(in srgb, var(--button-prm-hover) 50%, transparent); }
+.pengeluaran-modal-overlay .btn-primary-pengeluaran:disabled,
+.pengeluaran-modal-overlay .btn-ghost:disabled { opacity: 0.6; cursor: default; }
+
+/* Pesan error -- sama kayak .modal-error di BookingModal.css. */
+.pengeluaran-modal-overlay .pengeluaran-error { background: var(--pill); color: var(--h8); font-size: 12.5px; padding: 10px 14px; border-radius: 10px; margin-bottom: 10px; }
 
 @media (max-width: 640px) {
   .pengeluaran-modal-overlay { padding: 0; align-items: flex-end; }
   .pengeluaran-modal-overlay .modal { max-width: 100%; max-height: 92vh; border-radius: 22px 22px 0 0; }
-  .pengeluaran-modal-overlay .field-grid-pengeluaran.cols-2 { grid-template-columns: 1fr; }
+  .pengeluaran-modal-overlay .modal-head { padding: 16px 18px; }
+  .pengeluaran-modal-overlay .modal-body { padding: 16px 18px; }
+  .pengeluaran-modal-overlay .modal-foot { padding: 12px 18px 18px; }
+  /* Kategori/Tanggal & Judul/Tempat -- numpuk 1 kolom di HP. */
+  .pengeluaran-modal-overlay .field-grid-pengeluaran.cols-2 { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  /* Nama Item + field tambahan juga numpuk di HP -- setengah layar HP
+     kesempitan buat teks "Lainnya (ketik manual)". */
+  .pengeluaran-modal-overlay .field-grid-item-nama { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  /* Di HP cuma 1 kolom -- field tambahan kedua ikut numpuk biasa (kalau
+     tetep grid-column:2, browser bikin kolom ke-2 baru & layout jebol). */
+  .pengeluaran-modal-overlay .field-grid-item-nama .field-detail2 { grid-column: auto; }
 }

@@ -1,0 +1,156 @@
+/* File ini mandiri -- semua selector di-scope di bawah
+   .pengeluaran-detail-overlay. Nilai-nilai ukuran/warna (modal, judul +
+   garis bawah, tombol kecil di header, section-label, detail-grid)
+   SENGAJA disamain PERSIS sama BookingDetailModal.css (diduplikasi, bukan
+   di-share), biar Detail Pengeluaran kerasa satu keluarga sama Detail
+   Booking tanpa bergantung ke urutan import file lain. */
+
+.pengeluaran-detail-overlay {
+  position: fixed; inset: 0; background: rgb(36, 55, 62, 0.6);
+  display: flex; align-items: center; justify-content: center; padding: 26px;
+  z-index: 95;
+}
+.pengeluaran-detail-overlay .modal {
+  background: var(--table-body); border: 1.5px solid var(--line-box); border-radius: 24px; width: 100%; max-width: 600px;
+  max-height: 88vh; display: flex; flex-direction: column; overflow: hidden;
+  box-shadow: var(--shadow-modal);
+}
+.pengeluaran-detail-overlay .modal-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 26px 26px 10px; flex-shrink: 0; margin-bottom: 5px;
+}
+.pengeluaran-detail-overlay .modal-head h2 { font-size: 18px; position: relative; padding-bottom: 5px; color: var(--ink-soft); min-width: 0; }
+.pengeluaran-detail-overlay .modal-head h2::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: 0;
+  height: 4px; border-radius: 2px; background: var(--line-animation);
+}
+.pengeluaran-detail-overlay .modal-close {
+  width: 32px; height: 32px; flex-shrink: 0; border-radius: 10px; border: none; background: color-mix(in srgb, var(--h3) 20%, transparent);
+  color: var(--h3); font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s;
+}
+.pengeluaran-detail-overlay .modal-close:hover { background: color-mix(in srgb, var(--h3) 50%, transparent); }
+.pengeluaran-detail-overlay .modal-body { padding: 10px 26px 20px; overflow-y: auto; flex: 1; -webkit-overflow-scrolling: touch; }
+.pengeluaran-detail-overlay .modal-foot { display: flex; align-items: center; justify-content: flex-end; gap: 10px; padding: 10px 26px 20px; flex-shrink: 0; }
+.pengeluaran-detail-overlay .modal-error { background: var(--pill); color: var(--h8); font-size: 12.5px; padding: 10px 14px; border-radius: 10px; margin-bottom: 10px; }
+.pengeluaran-detail-overlay .empty-state { text-align: center; padding: 20px 26px; color: var(--ink-soft); font-size: 12px; }
+
+/* Tombol kecil di header (Nota, Edit Pengeluaran) -- sama kayak
+   .btn-ghost BookingDetailModal.css (Rincian Keuangan/Invoice/Edit). */
+.pengeluaran-detail-overlay .btn-ghost {
+  padding: 5px 10px; border-radius: 8px; border: 1.5px solid var(--button-border); background: var(--table-body);
+  font-size: 12px; font-weight: 600; color: var(--ink-soft); cursor: pointer; font-family: inherit;
+  transition: background 0.15s, border-color 0.15s; margin-bottom: 20px; line-height: 1.4;
+}
+.pengeluaran-detail-overlay .btn-ghost:hover {
+  background: color-mix(in srgb, var(--button-prm-hover) 50%, transparent); border: 1.5px solid color-mix(in srgb, var(--button-prm-hover) 50%, transparent);
+}
+.pengeluaran-detail-overlay .btn-ghost:disabled { opacity: 0.6; cursor: default; }
+/* Tombol Tutup di footer pakai .btn-ghost kecil yang sama (kayak Tutup di
+   Detail Booking) -- margin-bottom-nya dinolin biar sejajar sama tombol
+   Hapus Pengeluaran. */
+.pengeluaran-detail-overlay .modal-foot .btn-ghost { margin-bottom: 0; }
+/* Tombol Tutup di footer -- sama kayak .btn-batal BookingDetailModal.css. */
+.pengeluaran-detail-overlay .btn-batal {
+  padding: 10px 18px; border-radius: 11px; border: 1.5px solid color-mix(in srgb, var(--button-border) 70%, transparent); background: var(--box-dashboard);
+  font-size: 13.5px; font-weight: 600; color: var(--ink-soft); cursor: pointer; font-family: inherit;
+  transition: background 0.15s, border-color 0.15s;
+}
+.pengeluaran-detail-overlay .btn-batal:hover { background: color-mix(in srgb, var(--button-prm-hover) 50%, transparent); border: 1.5px solid color-mix(in srgb, var(--button-prm-hover) 50%, transparent); }
+
+/* Header: pill kategori (kiri) + tombol Nota & Edit Pengeluaran (kanan). */
+.pengeluaran-detail-overlay .detail-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+/* Tombol header punya margin-bottom 20px (warisan .btn-ghost) -- di
+   baris ini dinolin biar sejajar tengah sama pill kategori. */
+.pengeluaran-detail-overlay .detail-header .btn-ghost { margin-bottom: 0; }
+.pengeluaran-detail-overlay .detail-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px 10px; }
+/* Nilai Kategori Pengeluaran ditampilin sebagai pill berwarna penuh. */
+.pengeluaran-detail-overlay .kategori-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; padding: 5px 10px; border-radius: 8px;
+  background: var(--h3); color: #fff;
+}
+
+.pengeluaran-detail-overlay .section-label {
+  font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--ink-soft); margin: 20px 0 10px;
+}
+/* Info utama "Label : Nilai" -- grid 3 kolom (label selebar label
+   terpanjang | titik dua | nilai), jadi titik dua & nilainya sejajar
+   rapi ke bawah walau panjang labelnya beda-beda. */
+.pengeluaran-detail-overlay .info-list {
+  display: grid; grid-template-columns: max-content auto minmax(0, 1fr); gap: 8px 12px;
+  align-items: baseline; margin-bottom: 20px; font-size: 12.5px;
+}
+.pengeluaran-detail-overlay .info-label { font-weight: 700; color: var(--ink-soft); }
+.pengeluaran-detail-overlay .info-titik { color: var(--ink-soft); }
+.pengeluaran-detail-overlay .info-nilai { font-weight: 500; color: var(--h5); min-width: 0; overflow-wrap: anywhere; }
+
+/* Rincian Item -- 3 kolom kayak tabel: Nama (| isi tambahan) | Jumlah |
+   Subtotal (rata kanan). Tiap baris/grup dipisah garis tipis. Grup (nama
+   item sama >1x, misal Konsumsi: Makan & Minum) = 1 judul + baris anak
+   (↳) TANPA garis di antara anak-anaknya. */
+.pengeluaran-detail-overlay .item-list { display: flex; flex-direction: column; }
+.pengeluaran-detail-overlay .item-row,
+.pengeluaran-detail-overlay .item-grup { border-bottom: 1px solid color-mix(in srgb, var(--ink-soft) 40%, transparent); }
+/* Kolom Subtotal SENGAJA lebar TETAP (110px, muat sampai "Rp10.000.000"),
+   BUKAN auto -- tiap .item-row itu grid sendiri-sendiri; kalau kolom
+   kanannya auto, lebarnya ngikutin panjang angka di baris itu ("Rp100.000"
+   vs "Rp50.000"), sisa ruang buat 2 kolom fr jadi beda tiap baris, dan
+   angka Jumlah-nya geser nggak sejajar. */
+.pengeluaran-detail-overlay .item-row {
+  display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) 110px; align-items: center; gap: 10px;
+  padding: 9px 0; font-size: 12.5px; color: var(--ink-soft);
+}
+.pengeluaran-detail-overlay .item-grup { padding: 9px 0 4px; }
+.pengeluaran-detail-overlay .item-grup .item-row { border-bottom: none; padding: 4px 0; }
+.pengeluaran-detail-overlay .item-grup-judul { font-size: 12.5px; color: var(--ink-soft); }
+.pengeluaran-detail-overlay .item-nama { min-width: 0; overflow-wrap: anywhere; display: flex; align-items: flex-end; gap: 6px; }
+.pengeluaran-detail-overlay .item-panah { width: 22px; flex-shrink: 0; display: inline-flex; color: var(--ink-soft); }
+.pengeluaran-detail-overlay .item-jumlah { white-space: nowrap; }
+.pengeluaran-detail-overlay .item-nominal { text-align: right; white-space: nowrap; }
+
+.pengeluaran-detail-overlay .total-view-row {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+  padding: 12px 0 0;
+}
+.pengeluaran-detail-overlay .total-view-row span { font-size: 12.5px; font-weight: 600; color: var(--ink-soft); }
+.pengeluaran-detail-overlay .total-view-row b { font-size: 14px; color: var(--h5); }
+
+.pengeluaran-detail-overlay .catatan-view { font-size: 12px; color: var(--ink-soft); white-space: pre-line; line-height: 1.5; }
+
+/* ---- Hapus pengeluaran -- nilai SAMA PERSIS kayak tombol & banner
+   Hapus Booking di BookingDetailModal.css ---- */
+.pengeluaran-detail-overlay .delete-confirm-banner { background: var(--notif); padding: 12px 26px; }
+.pengeluaran-detail-overlay .delete-confirm-text { display: flex; flex-direction: column; gap: 3px; }
+.pengeluaran-detail-overlay .delete-confirm-text b { color: var(--h8); font-size: 13.5px; }
+.pengeluaran-detail-overlay .delete-confirm-text span { color: var(--h8); font-size: 12.5px; opacity: 0.85; }
+.pengeluaran-detail-overlay .btn-danger-ghost {
+  padding: 8px 8px; border-radius: 11px; border: 1px solid var(--notif); background: var(--notif);
+  font-size: 12px; font-weight: 500; color: var(--h8); cursor: pointer; font-family: inherit;
+  transition: background 0.15s; line-height: 1.4; margin-right: auto;
+}
+.pengeluaran-detail-overlay .btn-danger-ghost:hover { background: color-mix(in srgb, var(--notif) 85%, black); border: 1px solid color-mix(in srgb, var(--notif) 85%, black); }
+.pengeluaran-detail-overlay .btn-danger.batal {
+  padding: 8px 10px; border-radius: 11px; border: 1.5px solid var(--button-tx); background: none;
+  font-size: 12px; font-weight: 600; color: var(--ink-soft); cursor: pointer; font-family: inherit;
+  transition: background 0.15s, border-color 0.15s;
+}
+.pengeluaran-detail-overlay .btn-danger.batal:hover { background: color-mix(in srgb, var(--button-prm-hover) 50%, transparent); border: 1.5px solid color-mix(in srgb, var(--button-prm-hover) 50%, transparent); }
+.pengeluaran-detail-overlay .btn-danger {
+  padding: 8px 10px; border-radius: 11px; border: 1.5px solid var(--notif); background: var(--notif); color: #fff;
+  font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; line-height: 1.4;
+  transition: background 0.15s;
+}
+.pengeluaran-detail-overlay .btn-danger:hover { background: color-mix(in srgb, var(--notif) 85%, black); border: 1.5px solid color-mix(in srgb, var(--notif) 85%, black); }
+.pengeluaran-detail-overlay .btn-danger:disabled,
+.pengeluaran-detail-overlay .btn-danger-ghost:disabled { opacity: 0.6; cursor: not-allowed; }
+
+@media (max-width: 640px) {
+  .pengeluaran-detail-overlay { padding: 0; align-items: flex-end; }
+  .pengeluaran-detail-overlay .modal { max-width: 100%; max-height: 92vh; border-radius: 22px 22px 0 0; }
+  .pengeluaran-detail-overlay .modal-head { padding: 16px 18px 5px; }
+  .pengeluaran-detail-overlay .modal-body { padding: 5px 18px 16px; }
+  .pengeluaran-detail-overlay .modal-foot { padding: 12px 18px 18px; }
+  /* Di HP kolom Jumlah dipersempit biar nama item kebagian ruang lebih. */
+  .pengeluaran-detail-overlay .item-row { grid-template-columns: minmax(0, 1fr) 28px 96px; }
+}

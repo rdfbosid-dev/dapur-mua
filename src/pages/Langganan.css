@@ -31,13 +31,13 @@
 .paket-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
 .paket-card {
   text-align: left; font-family: inherit; cursor: pointer; border-radius: 14px; padding: 16px 14px;
-  border: 1.5px solid var(--button-border); background: var(--field); transition: border-color 0.15s, background 0.15s, transform 0.15s;
+  border: 3px solid color-mix(in srgb, var(--pill-alt) 30%, transparent); background: var(--card-langganan); transition: border-color 0.15s, background 0.15s, transform 0.15s;
 }
-.paket-card:hover { border-color: color-mix(in srgb, var(--h3) 60%, transparent); }
-.paket-card.sel { border-color: var(--h3); background: color-mix(in srgb, var(--h3) 12%, var(--field)); transform: translateY(-2px); }
-.paket-label { font-size: 13px; font-weight: 700; color: var(--ink-soft); margin-bottom: 6px; }
+.paket-card:hover { border: 3px solid var(--pill-alt); }
+.paket-card.sel { border-color: var(--pill-alt); background: color-mix(in srgb, var(--pill-alt) 30%, transparent); transform: translateY(-2px); }
+.paket-label { font-size: 13px; font-weight: 700; color: var(--h9); margin-bottom: 6px; }
 .paket-harga { font-family: 'Poppins', sans-serif; font-size: 18px; font-weight: 700; color: var(--h5); }
-.paket-period { font-size: 11px; color: var(--ink-soft); opacity: 0.8; margin-top: 2px; }
+.paket-period { font-size: 11px; color: var(--h9); opacity: 0.8; margin-top: 2px; }
 
 /* Toggle metode bayar -- numpang pola visual .toggle-row/.toggle-opt
    yang dipakai di form Booking, biar bahasa visual "pilih 1 dari 2
@@ -45,27 +45,53 @@
 .metode-toggle-row { display: flex; gap: 8px; margin-bottom: 16px; }
 .metode-opt {
   flex: 1; text-align: center; padding: 10px; border-radius: 10px; font-size: 13px; font-weight: 600;
-  background: var(--field); color: var(--ink-soft); cursor: pointer; border: 1.5px solid var(--button-border);
+  background: var(--card-langganan); color: var(--ink-soft); cursor: pointer; border: 2px solid solid color-mix(in srgb, var(--pill-alt) 30%, transparent);
   font-family: inherit; transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
-.metode-opt:hover { background: color-mix(in srgb, var(--button-prm-hover) 30%, transparent); }
-.metode-opt.sel { background: var(--h3); color: #fff; border-color: transparent; }
+.metode-opt:hover { background: color-mix(in srgb, var(--pill-alt) 50%, transparent); }
+.metode-opt.sel { background: var(--pill-alt); color: #fff; border-color: transparent; }
 
 .rekening-pilih-list { display: flex; flex-direction: column; gap: 8px; }
 .rekening-pilih-item {
   display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 11px;
-  border: 1.5px solid var(--button-border); background: var(--field); cursor: pointer; font-family: inherit;
+  border: 2px solid color-mix(in srgb, var(--pill-alt) 30%, transparent); background: var(--card-langganan); cursor: pointer; font-family: inherit;
   text-align: left; transition: border-color 0.15s, background 0.15s;
 }
-.rekening-pilih-item:hover { border-color: color-mix(in srgb, var(--h3) 60%, transparent); }
-.rekening-pilih-item.sel { border-color: var(--h3); background: color-mix(in srgb, var(--h3) 12%, var(--field)); }
+.rekening-pilih-item:hover { border: 2px solid color-mix(in srgb, var(--pill-alt) 70%, transparent); }
+.rekening-pilih-item.sel { border-color: var(--card-langganan); background: color-mix(in srgb, var(--pill-alt) 20%, transparent); }
 .rekening-pilih-bank { font-size: 12.5px; font-weight: 700; color: var(--ink-soft); min-width: 60px; }
-.rekening-pilih-nomor { font-size: 13px; color: var(--ink); font-family: monospace; }
+.rekening-pilih-nomor { font-size: 13px; color: var(--h5); font-family: monospace; }
 
 .qris-preview-wrap { display: flex; justify-content: center; padding: 10px 0; }
 .qris-preview-img { width: 220px; height: 220px; object-fit: contain; border-radius: 12px; border: 1.5px solid var(--line-box); background: #fff; padding: 10px; }
 
 .bukti-preview-img { display: block; width: 160px; border-radius: 10px; margin-top: 12px; border: 1.5px solid var(--line-box); }
+
+/* Tombol upload bukti custom -- input file asli disembunyikan (tetap bisa
+   diakses keyboard), <label> yang tampil sebagai tombol. */
+.upload-wrap { position: relative; display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.upload-input-hidden { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; pointer-events: none; }
+.upload-btn {
+  display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
+  padding: 8px 10px; border-radius: 8px; font-size: 12px; font-weight: 600; font-family: inherit;
+  color: var(--ink-soft); background: color-mix(in srgb, var(--pill-alt) 30%, transparent);
+  border: none;
+  transition: background 0.15s, transform 0.15s; margin-bottom: 10px;
+}
+.upload-btn:hover { background: color-mix(in srgb, var(--pill-alt) 70%, transparent); color: var(--h7); border: none; transform: translateY(-1px); }
+.upload-input-hidden:focus-visible + .upload-btn { outline: 2px solid var(--pill-alt); outline-offset: 2px; }
+.upload-filename { font-size: 12.5px; color: var(--ink-soft); word-break: break-all; }
+
+/* Wrapper preview bukti + tombol silang (hapus foto) di pojok kanan atas */
+.bukti-preview-wrap { position: relative; display: inline-block; margin-top: 12px; }
+.bukti-preview-wrap .bukti-preview-img { margin-top: 0; }
+.bukti-hapus-btn {
+  position: absolute; top: 6px; right: 6px; width: 24px; height: 24px; padding: 0;
+  display: flex; align-items: center; justify-content: center; border-radius: 50%; border: none;
+  background: rgba(0, 0, 0, 0.6); color: #fff; cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+}
+.bukti-hapus-btn:hover { background: rgba(0, 0, 0, 0.85); transform: scale(1.1); }
 
 @media (max-width: 700px) {
   .paket-grid { grid-template-columns: 1fr; }

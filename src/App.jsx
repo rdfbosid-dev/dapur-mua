@@ -10,6 +10,7 @@ import Dashboard from './pages/Dashboard'
 import BookingList from './pages/BookingList'
 import Kalender from './pages/Kalender'
 import Klien from './pages/Klien'
+import Pengeluaran from './pages/Pengeluaran'
 import Keuangan from './pages/Keuangan'
 import Laporan from './pages/Laporan'
 import Pengaturan from './pages/Pengaturan'
@@ -163,6 +164,14 @@ export default function App() {
               element={
                 <ProtectedRoute>
                   <Klien />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/pengeluaran"
+              element={
+                <ProtectedRoute>
+                  <Pengeluaran />
                 </ProtectedRoute>
               }
             />

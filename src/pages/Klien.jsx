@@ -6,6 +6,8 @@ import Sidebar from '../components/Sidebar'
 import BookingDetailModal from '../components/BookingDetailModal'
 import CustomSelect from '../components/CustomSelect'
 import './Klien.css'
+import IconClose from '../components/IconClose'
+
 
 function formatRupiah(n) {
   return 'Rp' + (Number(n) || 0).toLocaleString('id-ID')
@@ -448,14 +450,16 @@ export default function Klien() {
           <div className="modal">
             <div className="modal-head">
               <h2>{selectedClient.nama}</h2>
-              <button className="modal-close" onClick={() => setSelectedClient(null)} type="button">&times;</button>
+              <button className="modal-close" onClick={() => setSelectedClient(null)} type="button" aria-label="Tutup"><IconClose /></button>
             </div>
             <div className="modal-body">
-              <div className="detail-grid" style={{ marginBottom: 18 }}>
-                <div><span className="detail-label">ID Klien</span><div>{selectedClient.id.slice(0, 8)}</div></div>
-                <div><span className="detail-label">No. WhatsApp</span><div>{selectedClient.whatsapp || '-'}</div></div>
-                <div><span className="detail-label">Total Booking</span><div>{selectedClient.bookingList.length}</div></div>
-                <div><span className="detail-label">Total Pembayaran Klien</span><div>{formatRupiah(selectedClient.totalBelanja)}</div></div>
+              {/* Info klien -- daftar "Label : Nilai" (titik dua sejajar),
+                  pola SAMA kayak info utama di Detail Pengeluaran. */}
+              <div className="info-list">
+                <span className="info-label">ID Klien</span><span className="info-titik">:</span><span className="info-nilai">{selectedClient.id.slice(0, 8)}</span>
+                <span className="info-label">Nomor WhatsApp</span><span className="info-titik">:</span><span className="info-nilai">{selectedClient.whatsapp || '-'}</span>
+                <span className="info-label">Total Booking</span><span className="info-titik">:</span><span className="info-nilai">{selectedClient.bookingList.length}</span>
+                <span className="info-label">Total Pembayaran</span><span className="info-titik">:</span><span className="info-nilai">{formatRupiah(selectedClient.totalBelanja)}</span>
               </div>
               <div className="section-label">Riwayat Booking</div>
               <div className="riwayat-list">

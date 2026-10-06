@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Navigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
@@ -45,6 +45,7 @@ export default function Langganan() {
   const [buktiPreview, setBuktiPreview] = useState(null)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const buktiInputRef = useRef(null)
 
   async function loadData() {
     setLoading(true)
@@ -76,6 +77,15 @@ export default function Langganan() {
     setError('')
     setBuktiFile(file)
     setBuktiPreview(URL.createObjectURL(file))
+  }
+
+  function handleHapusBukti() {
+    if (buktiPreview) URL.revokeObjectURL(buktiPreview)
+    setBuktiFile(null)
+    setBuktiPreview(null)
+    setError('')
+    // Reset input aslinya, biar file yang sama bisa dipilih lagi setelah dihapus
+    if (buktiInputRef.current) buktiInputRef.current.value = ''
   }
 
   async function handleSubmit() {
@@ -237,8 +247,29 @@ export default function Langganan() {
                 {selectedPaket && metode && (metode === 'qris' || selectedRekening) && (
                   <div className="card-langganan">
                     <div className="card-head-langganan"><h3>3. Upload Bukti Transfer</h3></div>
-                    <input type="file" accept="image/*" onChange={handlePilihBukti} />
-                    {buktiPreview && <img src={buktiPreview} alt="Preview bukti transfer" className="bukti-preview-img" />}
+                    <div className="upload-wrap">
+                      <input id="bukti-input" ref={buktiInputRef} className="upload-input-hidden" type="file" accept="image/*" onChange={handlePilihBukti} />
+                      <label className="upload-btn" htmlFor="bukti-input">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                          <polyline points="17 8 12 3 7 8" />
+                          <line x1="12" y1="3" x2="12" y2="15" />
+                        </svg>
+                        <span>{buktiFile ? 'Ganti Foto' : 'Pilih Foto Bukti Transfer'}</span>
+                      </label>
+                      {buktiFile && <span className="upload-filename">{buktiFile.name}</span>}
+                    </div>
+                    {buktiPreview && (
+                      <div className="bukti-preview-wrap">
+                        <img src={buktiPreview} alt="Preview bukti transfer" className="bukti-preview-img" />
+                        <button type="button" className="bukti-hapus-btn" onClick={handleHapusBukti} aria-label="Hapus foto">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18" />
+                            <line x1="6" y1="6" x2="18" y2="18" />
+                          </svg>
+                        </button>
+                      </div>
+                    )}
                     {error && <div className="msg-error" style={{ marginTop: 10 }}>{error}</div>}
                     <button className="btn-primary" type="button" disabled={!buktiFile || submitting} onClick={handleSubmit} style={{ marginTop: 14 }}>
                       {submitting ? 'Mengirim...' : 'Kirim Pengajuan'}

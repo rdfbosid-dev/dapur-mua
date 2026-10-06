@@ -1,0 +1,18 @@
+/* Kotak peringatan kewajaran angka -- file CSS mandiri (konvensi project),
+   semua selector berawalan .peringatan-kewajaran. Gayanya sengaja
+   "outline" (garis merah muda + latar tipis), BEDA dari banner error
+   .modal-error di atas form yang solid, biar keduanya nggak ketuker. */
+.peringatan-kewajaran {
+  margin-top: 12px; padding: 12px 14px; border-radius: 12px;
+  border: 1.5px solid var(--pill);
+  background: color-mix(in srgb, var(--pill) 16%, transparent);
+  color: var(--ink-soft); font-size: 12px; line-height: 1.55;
+}
+.peringatan-kewajaran-judul {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 12.5px; font-weight: 700; color: var(--pill); margin-bottom: 6px;
+}
+.peringatan-kewajaran-judul svg { width: 16px; height: 16px; flex-shrink: 0; }
+.peringatan-kewajaran ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 3px; }
+.peringatan-kewajaran li { overflow-wrap: anywhere; }
+.peringatan-kewajaran-saran { margin-top: 8px; font-size: 11.5px; opacity: 0.85; }

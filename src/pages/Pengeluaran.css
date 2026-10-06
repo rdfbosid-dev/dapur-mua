@@ -1,0 +1,108 @@
+/* Halaman Pengeluaran -- file CSS mandiri (konvensi project: tiap file
+   punya class sendiri, nggak numpang file lain), KECUALI class layout
+   shell (.app-shell, .main, .topbar, .topbar-actions, .greeting,
+   .greeting-date, .loading-state, .btn-booking-primary) yang emang
+   didefinisiin sekali di Dashboard.css & dipakai bareng semua halaman.
+
+   - Baris filter (.pgl-filter-bar/.pgl-search/.pgl-filter-select) --
+     nilainya disalin dari .filter-bar/.search-box-booking/.filter-select
+     di BookingList.css, biar halaman ini kerasa satu keluarga sama
+     halaman Booking. Nama class-nya SENGAJA beda (.filter-select udah
+     didefinisiin beda-beda di BookingList.css & Keuangan.css).
+   - Kartu & daftar (.pgl-*) -- dipindah dari Keuangan.css (dulu tab
+     "Pengeluaran Usaha" di halaman Keuangan). */
+
+/* ---------- Filter (pencarian + tahun + bulan) ---------- */
+.pgl-filter-bar { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+.pgl-search {
+  flex: 1; max-width: 350px; display: flex; align-items: center; gap: 10px;
+  background: color-mix(in srgb, var(--box-dashboard) 90%, transparent); border: 1.5px solid color-mix(in srgb, var(--button-border) 70%, transparent); border-radius: 11px; padding: 3px 14px;
+}
+.pgl-search svg { width: 14px; height: 14px; color: var(--h5); flex-shrink: 0; }
+.pgl-search input { border: none; outline: none; font-size: 12px; font-family: inherit; color: var(--ink-soft); flex: 1; background: none; min-width: 0; }
+.pgl-search input::placeholder { color: color-mix(in srgb, var(--ink-soft) 70%, transparent); }
+.pgl-search:focus-within {
+  border-color: var(--h3);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--h3) 18%, transparent);
+}
+.pgl-filter-select { width: 170px; }
+
+/* ---------- Kartu (nilai sama kayak .card-keuangan di Keuangan.css) ---------- */
+.pgl-card { background: color-mix(in srgb, var(--box-dashboard) 90%, transparent); border-radius: 20px; padding: 22px; border: 1px solid var(--line-box); box-shadow: var(--shadow-card); }
+
+/* ---------- Ringkasan: total + bar per kategori ---------- */
+.pgl-ringkasan { margin-bottom: 18px; }
+.pgl-ringkasan h3 { font-size: 14px; color: var(--ink-soft); }
+/* Judul "Total Pengeluaran Bisnis" + badge periode ("Semua Waktu", dst) SEBARIS:
+   badge nempel di ujung kanan teks judul. flex-wrap biar di layar yang sempit
+   badge turun ke baris bawah dengan rapi (bukan meluber keluar kartu). */
+.pgl-ringkasan-judul { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px; }
+.pgl-periode { display: inline-block; font-size: 12px; font-weight: 600; color: var(--h7); padding: 3px 9px; background: color-mix(in srgb, var(--pill-alt) 70%, transparent); border-radius: 8px; }
+.pgl-total { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 26px; color: var(--pill); margin-top: 4px; }
+/* Keterangan halaman -- penjelasan buat user tentang halaman ini, DI
+   ATAS baris filter & selebar halaman penuh (nggak dibatasin max-width). */
+.pgl-hint { padding: 8px 16px; border-radius: 12px; border: 3px solid color-mix(in srgb, var(--pill-alt) 30%, transparent); font-size: 13px; color: var(--h9); background: var(--card-langganan); margin-bottom: 18px; line-height: 1.5; text-align: justify; }
+.pgl-hint a { font-weight: 800; }
+.pgl-hint b { color: var(--teks-khusus); opacity: 0.8; }
+
+/* Ringkasan per kategori -- bar horizontal, panjangnya = porsi dari
+   total pengeluaran yang lagi ditampilin (ngikut filter). Diurutin dari
+   yang paling gede. */
+.pgl-kategori-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 28px; margin-top: 18px; }
+.pgl-kategori-row { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.pgl-kategori-info { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; color: var(--ink-soft); }
+.pgl-kategori-info span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pgl-kategori-info b { white-space: nowrap; }
+.pgl-kategori-track { height: 6px; border-radius: 999px; background: color-mix(in srgb, var(--ink-faint) 70%, transparent); overflow: hidden; }
+.pgl-kategori-fill { height: 100%; border-radius: 999px; background: var(--pill); }
+
+/* Kosong / gagal muat */
+.pgl-kosong { font-size: 13.5px; color: var(--ink-soft); line-height: 1.6; text-align: center; padding: 28px 22px; }
+
+/* ---------- Daftar per bulan -- 1 kartu per bulan, tiap transaksi 1
+   baris yang bisa diklik buat buka Detail. ---------- */
+.pgl-bulan { margin-bottom: 18px; padding: 18px 22px; }
+.pgl-bulan-head {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+  padding-bottom: 10px; border-bottom: 1px solid var(--line-box);
+}
+.pgl-bulan-head h3 { font-size: 14px; color: var(--ink-soft); }
+.pgl-bulan-head b { font-family: 'Poppins', sans-serif; font-size: 14px; color: var(--pill); white-space: nowrap; }
+
+.pgl-row {
+  display: flex; align-items: center; gap: 14px; width: 100%; text-align: left;
+  font-family: inherit; background: none; border: none; cursor: pointer;
+  padding: 12px; border-bottom: 1px solid color-mix(in srgb, var(--line-box) 70%, transparent);
+  border-radius: 10px; transition: background 0.15s;
+}
+.pgl-row:last-child { border-bottom: none; }
+.pgl-row:hover { background: color-mix(in srgb, var(--ink-faint) 45%, transparent); }
+.pgl-row:focus-visible { outline: 2px solid var(--pill); outline-offset: -2px; }
+.pgl-tgl {
+  width: 44px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center;
+  padding: 5px 0; border-radius: 10px; background: var(--h3);
+}
+.pgl-tgl-hari { font-family: 'Poppins', sans-serif; font-size: 16px; font-weight: 700; color: var(--h7); line-height: 1.1; }
+.pgl-tgl-bulan { font-size: 10.5px; font-weight: 600; color: var(--h7); }
+.pgl-info { flex: 1; min-width: 0; }
+.pgl-judul { font-size: 14px; font-weight: 600; color: var(--ink-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pgl-meta { font-size: 12px; color: var(--ink-soft); opacity: 0.75; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pgl-nominal { font-family: 'Poppins', sans-serif; font-size: 14px; font-weight: 700; color: var(--ink-soft); white-space: nowrap; }
+
+@media (max-width: 900px) {
+  /* Sama kayak halaman Booking: kotak cari 1 baris penuh, dropdown
+     Tahun & Bulan berbagi baris di bawahnya. */
+  .pgl-search { max-width: none; flex: 1 1 100%; }
+  .pgl-filter-select { flex: 1 1 calc(50% - 6px); width: auto; }
+  .pgl-kategori-list { grid-template-columns: minmax(0, 1fr); }
+  .pgl-hint { font-size: 10px; }
+}
+@media (max-width: 640px) {
+  .pgl-bulan { padding: 16px; }
+  .pgl-total { font-size: 22px; }
+  .pgl-hint { font-size: 10px; }
+}
+@media (max-width: 480px) {
+  .pgl-search { padding: 8px 12px; }
+  .pgl-hint { font-size: 10px; }
+}

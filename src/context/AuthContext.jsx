@@ -120,18 +120,33 @@ export function AuthProvider({ children }) {
 
   const signOut = () => supabase.auth.signOut()
 
-  // Kekunci kalau: status langganan BUKAN 'active' DAN tanggal
-  // trial_ends_at udah lewat. Selama profile belum kebaca (null), anggap
-  // BELUM terkunci -- biar nggak "kedip" nge-redirect duluan sebelum
-  // data profil sempet kebaca.
-  const isLocked = !!(
+  const isAdmin = user?.id === ADMIN_USER_ID
+
+  // Kekunci kalau SALAH SATU:
+  // 1. TRIAL HABIS -- status BUKAN 'active' DAN trial_ends_at udah lewat.
+  // 2. LANGGANAN HABIS -- status 'active' TAPI subscription_ends_at udah
+  //    lewat. SEBELUMNYA kasus ini nggak dicek sama sekali, jadi pelanggan
+  //    yang langganannya udah habis tetep bisa pakai app selamanya.
+  //    Status 'active' dengan subscription_ends_at KOSONG (null) = aktif
+  //    PERMANEN (tanpa batas waktu), sengaja nggak pernah kekunci.
+  // Admin NGGAK PERNAH kekunci (apapun isi data profilnya) -- biar akses
+  // ke halaman Admin nggak bisa ketutup gara-gara data langganan admin.
+  // Selama profile belum kebaca (null), anggap BELUM terkunci -- biar
+  // nggak "kedip" nge-redirect duluan sebelum data profil sempet kebaca.
+  const sekarang = new Date()
+  const trialHabis = !!(
     profile &&
     profile.subscription_status !== 'active' &&
     profile.trial_ends_at &&
-    new Date(profile.trial_ends_at) < new Date()
+    new Date(profile.trial_ends_at) < sekarang
   )
-
-  const isAdmin = user?.id === ADMIN_USER_ID
+  const langgananHabis = !!(
+    profile &&
+    profile.subscription_status === 'active' &&
+    profile.subscription_ends_at &&
+    new Date(profile.subscription_ends_at) < sekarang
+  )
+  const isLocked = !isAdmin && (trialHabis || langgananHabis)
 
   return (
     <AuthContext.Provider value={{ user, loading, signOut, profile, refreshProfile, isLocked, isAdmin }}>

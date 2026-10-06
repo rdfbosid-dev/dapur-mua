@@ -1,0 +1,48 @@
+/* Style KHUSUS Nota Pengeluaran doang -- tambahan di atas InvoiceModal.css
+   (yang isinya style BERSAMA Invoice/Remittance Advice/Nota). Pola SAMA
+   kayak RemittanceAdviceModal.css.
+
+   Teks kecil di bawah nama item (Nama Brand, Nama/Akun Medsos, dst)
+   dikasih 2 versi warna:
+   1. Versi NORMAL (preview di layar) -- ngikut tema app (terang/gelap).
+   2. Versi .invoice-print-portal (hasil Cetak/Unduh) -- warna FIKS
+      (--pi-text-soft, didefinisiin di InvoiceModal.css), soalnya kertas
+      hasil cetak/PDF/PNG SELALU putih apapun tema app-nya. Kalau ikut
+      tema, pas Mode Gelap teksnya jadi terang & nggak kebaca di kertas
+      putih (alasan yang sama persis kayak komentar di
+      RemittanceAdviceModal.css). */
+.nota-item-sub { font-size: 11px; color: var(--ink-soft); opacity: 0.8; margin-top: 2px; }
+.invoice-print-portal .nota-item-sub { font-size: 12.5px; color: var(--pi-text-soft); opacity: 1; margin-top: 3px; }
+
+/* Kolom angka (Jumlah/Harga Satuan/Subtotal) nggak boleh kepotong 2
+   baris -- versi cetak fontnya lebih gede dari preview (kasus yang
+   sama kayak tanggal Riwayat Pembayaran di Invoice dulu). Kolom Item
+   yang dibiarin fleksibel & boleh turun baris. */
+.nota-table td.right,
+.nota-table th.right { white-space: nowrap; }
+
+/* Grup item (nama sama >1x, misal Konsumsi: Makan & Minum) -- SAMA kayak
+   tampilan Detail Pengeluaran: baris judul + baris anak (↳), TANPA garis
+   di antara judul & anak-anaknya; garis pemisah cuma di bawah anak
+   terakhir. Padding vertikal dirapetin biar kerasa 1 kelompok. */
+.nota-table tr.nota-grup-judul td { border-bottom: none; padding-bottom: 2px; }
+.nota-table tr.nota-grup-anak td { border-bottom: none; padding-top: 3px; padding-bottom: 3px; }
+.nota-table tr.nota-grup-anak.terakhir td { border-bottom: 1px solid color-mix(in srgb, var(--button-border) 30%, transparent); padding-bottom: 8px; }
+.invoice-print-portal .nota-table tr.nota-grup-judul td { border-bottom: none; padding-bottom: 3px; }
+.invoice-print-portal .nota-table tr.nota-grup-anak td { border-bottom: none; padding-top: 4px; padding-bottom: 4px; }
+.invoice-print-portal .nota-table tr.nota-grup-anak.terakhir td { border-bottom: 1.5px solid var(--pi-line); padding-bottom: 13px; }
+.nota-anak { display: inline-flex; align-items: flex-end; gap: 6px; }
+.nota-panah { width: 22px; flex-shrink: 0; display: inline-flex; }
+
+/* Total Pengeluaran -- KHUSUS Nota, garis di atasnya dibuang (.inv-summary-final
+   dari InvoiceModal.css bawaannya punya border-top, soalnya di Invoice
+   dia jadi pemisah dari baris Total Tagihan/Sudah Dibayar; di Nota cuma
+   ada 1 baris, jadi garisnya nggak perlu). Selector pakai .nota-paper biar
+   lebih spesifik & menang lawan aturan Invoice -- versi layar MAUPUN cetak. */
+.nota-paper .inv-summary-final { border-top: none; margin-top: 0; padding-top: 0; }
+.invoice-print-portal .nota-paper .inv-summary-final { border-top: none; margin-top: 0; padding-top: 0; }
+
+/* Label kedua di kolom kanan (Lokasi/Tempat, di bawah Tanggal) -- dikasih
+   jarak atas biar kebaca sebagai blok baru, bukan nyambung ke tanggal. */
+.nota-label-lanjutan { margin-top: 12px; }
+.invoice-print-portal .nota-label-lanjutan { margin-top: 16px; }

@@ -7,7 +7,7 @@
 
 .booking-detail-overlay {
   position: fixed; inset: 0; background: rgb(36, 55, 62, 0.6);
-  display: flex; align-items: center; justify-content: center; padding: 24px;
+  display: flex; align-items: center; justify-content: center; padding: 26px;
   /* z-index 95 -- lihat penjelasan di BookingModal.css, soal kenapa harus
      lebih tinggi dari .mobile-topbar (z-index:90). */
   z-index: 95;
@@ -19,7 +19,7 @@
 }
 .booking-detail-overlay .modal-head {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 16px 16px 0; flex-shrink: 0; margin-bottom: 5px;
+  padding: 26px 26px 5px; flex-shrink: 0;
 }
 .booking-detail-overlay .modal-head h2 {
   font-size: 18px;
@@ -42,11 +42,11 @@
   transition: background 0.15s;
 }
 .booking-detail-overlay .modal-close:hover { background: color-mix(in srgb, var(--h3) 50%, transparent); color: var(--h3); }
-.booking-detail-overlay .modal-body { padding: 10px 16px 20px; overflow-y: auto; flex: 1; -webkit-overflow-scrolling: touch; }
-.booking-detail-overlay .modal-foot { display: flex; align-items: center; justify-content: flex-end; gap: 10px; padding: 10px 26px 20px; flex-shrink: 0; }
+.booking-detail-overlay .modal-body { padding: 20px 26px; overflow-y: auto; flex: 1; -webkit-overflow-scrolling: touch; }
+.booking-detail-overlay .modal-foot { display: flex; align-items: center; justify-content: flex-end; gap: 10px; padding: 16px 26px; flex-shrink: 0; }
 .booking-detail-overlay .modal-foot .btn-ghost { margin-bottom: 0; }
 .booking-detail-overlay .modal-error { background: var(--pill); color: var(--h8); font-size: 12.5px; padding: 10px 14px; border-radius: 10px; margin-bottom: 10px; }
-.booking-detail-overlay .empty-state { text-align: center; padding: 32px 16px; color: var(--ink-soft); font-size: 12px; }
+.booking-detail-overlay .empty-state { text-align: center; padding: 32px 26px; color: var(--ink-soft); font-size: 12px; }
 
 .booking-detail-overlay .btn-payment {
   padding: 5px 10px; border-radius: 8px; border: 1px solid color-mix(in srgb, var(--button-prm-hover) 50%, transparent); background: color-mix(in srgb, var(--button-prm-hover) 50%, transparent);
@@ -306,7 +306,7 @@
 /* ---- Konfirmasi hapus booking ---- */
 .booking-detail-overlay .delete-confirm-banner {
   background: var(--notif);
-  padding: 12px 16px;
+  padding: 12px 26px;
 }
 .booking-detail-overlay .delete-confirm-text { display: flex; flex-direction: column; gap: 3px; }
 .booking-detail-overlay .delete-confirm-text b { color: var(--h8); font-size: 13.5px; }
@@ -320,7 +320,7 @@
 .booking-detail-overlay .btn-danger-ghost:hover { background: color-mix(in srgb, var(--notif) 85%, black); border: 1px solid color-mix(in srgb, var(--notif) 85%, black); }
 
 .booking-detail-overlay .btn-danger.batal {
-  padding: 8px 10px; border-radius: 11px; border: 1.5px solid var(--button-tx); background: var(--white);
+  padding: 8px 10px; border-radius: 11px; border: 1.5px solid var(--button-tx); background: none;
   font-size: 12px; font-weight: 600; color: var(--ink-soft); cursor: pointer; font-family: inherit;
   transition: background 0.15s, border-color 0.15s;
 }
@@ -332,7 +332,7 @@
   font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; line-height: 1.4;
   transition: background 0.15s;
 }
-.booking-detail-overlay .btn-danger:hover { background: color-mix(in srgb, var(--notif) 85%, black); }
+.booking-detail-overlay .btn-danger:hover { background: color-mix(in srgb, var(--notif) 85%, black); border: 1.5px solid color-mix(in srgb, var(--notif) 85%, black); }
 .booking-detail-overlay .btn-danger:disabled,
 .booking-detail-overlay .btn-danger-ghost:disabled { opacity: 0.6; cursor: not-allowed; }
 

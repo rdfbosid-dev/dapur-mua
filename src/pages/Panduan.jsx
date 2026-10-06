@@ -44,6 +44,16 @@ const LANGKAH = [
     ],
   },
   {
+    title: 'Catat Pengeluaran Bisnis',
+    ringkas: 'Belanja alat, kosmetik, iklan, dan biaya bisnis lainnya.',
+    isi: [
+      'Buka menu Pengeluaran, klik tombol "+ Pengeluaran". Pilih kategori (misalnya Belanja Alat & Kosmetik), isi tanggal, lalu rincian item yang dibeli.',
+      'Bayar ke tim/vendor untuk sebuah booking tidak perlu dicatat di sini, karena sudah otomatis dihitung dari data booking.',
+      'Di menu Keuangan, Pengeluaran Booking dan Pengeluaran Bisnis ditampilkan terpisah dan tidak dijumlahkan. Dapur MUA tidak menghitung Laba Bersih untukmu. Untuk perkiraan kasar, Laba Bersih ≈ Penghasilan − Pengeluaran Bisnis.',
+      'Hati-hati dengan barang yang kamu jual lagi ke klien lewat Add On (Beli): modalnya sudah terpotong dari Penghasilan. Kalau pembelian barang yang sama juga kamu catat di Pengeluaran Bisnis, modalnya terhitung dua kali.',
+    ],
+  },
+  {
     title: 'Sinkronisasi Kalender ke HP',
     ringkas: 'Jadwal booking otomatis muncul di kalender HP-mu.',
     isi: [

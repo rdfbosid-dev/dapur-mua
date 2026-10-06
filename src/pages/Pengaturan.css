@@ -104,12 +104,6 @@
 .msg-error { background: var(--pill); color: var(--h8); font-size: 12.5px; padding: 10px 14px; border-radius: 10px; margin-bottom: 14px; }
 
 .danger-text { font-size: 13px; color: var(--ink-soft); margin-bottom: 16px; }
-.btn-keluar-ghost {
-  padding: 8px 16px; border-radius: 11px; border: 1px solid var(--notif); background: var(--notif);
-  font-size: 13px; font-weight: 600; color: var(--h8); cursor: pointer; font-family: inherit;
-  transition: background 0.15s; line-height: 1.4; margin-right: auto;
-}
-.btn-keluar-ghost:hover { background: color-mix(in srgb, var(--notif) 85%, black); border: 1px solid color-mix(in srgb, var(--notif) 85%, black); }
 
 @media (max-width: 700px) {
   .rekening-input-bank { flex: 0 0 65px; }

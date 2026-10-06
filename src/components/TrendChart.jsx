@@ -112,8 +112,11 @@ export default function TrendChart({ series, months, area = false, mounted }) {
           <defs>
             {fillOrder.map(({ s, idx }) => (
               <linearGradient key={s.label} id={gradId(idx)} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="70%" stopColor={s.color} stopOpacity="0.4" />
-                <stop offset="100%" stopColor={s.color} stopOpacity="0.02" />
+                {/* Warna lewat `style` (properti CSS), BUKAN atribut stopColor --
+                    biar warna berupa variabel tema (var(--...)) pasti kebaca di
+                    semua browser. Warna hex biasa hasilnya SAMA PERSIS. */}
+                <stop offset="70%" style={{ stopColor: s.color }} stopOpacity="0.4" />
+                <stop offset="100%" style={{ stopColor: s.color }} stopOpacity="0.02" />
               </linearGradient>
             ))}
           </defs>
@@ -138,12 +141,14 @@ export default function TrendChart({ series, months, area = false, mounted }) {
               key={s.label}
               points={toPolyline(pts)}
               fill="none"
-              stroke={s.color}
               strokeWidth="2.5"
               strokeLinecap="round"
               strokeLinejoin="round"
               className="trendchart-line"
               style={{
+                // stroke lewat style (bukan atribut) -- alasannya sama kayak
+                // stopColor di atas: biar var(--...) pasti jalan.
+                stroke: s.color,
                 strokeDasharray: len,
                 strokeDashoffset: mounted ? 0 : len,
               }}

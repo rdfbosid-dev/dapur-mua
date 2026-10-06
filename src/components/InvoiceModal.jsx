@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useAuth } from '../context/AuthContext'
 import './InvoiceModal.css'
+import IconClose from './IconClose'
 
 function formatRupiah(n) {
   return 'Rp' + (Number(n) || 0).toLocaleString('id-ID')
@@ -481,7 +482,7 @@ export default function InvoiceModal({ booking, peserta, payments, bundlingItems
         <div className="modal invoice-modal">
           <div className="modal-head invoice-no-print">
             <h2>Invoice</h2>
-            <button className="modal-close" onClick={onClose} type="button">&times;</button>
+            <button className="modal-close" onClick={onClose} type="button" aria-label="Tutup"><IconClose /></button>
           </div>
 
           <div className="modal-body">

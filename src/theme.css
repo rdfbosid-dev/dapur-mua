@@ -74,9 +74,13 @@
   --bar-komisi-vendor: #6e7fae;
   --bar-produk: #4b1d8b;
   --bar-untung-produk: #9c73d6;
+  --bar-pengeluaran-bisnis: #0b8e0b;
   --table-body: #f2f3fc;
   --line-box: #ced3f5;
   --line-modal: color-mix(in srgb, var(--ink-soft) 80%, transparent);
+  --card-langganan: #c9cff6e6;
+  --logout: #f00433;
+  --teks-khusus: #f00433;
 
   --shadow-modal: 0 24px 60px -12px rgb(29, 33, 58, 0.35);
   --shadow-card: 5px 5px 10px -5px rgb(29, 33, 58, 0.35);
@@ -162,9 +166,13 @@
   --bar-komisi-vendor: #41a9ee;
   --bar-produk: #e879b4;
   --bar-untung-produk: #d699af;
+  --bar-pengeluaran-bisnis: #16bb81;
   --table-body: rgb(19, 44, 63);
   --line-box: #1f405a;
   --line-modal: #FFFFFF;
+  --card-langganan: #3f95ba5b;
+  --logout: #3f95ba;
+  --teks-khusus: #51dfef;
 
   --shadow-modal: 0 6px 20px -5px rgb(142, 187, 205, 0.35);
   --shadow-card: 5px 6px 10px -5px rgba(142, 187, 205, 0.35);

@@ -32,7 +32,12 @@ export default function TrialHabis() {
           <div className="auth-brand-name">Dapur MUA</div>
         </div>
 
-        <div className="auth-title-trial">Masa coba gratis kamu udah habis</div>
+        {/* Halaman ini dipakai 2 kasus kunci (lihat isLocked di
+            AuthContext.jsx): trial habis & langganan habis. Status 'active'
+            yang kekunci = pasti langganannya yang habis. */}
+        <div className="auth-title-trial">
+          {profile?.subscription_status === 'active' ? 'Masa langganan kamu udah habis' : 'Masa coba gratis kamu udah habis'}
+        </div>
         <div className="auth-subtitle">
           Data booking, klien, dan keuangan kamu tetap aman kok, cuma belum bisa diakses
           sementara.<br />

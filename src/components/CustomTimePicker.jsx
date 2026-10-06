@@ -4,7 +4,13 @@ import './CustomDatePicker.css'
 const HOURS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'))
 const MINUTES = ['00', '05', '10', '15', '20', '25', '30', '35', '40', '45', '50', '55']
 
-export default function CustomTimePicker({ value, onChange, placeholder = 'Pilih Jam', variant = null }) {
+// Placeholder default "--:--" (BUKAN "Pilih Jam") -- field jam di form
+// Booking/Edit Booking itu kolom sempit (~87px pas padding modal 26px).
+// "Pilih Jam" kepanjangan & dulu ngedorong ikon jam sampai mepet ke
+// bingkai. "--:--" selebar nilai jam aslinya ("08:30"), jadi ikon selalu
+// pas di posisi yang sama kayak ikon field lain. Label "Jam Mulai"/"Jam
+// Selesai" di atasnya udah cukup jelas buat ngasih tau isinya apa.
+export default function CustomTimePicker({ value, onChange, placeholder = '--:--', variant = null }) {
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
   const [h, m] = value ? value.split(':') : ['', '']

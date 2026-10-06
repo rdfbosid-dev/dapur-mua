@@ -1,6 +1,6 @@
 .invoice-overlay {
   position: fixed; inset: 0; background: rgb(36, 55, 62, 0.6);
-  display: flex; align-items: center; justify-content: center; padding: 24px;
+  display: flex; align-items: center; justify-content: center; padding: 26px;
   /* z-index 95 -- lihat penjelasan di BookingModal.css, soal kenapa harus
      lebih tinggi dari .mobile-topbar (z-index:90). */
   z-index: 95;
@@ -12,7 +12,7 @@
 }
 .invoice-overlay .modal-head.invoice-no-print {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 16px 16px; flex-shrink: 0; margin-bottom: 5px;
+  padding: 26px 26px 10px; flex-shrink: 0;
 }
 .invoice-overlay .modal-head h2 { font-size: 18px; }
 .invoice-overlay .modal-close {
@@ -21,7 +21,7 @@
   transition: background 0.15s;
 }
 .invoice-overlay .modal-close:hover { background: color-mix(in srgb, var(--h3) 50%, transparent); color: var(--h3); }
-.invoice-overlay .modal-body { padding: 22px 26px; overflow-y: auto; flex: 1; -webkit-overflow-scrolling: touch; }
+.invoice-overlay .modal-body { padding: 10px 26px; overflow-y: auto; flex: 1; -webkit-overflow-scrolling: touch; }
 .invoice-overlay .modal-foot { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; padding: 16px 26px; flex-shrink: 0; }
 .invoice-overlay .btn-ghost {
   padding: 5px 10px; border-radius: 8px; border: 1.5px solid var(--button-border); background: var(--table-body);
@@ -65,7 +65,7 @@
 .inv-studio-meta svg { flex-shrink: 0; }
 .inv-title-block { text-align: right; }
 .inv-title { font-family: 'Poppins', sans-serif; font-size: 22px; font-weight: 700; color: var(--h5); letter-spacing: 0.04em; }
-.inv-kode { font-family: 'Poppins', sans-serif; font-size: 12px; color: var(--ink); margin-top: 2px; }
+.inv-kode { font-family: 'Poppins', sans-serif; font-size: 12px; color: var(--ink-soft); margin-top: 2px; }
 
 .inv-divider { height: 1px; background: var(--button-border); margin: 16px 0; }
 
@@ -73,39 +73,31 @@
 .inv-label { font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 4px; }
 .inv-name { font-size: 12.5px; font-weight: 600; color: var(--h5); margin-bottom: 5px; }
 .inv-sub-event { font-size: 12.5px; font-weight: 600; color: var(--h5); margin-bottom: 5px; }
-.inv-sub-date { font-size: 11px; color: var(--ink); margin-top: 1px; }
-.inv-sub-loc { font-size: 11px; color: var(--ink); margin-top: 1px; }
+.inv-sub-date { font-size: 11px; color: var(--ink-soft); margin-top: 1px; }
+.inv-sub-loc { font-size: 11px; color: var(--ink-soft); margin-top: 1px; }
 
-.inv-sub { font-size: 11px; color: var(--ink); margin-top: 1px; }
+.inv-sub { font-size: 11px; color: var(--ink-soft); margin-top: 1px; }
 .inv-sub-note { font-size: 11px; color: var(--ink-soft); margin-top: 1px; }
 
-/* table-layout: fixed -- SENGAJA, biar lebar tiap kolom KONSISTEN
-   (nggak ngikutin konten terpanjang lagi). Sebelumnya default-nya
-   "auto": kalau teks Layanan/Add On kepanjangan (misal gabungan 2
-   vendor Paket Bundling), browser bakal narik lebar kolom itu SEENAKNYA,
-   nyempitin kolom Klien walau isinya cuma nama pendek. Sekarang lebar
-   per kolom FIKS (persentase), dan teks yang kepanjangan otomatis TURUN
-   BARIS (overflow-wrap) numpuk ke bawah dalam sel yang sama, bukan
-   narik lebar kolom. */
 .inv-table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-/* table-layout: fixed -- SENGAJA, biar lebar tiap kolom KONSISTEN
-   (nggak ngikutin konten terpanjang lagi). Sebelumnya default-nya
-   "auto": kalau teks Layanan/Add On kepanjangan (misal gabungan 2
-   vendor Paket Bundling), browser bakal narik lebar kolom itu SEENAKNYA,
-   nyempitin kolom Klien walau isinya cuma nama pendek. Sekarang lebar
-   per kolom FIKS (persentase), dan teks yang kepanjangan otomatis TURUN
-   BARIS (overflow-wrap) numpuk ke bawah dalam sel yang sama, bukan
-   narik lebar kolom.
-   Scoped ke ".inv-table-3col" doang (BUKAN ".inv-table" polos) --
-   ada 1 tabel lain (fallback Paket Bundling tanpa peserta_id, kasus
-   langka) yang numpang class ".inv-table" tapi cuma 2 kolom; kalau
-   width rule di bawah ini nggak di-scope, bakal salah kepasang di
-   situ juga. */
-.inv-table-3col { table-layout: fixed; }
-.inv-table-3col th:nth-child(1), .inv-table-3col td:nth-child(1) { width: 18%; }
-.inv-table-3col th:nth-child(2), .inv-table-3col td:nth-child(2) { width: 57%; }
-.inv-table-3col th:nth-child(3), .inv-table-3col td:nth-child(3) { width: 25%; }
-.inv-table-3col td { overflow-wrap: break-word; word-break: break-word; }
+/* Lebar kolom tabel 3 kolom (Klien | Layanan/Add On | Biaya):
+   - Klien & Biaya -> lebarnya NGIKUTIN isinya & DILARANG turun baris
+     (white-space: nowrap + width: 1% = trik tabel "sempitin kolom ini
+     sepas mungkin sama isinya"). Nama klien sepanjang apapun tetep 1
+     baris -- sesuai permintaan.
+   - Layanan/Add On -> otomatis dapet SISA lebar, & teks yang kepanjangan
+     (misal gabungan vendor Paket Bundling) TURUN BARIS di dalam kolomnya
+     sendiri (overflow-wrap) -- jadi nggak bisa lagi "ngerebut" lebar
+     kolom Klien. Masalah lama yang dulu bikin pakai table-layout: fixed
+     + persentase (Klien 18%) tetep ketutup, tanpa bikin nama klien
+     panjang kepotong jadi 2-3 baris.
+   Scoped ke ".inv-table-3col" doang (BUKAN ".inv-table" polos) -- ada
+   tabel lain (fallback Paket Bundling 2 kolom, Remittance Advice, Nota
+   Pengeluaran) yang numpang class ".inv-table"; aturan ini nggak boleh
+   ikut kepasang di situ. */
+.inv-table-3col th:nth-child(1), .inv-table-3col td:nth-child(1),
+.inv-table-3col th:nth-child(3), .inv-table-3col td:nth-child(3) { width: 1%; white-space: nowrap; }
+.inv-table-3col td:nth-child(2) { overflow-wrap: anywhere; }
 .inv-table thead th {
   text-align: left; font-size: 10.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
   color: var(--ink-soft); padding: 8px 4px; border-bottom: 1px solid var(--button-border);
@@ -114,7 +106,7 @@
 .inv-table td { padding: 8px 4px; font-size: 13px; color: var(--ink-soft); border-bottom: 1px solid color-mix(in srgb, var(--button-border) 30%, transparent); }
 .inv-table td.right { text-align: right; font-size: 12.5px; }
 
-.inv-summary { background: color-mix(in srgb, var(--button-prm-hover) 20%, transparent); border-radius: 14px; padding: 14px 18px; margin-bottom: 16px; }
+.inv-summary { background: color-mix(in srgb, var(--button-prm-hover) 20%, transparent); border-radius: 14px; padding: 14px 16px; margin-bottom: 16px; }
 .inv-summary-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--ink-soft); padding: 4px 0; }
 .inv-summary-row b { color: var(--h5); font-size: 13px; }
 .inv-summary-final { border-top: 1px solid var(--button-border); margin-top: 6px; padding-top: 10px; font-weight: 700; }

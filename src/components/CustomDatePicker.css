@@ -3,6 +3,13 @@
    otomatis identik sama dropdown Event/Sumber Kanal Booking di device
    manapun. File ini cuma isi panel popup kalender & jam/menit-nya doang. */
 .cdate, .ctime { position: relative; width: 100%; }
+/* Pengaman: teks di tombol jam/tanggal BOLEH kepotong (...) kalau
+   kolomnya kesempitan, tapi ikon di kanannya NGGAK BOLEH kedorong keluar
+   padding -- dulu teks yang kepanjangan (nowrap) ngedorong ikon jam
+   sampai nempel bingkai. min-width:0 wajib biar span-nya mau nyusut di
+   dalam flex. */
+.cdate .cselect-trigger > span,
+.ctime .cselect-trigger > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .cdate-placeholder { color: var(--placeholder); }
 
 .cdate-panel {

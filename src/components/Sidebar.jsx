@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
 import { openAdminWhatsApp } from '../lib/whatsapp'
+import { useFiturBaru } from '../lib/useFiturBaru'
 import './Sidebar.css'
 
 const navUtamaMUA = [
@@ -10,6 +11,12 @@ const navUtamaMUA = [
   { to: '/booking', label: 'Booking', icon: 'list' },
   { to: '/kalender', label: 'Kalender', icon: 'calendar' },
   { to: '/klien', label: 'Klien', icon: 'users' },
+  // Pengeluaran Usaha (non-booking) -- halaman input & kelola pengeluaran.
+  // Ditaruh di sini (bukan Rekapan) biar urutannya SAMA di sidebar desktop
+  // & bottom nav HP (dua-duanya numpang array ini).
+  // `fiturBaru` = kunci di FITUR_BARU (lib/useFiturBaru.js) -- selama masih
+  // aktif, item ini dikasih penanda "Fitur Baru" (di sidebar & bottom nav HP).
+  { to: '/pengeluaran', label: 'Pengeluaran', icon: 'wallet', fiturBaru: 'pengeluaran' },
 ]
 
 const navRekapan = [
@@ -65,6 +72,8 @@ function Icon({ name }) {
       return <svg {...common}><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3Z"/><path d="m9 12 2 2 4-4"/></svg>
     case 'card':
       return <svg {...common}><rect x="2" y="5" width="20" height="14" rx="2.5"/><path d="M2 10h20"/><path d="M6 15h4"/></svg>
+    case 'wallet':
+      return <svg {...common}><path d="M3 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v1"/><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M16 13.5h2"/></svg>
     case 'logout':
       return <svg {...common}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
     default:
@@ -78,6 +87,9 @@ export default function Sidebar({ headerAction = null }) {
   const logoSrc = theme === 'dark' ? '/icon-512-dark.png' : '/icon-512-light.png'
   const studioName = profile?.studio_name || ''
   const navUtama = isAdmin ? navUtamaAdmin : navUtamaMUA
+  // Fitur apa saja yang lagi ditandai "Fitur Baru" buat user ini (lihat useFiturBaru).
+  const fiturBaruAktif = useFiturBaru()
+  const adaTandaBaru = (item) => !!(item.fiturBaru && fiturBaruAktif[item.fiturBaru])
   const [mobileOpen, setMobileOpen] = useState(false)
   const location = useLocation()
 
@@ -145,10 +157,11 @@ export default function Sidebar({ headerAction = null }) {
             <NavLink
               key={item.to}
               to={item.to}
-              className={({ isActive }) => 'nav-item' + (isActive ? ' active' : '')}
+              className={({ isActive }) => 'nav-item' + (isActive ? ' active' : '') + (adaTandaBaru(item) ? ' punya-tanda-baru' : '')}
               >
               <Icon name={item.icon} />
               {item.label}
+              {adaTandaBaru(item) && <span className="tanda-fitur-baru">Fitur Baru</span>}
             </NavLink>
             ))}
         </div>
@@ -206,17 +219,17 @@ export default function Sidebar({ headerAction = null }) {
             </NavLink>
           </>
         )}
-        {/* Tombol "Keluar" ini CUMA buat admin -- user MUA biasa udah
-            punya tombol sign-out sendiri di halaman Pengaturan (nggak
-            ke-lihat dari sini soalnya itu bukan bagian dari Sidebar.jsx).
-            Admin nggak punya akses ke Pengaturan sama sekali (disembunyiin
-            di atas), jadi tanpa ini dia nggak punya jalan keluar. */}
-        {isAdmin && (
-          <button type="button" className="nav-item nav-item-bantuan" onClick={signOut} style={{ marginBottom: 12 }}>
-            <Icon name="logout" />
-            Keluar
-          </button>
-        )}
+        {/* Tombol Keluar -- DI ATAS avatar, buat SEMUA akun (MUA & admin).
+            Dikasih latar merah lembut (lihat .nav-item-keluar di
+            Sidebar.css) biar kebedain dari tab-tab menu lain & user
+            langsung tahu ini tombol keluar. Sebelumnya user MUA keluar
+            lewat kartu "Keluar Akun" di halaman Pengaturan, & admin punya
+            tombol sendiri -- sekarang disatuin di sini. Drawer mobile
+            pakai markup yang sama, jadi otomatis berlaku di HP juga. */}
+        <button type="button" className="nav-item nav-item-bantuan nav-item-keluar" onClick={signOut}>
+          <Icon name="logout" />
+          Keluar
+        </button>
         <div className="profile">
           <div className="avatar">{profile?.logo_url ? <img src={profile.logo_url} alt="Logo" /> : initials}</div>
           <div>
@@ -240,27 +253,20 @@ export default function Sidebar({ headerAction = null }) {
           dari 4 item, tab bar ini ikut ke-update sendiri, nggak perlu
           diubah manual dobel. Item Keuangan/Laporan/Panduan/Bantuan/
           Pengaturan SENGAJA nggak dimasukin ke sini (sesuai permintaan) --
-          tetep diakses lewat hamburger menu seperti biasa. */}
+          tetep diakses lewat hamburger menu seperti biasa. Pengeluaran
+          ikut muncul di sini otomatis (bagian dari navUtama). */}
       <nav className="mobile-bottom-tabs">
         {navUtama.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
-            className={({ isActive }) => 'bottom-tab-item' + (isActive ? ' active' : '')}
+            className={({ isActive }) => 'bottom-tab-item' + (isActive ? ' active' : '') + (adaTandaBaru(item) ? ' punya-tanda-baru' : '')}
           >
             <Icon name={item.icon} />
             <span>{item.label}</span>
+            {adaTandaBaru(item) && <span className="tanda-fitur-baru">Fitur Baru</span>}
           </NavLink>
         ))}
-        {!isAdmin && (
-          <NavLink
-            to="/pengaturan"
-            className={({ isActive }) => 'bottom-tab-item' + (isActive ? ' active' : '')}
-          >
-            <Icon name="settings" />
-            <span>Pengaturan</span>
-          </NavLink>
-        )}
       </nav>
     </>
   )

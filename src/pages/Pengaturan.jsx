@@ -9,7 +9,7 @@ function initialsOf(name) {
 }
 
 export default function Pengaturan() {
-  const { user, signOut, profile, refreshProfile } = useAuth()
+  const { user, profile, refreshProfile } = useAuth()
 
   const [studioName, setStudioName] = useState('')
   const [kodePrefix, setKodePrefix] = useState('')
@@ -390,11 +390,6 @@ export default function Pengaturan() {
               )}
             </div>
 
-            <div className="card-pengaturan">
-              <div className="card-head-pengaturan"><h3>Keluar Akun</h3></div>
-              <p className="danger-text">Kamu akan keluar dari sesi ini dan perlu login ulang buat mengakses Dapur MUA lagi.</p>
-              <button className="btn-keluar-ghost" onClick={signOut} type="button">Keluar</button>
-            </div>
           </div>
         )}
       </div>

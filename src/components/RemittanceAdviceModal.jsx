@@ -14,6 +14,7 @@ import CustomSelect from './CustomSelect'
 // jalan (CSS global, bukan scoped), tapi worth diinget dependensinya.
 import './InvoiceModal.css'
 import './RemittanceAdviceModal.css'
+import IconClose from './IconClose'
 
 function formatRupiah(n) {
   return 'Rp' + (Number(n) || 0).toLocaleString('id-ID')
@@ -259,7 +260,7 @@ export default function RemittanceAdviceModal({ booking, payee, onClose }) {
         <div className="modal invoice-modal">
           <div className="modal-head invoice-no-print">
             <h2>Remittance Advice</h2>
-            <button className="modal-close" onClick={onClose} type="button">&times;</button>
+            <button className="modal-close" onClick={onClose} type="button" aria-label="Tutup"><IconClose /></button>
           </div>
 
           <div className="modal-body">

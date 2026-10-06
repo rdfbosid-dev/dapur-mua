@@ -24,14 +24,24 @@
 .card-keuangan { background: color-mix(in srgb, var(--box-dashboard) 90%, transparent); border-radius: 20px; padding: 22px; border: 1px solid var(--line-box); box-shadow: var(--shadow-card); }
 .card-head-keuangan { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; margin-bottom: 10px; }
 .card-head-keuangan h3 { font-size: 14px; color: var(--ink-soft); }
+/* Angka tahun di judul kartu ("2026") dibungkus pil biar menonjol -- warnanya
+   turunan dari tombol aksen (.banding-bantuan-btn) biar nyatu sama tema, tapi
+   latarnya DIGELAPIN dikit (campur hitam 18%) supaya kontras teks putihnya
+   lolos standar keterbacaan 4.5:1 (kalau pakai warna tombol apa adanya cuma
+   ~4.3:1, karena teksnya kecil). */
+.tahun-badge {
+  display: inline-block; margin-left: 2px; padding: 3px 9px; border-radius: 10px;
+  background: color-mix(in srgb, var(--pill-alt) 70%, transparent); color: var(--h7);
+  font-size: 12px; font-weight: 700; letter-spacing: 0.02em;
+}
 
 .bar-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-bottom: 30px; }
 /* Baris ke-2 chart bar -- 2 kolom (bukan 3), buat kartu-kartu gabungan
    (Vendor, Produk, dan potensi nambah lagi ke depan kayak Portofolio).
    Pola persis .bar-grid, cuma jumlah kolomnya beda. */
 .bar-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 30px; }
-/* Tren Omzet & Penghasilan (kiri) + Tren Pengeluaran (kanan), sejajar
-   di desktop -- polanya SAMA kayak .bar-grid (grid 2 kolom, numpuk 1
+/* Tren Pengeluaran Booking (kiri) + Pengeluaran Bisnis per Kategori (kanan),
+   sejajar di desktop -- polanya SAMA kayak .bar-grid (grid 2 kolom, numpuk 1
    kolom di mobile), cuma 2 kolom bukan 3. */
 .tren-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
 .bar-grid .chart-total-belanja { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 14px; color: var(--bar-belanja); filter: brightness(1.08); }
@@ -73,7 +83,10 @@
 }
 .keuangan-table { table-layout: fixed; }
 
-.keuangan-table { width: 100%; border-collapse: collapse; min-width: 1750px; }
+/* min-width 1902px = jumlah lebar kolom (px) di <colgroup> Keuangan.jsx
+   (14 kolom lama @ lebar aslinya + 1 kolom baru Pengeluaran Bisnis).
+   Dulu 1750px. */
+.keuangan-table { width: 100%; border-collapse: collapse; min-width: 1902px; }
 .keuangan-table thead th {
   text-align: center; font-size: 12px; font-weight: 700; color: var(--h4);
   text-transform: uppercase; letter-spacing: 0.03em; padding: 12px 16px;
@@ -156,9 +169,81 @@
 }
 
 @media (max-width: 900px) {
-  .keuangan-table { min-width: 1750px; }
+  .keuangan-table { min-width: 1902px; }
 }
 /* Keterangan kecil di bawah chart Transport -- ukuran, warna & jarak
    SAMA PERSIS kayak .mbar-legend (MonthlyBarChart.css), biar sejajar
    rapi sama legend "Bayar ke Tim / Komisi dari Tim" di kartu sebelah. */
 .chart-keterangan-keuangan { margin-top: 10px; text-align: center; font-size: 11.5px; color: var(--ink-soft); }
+
+/* ============================================================
+   PENGHASILAN & PENGELUARAN BISNIS
+   Kartu perbandingan: dua angka berdampingan + grafik 2 batang per bulan.
+   TANPA rumus & TANPA Laba Bersih (Dapur MUA sengaja nggak menghitungnya).
+   ============================================================ */
+.banding-card { margin-bottom: 18px; }
+.banding-ringkasan { display: flex; align-items: flex-start; gap: 36px; flex-wrap: wrap; margin: 4px 0 18px; }
+.banding-stat { display: flex; flex-direction: column; gap: 3px; }
+.banding-stat-label { font-size: 12px; color: var(--ink-soft); }
+.banding-stat-nilai { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 20px; filter: brightness(1.08); }
+.banding-penghasilan { color: var(--bar-pengeluaran-bisnis); }
+.banding-pengeluaran { color: var(--pill); }
+
+/* Legend grafik tren di kartu ini DAN di kartu "Pengeluaran dalam Booking"
+   (.tren-grid): SEJAJAR (berjejer) & di TENGAH. Selector
+   2 class sengaja -- biar menang lawan `.legend { flex-direction: column }`
+   di Dashboard.css / Laporan.css. Bobotnya sama dengan .legend-row-inline di
+   TrendChart.css, jadi siapa yang dimuat BELAKANGAN yang menang -- itu yang
+   bikin legend numpuk ke bawah & rata kiri. flex-wrap biar di HP yang sempit
+   legend turun baris dengan rapi, bukan meluber. */
+.banding-card .legend-row-inline,
+.tren-grid .legend-row-inline { flex-direction: row; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px 18px; margin-top: 14px; }
+
+.banding-peringatan {
+  background: var(--pill); color: var(--h8); font-size: 12.5px; line-height: 1.5;
+  padding: 10px 14px; border-radius: 10px; margin-bottom: 14px;
+}
+
+/* Tombol buka-tutup "Cara membaca grafik" -- nilai gayanya disalin dari
+   .kcb-btn di Kalender.css (diduplikasi, bukan di-share): latar
+   --button-prm-hover, sudut 10px, teks 13px tebal. Ditambah panah yang
+   muter 180 derajat pas penjelasannya terbuka. */
+.banding-bantuan-btn {
+  display: inline-flex; align-items: center; gap: 8px; margin-top: 18px;
+  padding: 9px 16px; border-radius: 10px; border: none;
+  background: var(--button-prm-hover); color: var(--button-tx-hover);
+  font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer;
+  transition: background 0.15s;
+}
+.banding-bantuan-btn:hover { background: var(--h3); }
+.banding-bantuan-btn:focus-visible { outline: 2px solid var(--h3); outline-offset: 2px; }
+.banding-bantuan-btn svg { width: 14px; height: 14px; flex-shrink: 0; transition: transform 0.2s; }
+.banding-bantuan-btn[aria-expanded="true"] svg { transform: rotate(180deg); }
+
+/* Penjelasan cara membaca grafik -- kotak lembut, nongol di bawah
+   tombolnya (atribut hidden dari JSX yang ngatur buka-tutupnya). */
+.banding-penjelasan {
+  margin-top: 10px; padding: 10px; border-radius: 12px;
+  border: 3px solid color-mix(in srgb, var(--pill-alt) 30%, transparent);
+  background: color-mix(in srgb, var(--card-langganan) 50%, transparent);
+  font-size: 12px; line-height: 1.6; color: var(--ink-soft);
+}
+.banding-penjelasan ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; }
+.banding-penjelasan b { color: var(--ink-soft); }
+
+/* Pengeluaran Usaha per kategori -- bar horizontal, panjangnya = porsi
+   dari total pengeluaran usaha tahun itu, terbesar di atas. */
+.keu-kat-list { display: flex; flex-direction: column; gap: 12px; }
+.keu-kat-row { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.keu-kat-info { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; color: var(--ink-soft); }
+.keu-kat-info span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.keu-kat-info b { white-space: nowrap; }
+.keu-kat-track { height: 6px; border-radius: 999px; background: color-mix(in srgb, var(--ink-faint) 70%, transparent); overflow: hidden; }
+.keu-kat-fill { height: 100%; border-radius: 999px; background: var(--pill); }
+/* Baris gabungan "Kategori lainnya (N)" -- warnanya dibikin lebih pudar biar kebeda dari kategori asli. */
+.keu-kat-fill.gabungan { background: color-mix(in srgb, var(--pill) 55%, transparent); }
+
+@media (max-width: 640px) {
+  .banding-ringkasan { gap: 24px; }
+  .banding-stat-nilai { font-size: 16px; }
+}

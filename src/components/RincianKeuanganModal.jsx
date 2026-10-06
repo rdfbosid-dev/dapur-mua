@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import RemittanceAdviceModal from './RemittanceAdviceModal'
 import './RincianKeuanganModal.css'
+import IconClose from './IconClose'
 
 function formatRupiah(n) {
   const num = Number(n) || 0
@@ -363,7 +364,7 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
       <div className="modal">
         <div className="modal-head">
           <h2>Rincian Keuangan</h2>
-          <button className="modal-close" onClick={onClose} type="button">&times;</button>
+          <button className="modal-close" onClick={onClose} type="button" aria-label="Tutup"><IconClose /></button>
         </div>
 
         <div className="modal-body">
