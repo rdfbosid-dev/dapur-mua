@@ -251,7 +251,7 @@ export default function PengeluaranModal({ onClose, onSaved, editData = null }) 
                   options={[...KATEGORI_PENGELUARAN.map((k) => k.nama), KATEGORI_LAINNYA]}
                   value={kategori}
                   onChange={gantiKategori}
-                  placeholder="Pilih kategori"
+                  placeholder="Pilih Kategori"
                   variant="modal"
                 />
                 {kategori === KATEGORI_LAINNYA && (
