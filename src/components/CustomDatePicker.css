@@ -57,11 +57,14 @@
    - .agenda (semua tanggal beragenda): titik --pill-later di bawah angka.
    Ditaruh SEBELUM .outside/.today/.selected, biar yang terpilih tetap menang. */
 .cdate-cell.agenda { position: relative; }
-.cdate-cell.agenda-solo { background: var(--pill-later); color: var(--h7); font-weight: 700; }
+/* Angka pakai --h9 (warna teks utama, ikut berubah di mode terang/gelap), BUKAN putih --h7 kayak
+   level kepadatan -- isi hijau lembut ini terang, teks putih cuma ~1.6:1 di mode terang (nggak
+   terbaca). --h9 lolos kontras 4.5:1 di kedua mode. */
+.cdate-cell.agenda-solo { background: color-mix(in srgb, var(--pill-later) 85%, transparent); color: var(--h9); font-weight: 700; }
 .cdate-cell.agenda::after {
-  content: ''; position: absolute; bottom: 3px; left: 50%; width: 5px; height: 5px; margin-left: -2.5px;
+  content: ''; position: absolute; bottom: 5px; left: 50%; width: 3px; height: 3px; margin-left: -1.5px;
   border-radius: 50%; background: var(--pill-later);
-  box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--box-dashboard) 90%, transparent);
+  box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--h7) 90%, transparent);
 }
 /* Di luar bulan yang lagi dilihat: nggak diisi warna (sama kayak kepadatan), titiknya diredam. */
 .cdate-cell.outside.agenda-solo { background: none; color: var(--ink-faint); }

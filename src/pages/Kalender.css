@@ -146,6 +146,26 @@
 .density-4 { background: var(--notif); }
 .density-4 .cell-date { color: var(--h8); font-weight: 700; }
 
+/* AGENDA pelatihan/portofolio (--pill-later) -- dari halaman Pengeluaran.
+   2 lapis biar tetap kebaca walau tanggalnya juga berwarna kepadatan booking:
+   - .agenda-solo (tanggal TANPA booking): isi lembut --pill-later,
+   - .agenda-dot (semua tanggal beragenda): titik --pill-later di bawah angka.
+   Di luar bulan yang lagi dilihat: nggak diisi warna (sama kayak kepadatan),
+   titiknya diredam. */
+.cell-circle.agenda-solo { background: color-mix(in srgb, var(--pill-later) 85%, transparent); }
+/* Angkanya SENGAJA pakai --h9 (warna teks utama, ikut berubah di mode terang/gelap),
+   BUKAN putih (--h7) kayak level kepadatan -- isi hijau lembut ini terang, jadi teks
+   putih cuma ~1.6:1 di mode terang (nggak terbaca). --h9 lolos kontras 4.5:1 di kedua mode. */
+.cell-circle.agenda-solo .cell-date { color: var(--h9); font-weight: 700; }
+.agenda-dot {
+  position: absolute; bottom: 12%; left: 50%; width: 6px; height: 6px; margin-left: -3px; border-radius: 50%;
+  background: var(--pill-later); box-shadow: 0 0 0 2px color-mix(in srgb, var(--h7) 90%, transparent);
+}
+.kalender-cell.outside .cell-circle.agenda-solo { background: transparent; }
+.kalender-cell.outside .agenda-dot { opacity: 0.55; }
+.kalender-legend { display: flex; align-items: center; gap: 8px; margin-top: 14px; font-size: 11.5px; color: var(--ink-soft); }
+.legend-agenda-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--pill-later); flex-shrink: 0; }
+
 .today-dot {
   position: absolute;
   width: 60px; height: 60px; border-radius: 50%; border: 3px solid var(--h9);
@@ -189,6 +209,10 @@
 .status-pill { font-size: 11px; font-weight: 700; padding: 6px 12px; border-radius: 20px; white-space: nowrap; display: inline-block; }
 .status-pill.lunas { background: var(--pill-alt); color: var(--h7); }
 .status-pill.belum { background: var(--pill); color: var(--h8); }
+/* Baris agenda seharian (pelatihan/portofolio) -- hijau --pill-later, sama kayak penanda di grid. */
+.dash-b-avatar.agenda { background: var(--pill-later); color: var(--h7); }
+.dash-b-avatar.agenda.selesai { opacity: 0.55; }
+.status-pill.agenda { background: var(--pill-later); color: var(--h7); }
 
 .loading-state { text-align: center; padding: 60px; color: var(--ink-soft); font-size: 13px; }
 .empty-state { text-align: left; padding: 10px 0; color: var(--ink-soft); font-size: 13px; }

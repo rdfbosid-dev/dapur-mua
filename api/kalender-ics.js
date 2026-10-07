@@ -4,6 +4,14 @@ function pad(n) {
   return String(n).padStart(2, '0')
 }
 
+// Kategori Pengeluaran yang dianggap AGENDA (kegiatan yang makan waktu: ikut
+// pelatihan/kelas & bikin portofolio) -- ikut tampil di kalender HP sebagai
+// event seharian, sama kayak booking. SALINAN dari KATEGORI_AGENDA di
+// src/lib/agendaPengeluaran.js (endpoint ini jalan di server, nggak bisa
+// import dari file yang bergantung ke klien Supabase browser) -- kalau ubah
+// salah satu, ubah dua-duanya. Nama HARUS sama persis kayak di database.
+const KATEGORI_AGENDA = ['Portofolio', 'Pelatihan & Kelas']
+
 // Karakter khusus (koma, titik-koma, newline, backslash) WAJIB di-escape
 // di format iCalendar, kalau nggak bisa bikin file .ics-nya rusak/nggak
 // kebaca sama app kalender.
@@ -125,6 +133,21 @@ export default async function handler(req, res) {
     }
   }
 
+  // AGENDA pelatihan/portofolio dari halaman Pengeluaran. PENTING: kunci
+  // service role di atas MENEMBUS RLS, jadi filter `.eq('user_id', ...)` di
+  // sini WAJIB -- tanpa itu agenda SEMUA user ikut kebaca. Dibaca dari tabel
+  // asli `pengeluaran` (bukan VIEW pengeluaran_summary, yang di bawah kunci
+  // service role juga nggak kena RLS). Kolom `keterangan` (catatan biaya)
+  // SENGAJA nggak diambil -- jangan sampai angka/catatan keuangan masuk ke
+  // kalender HP. Fail-open kayak hitungan peserta: kalau gagal, kalender
+  // tetap jalan, cuma tanpa agenda (bukan bikin seluruh .ics gagal).
+  const { data: agendaRows, error: agendaError } = await supabaseAdmin
+    .from('pengeluaran')
+    .select('id, kategori, judul, tanggal, tempat, penyelenggara')
+    .eq('user_id', profile.id)
+    .in('kategori', KATEGORI_AGENDA)
+    .order('tanggal', { ascending: true })
+
   // Ini SATU-SATUNYA sinyal yang kita punya buat tau app Kalender di HP
   // user beneran "narik" link ini (bukan cuma di-copy doang) -- link .ics
   // itu pasif, nggak ada notifikasi balik dari Google Calendar/Kalender
@@ -198,6 +221,31 @@ export default async function handler(req, res) {
     ].filter(Boolean).join('\r\n')
   })
 
+  // Event AGENDA -- pengeluaran cuma nyimpen TANGGAL (tanpa jam), jadi dibuat
+  // event SEHARIAN (VALUE=DATE), polanya sama kayak booking tanpa jam makeup.
+  // UID dikasih awalan "pengeluaran-" biar nggak pernah bentrok sama UID booking.
+  const agendaEvents = (agendaError ? [] : (agendaRows || [])).filter((a) => a.tanggal).map((a) => {
+    const [y, m, d] = a.tanggal.split('-').map(Number)
+    const dtStart = `${y}${pad(m)}${pad(d)}`
+    const end = new Date(y, m - 1, d + 1)
+    const dtEnd = `${end.getFullYear()}${pad(end.getMonth() + 1)}${pad(end.getDate())}`
+    const summary = escapeICS(a.judul ? `${a.kategori} - ${a.judul}` : a.kategori)
+    const location = escapeICS(a.tempat || '')
+    const description = escapeICS(a.penyelenggara ? `Penyelenggara: ${a.penyelenggara}` : '')
+
+    return [
+      'BEGIN:VEVENT',
+      `UID:pengeluaran-${a.id}@dapurmua.app`,
+      `DTSTAMP:${now}`,
+      `DTSTART;VALUE=DATE:${dtStart}`,
+      `DTEND;VALUE=DATE:${dtEnd}`,
+      `SUMMARY:${summary}`,
+      location ? `LOCATION:${location}` : null,
+      description ? `DESCRIPTION:${description}` : null,
+      'END:VEVENT',
+    ].filter(Boolean).join('\r\n')
+  })
+
   const ics = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
@@ -205,6 +253,7 @@ export default async function handler(req, res) {
     'CALSCALE:GREGORIAN',
     `X-WR-CALNAME:Jadwal Booking - ${escapeICS(studioName)}`,
     ...events,
+    ...agendaEvents,
     'END:VCALENDAR',
   ].join('\r\n')
 

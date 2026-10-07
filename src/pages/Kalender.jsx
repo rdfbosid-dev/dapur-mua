@@ -4,6 +4,9 @@ import { useAuth } from '../context/AuthContext'
 import Sidebar from '../components/Sidebar'
 import BookingModal from '../components/BookingModal'
 import BookingDetailModal from '../components/BookingDetailModal'
+import PengeluaranModal from '../components/PengeluaranModal'
+import PengeluaranDetailModal from '../components/PengeluaranDetailModal'
+import { KATEGORI_AGENDA } from '../lib/agendaPengeluaran'
 import './Kalender.css'
 
 const BULAN_PENUH = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
@@ -16,6 +19,16 @@ function initialsOf(name) {
     .slice(0, 2)
     .join('')
     .toUpperCase()
+}
+
+// Singkatan di lingkaran avatar baris agenda (pelatihan/portofolio).
+const SINGKATAN_AGENDA = { Portofolio: 'PF', 'Pelatihan & Kelas': 'PK' }
+
+// "YYYY-MM-DD" (kolom date) -> kunci hari yang sama persis kayak dayKey() di
+// bawah. Di-parse MANUAL (bukan new Date(str)) biar nggak geser sehari gara-gara zona waktu.
+function kunciTanggal(str) {
+  const [y, m, d] = String(str || '').split('-').map(Number)
+  return `${y}-${(m || 1) - 1}-${d || 1}`
 }
 
 function sameDate(a, b) {
@@ -71,6 +84,15 @@ export default function Kalender() {
   const [showModal, setShowModal] = useState(false)
   const [selectedBooking, setSelectedBooking] = useState(null)
 
+  // AGENDA = pelatihan/portofolio yang dicatat di halaman Pengeluaran. Ditampilin
+  // di kalender ini (penanda --pill-later + baris di panel Agenda) karena
+  // kegiatan itu makan waktu & ngaruh ke jadwal booking. Baris penuh dari VIEW
+  // pengeluaran_summary (biar bisa dibuka lagi lewat modal Detail Pengeluaran).
+  const [agendaList, setAgendaList] = useState([])
+  const [detailAgenda, setDetailAgenda] = useState(null)
+  const [editAgenda, setEditAgenda] = useState(null)
+  const [showFormAgenda, setShowFormAgenda] = useState(false)
+
   const [showKalenderLink, setShowKalenderLink] = useState(false)
   const [linkCopied, setLinkCopied] = useState(false)
 
@@ -110,7 +132,30 @@ export default function Kalender() {
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { loadBookings() }, [])
 
+  // Ngembaliin daftar terbaru (kosong kalau gagal) -- dipakai buat nyegerin
+  // modal Detail abis diedit. Gagal = kalender tetap jalan, cuma tanpa agenda.
+  function loadAgenda() {
+    return supabase
+      .from('pengeluaran_summary').select('*').in('kategori', KATEGORI_AGENDA)
+      .then(({ data, error: err }) => {
+        const daftar = err ? [] : (data || [])
+        setAgendaList(daftar)
+        return daftar
+      })
+  }
+  useEffect(() => { loadAgenda() }, [])
+
   const grid = useMemo(() => buildGrid(viewYear, viewMonth), [viewYear, viewMonth])
+
+  const agendaByDay = useMemo(() => {
+    const map = new Map()
+    agendaList.forEach((a) => {
+      const key = kunciTanggal(a.tanggal)
+      if (!map.has(key)) map.set(key, [])
+      map.get(key).push(a)
+    })
+    return map
+  }, [agendaList])
 
   const bookingsByDay = useMemo(() => {
     const map = new Map()
@@ -129,6 +174,9 @@ export default function Kalender() {
   function bookingsOn(d) {
     return bookingsByDay.get(dayKey(d)) || []
   }
+  function agendaOn(d) {
+    return agendaByDay.get(dayKey(d)) || []
+  }
 
   function goPrevMonth() {
     if (viewMonth === 0) { setViewMonth(11); setViewYear((y) => y - 1) }
@@ -146,9 +194,32 @@ export default function Kalender() {
 
   const agendaHariIni = bookingsOn(selectedDate).sort((a, b) => (a.jam_start_makeup || '').localeCompare(b.jam_start_makeup || ''))
 
+  const agendaPengeluaranHariIni = agendaOn(selectedDate)
+
   function handleSaved() {
     setShowModal(false)
     loadBookings()
+  }
+
+  // Alur SAMA kayak halaman Pengeluaran: klik baris -> Detail -> (Edit) -> form
+  // edit -> abis disimpan balik ke Detail pakai data terbaru. Batal: balik ke Detail.
+  function bukaEditDariDetail() {
+    setEditAgenda(detailAgenda)
+    setDetailAgenda(null)
+    setShowFormAgenda(true)
+  }
+  async function handleAgendaSaved() {
+    const idDiedit = editAgenda?.id
+    setShowFormAgenda(false)
+    setEditAgenda(null)
+    const terbaru = await loadAgenda()
+    const baris = idDiedit ? terbaru.find((p) => p.id === idDiedit) : null
+    if (baris) setDetailAgenda(baris)
+  }
+  function handleBatalFormAgenda() {
+    if (editAgenda) setDetailAgenda(editAgenda)
+    setShowFormAgenda(false)
+    setEditAgenda(null)
   }
 
   return (
@@ -184,7 +255,7 @@ export default function Kalender() {
             ) : (
               <>
                 <div className="kcb-title">Hubungkan Kalender HP</div>
-                <div className="kcb-sub">Sinkronisasi jadwal booking-mu ke Google Calendar/Kalender iPhone untuk update otomatis tiap ada booking baru.</div>
+                <div className="kcb-sub">Sinkronisasi jadwal booking dan agenda pelatihan/portofolio-mu ke Google Calendar/Kalender iPhone untuk update otomatis tiap ada jadwal baru.</div>
               </>
             )}
           </div>
@@ -244,20 +315,29 @@ export default function Kalender() {
                 const isSelected = sameDate(cell.date, selectedDate)
                 const isToday = sameDate(cell.date, today)
                 const density = count === 0 ? 0 : count === 1 ? 1 : count === 2 ? 2 : count === 3 ? 3 : 4
+                // Penanda agenda pelatihan/portofolio (--pill-later): isi lembut kalau tanggal
+                // itu BELUM ada booking (.agenda-solo) + titik kecil yang SELALU tampil,
+                // jadi tetap kebaca walau tanggalnya juga sudah berwarna kepadatan booking.
+                const dayAgenda = agendaOn(cell.date)
                 return (
                   <div
                     key={i}
                     className={`kalender-cell${cell.inMonth ? '' : ' outside'}${isSelected ? ' selected' : ''}`}
                     onClick={() => setSelectedDate(cell.date)}
+                    title={dayAgenda.length > 0 ? dayAgenda.map((a) => (a.judul ? `${a.kategori}: ${a.judul}` : a.kategori)).join('\n') : undefined}
                   >
-                    <div className={`cell-circle density-${density}`}>
+                    <div className={`cell-circle density-${density}${dayAgenda.length > 0 && density === 0 ? ' agenda-solo' : ''}`}>
                       <span className="cell-date">{cell.date.getDate()}</span>
+                      {dayAgenda.length > 0 && <span className="agenda-dot"></span>}
                       {isToday && <span className="today-dot"></span>}
                     </div>
                   </div>
                 )
               })}
             </div>
+            {agendaList.length > 0 && (
+              <div className="kalender-legend"><span className="legend-agenda-dot"></span>Agenda pelatihan / portofolio</div>
+            )}
           </div>
 
           <div className="card agenda-card">
@@ -266,10 +346,23 @@ export default function Kalender() {
             </div>
             {loading ? (
               <div className="loading-state">Memuat...</div>
-            ) : agendaHariIni.length === 0 ? (
+            ) : agendaHariIni.length === 0 && agendaPengeluaranHariIni.length === 0 ? (
               <div className="empty-state">Tidak ada agenda makeup di tanggal ini.</div>
             ) : (
-              agendaHariIni.map((b) => (
+              <>
+              {/* Agenda SEHARIAN (pelatihan/portofolio) di atas, kayak event seharian di
+                  aplikasi kalender biasa; baru booking berjam di bawahnya. */}
+              {agendaPengeluaranHariIni.map((a) => (
+                <div className="dash-booking-row" key={`agenda-${a.id}`} onClick={() => setDetailAgenda(a)} style={{ cursor: 'pointer' }}>
+                  <div className={`dash-b-avatar agenda${isSelesai(a.tanggal, null) ? ' selesai' : ''}`}>{SINGKATAN_AGENDA[a.kategori] || 'AG'}</div>
+                  <div className="b-info">
+                    <div className="b-name">{a.judul || a.kategori}</div>
+                    <div className="b-meta">{[a.judul ? a.kategori : null, a.tempat, a.penyelenggara].filter(Boolean).join(' · ') || 'Agenda'}</div>
+                  </div>
+                  <span className="status-pill agenda">Seharian</span>
+                </div>
+              ))}
+              {agendaHariIni.map((b) => (
                 <div className="dash-booking-row" key={b.id} onClick={() => setSelectedBooking(b)} style={{ cursor: 'pointer' }}>
                   <div className={`dash-b-avatar${isSelesai(b.tanggal_acara, b.jam_start_makeup) ? ' selesai' : ''}`}>{initialsOf(b.nama_klien)}</div>
                   <div className="b-info">
@@ -282,13 +375,26 @@ export default function Kalender() {
                     {b.status_pembayaran}
                   </span>
                 </div>
-              ))
+              ))}
+              </>
             )}
           </div>
         </div>
       </div>
 
       {showModal && <BookingModal onClose={() => setShowModal(false)} onSaved={handleSaved} />}
+      {detailAgenda && (
+        <PengeluaranDetailModal
+          key={detailAgenda.id}
+          data={detailAgenda}
+          onClose={() => setDetailAgenda(null)}
+          onEdit={bukaEditDariDetail}
+          onDeleted={() => { setDetailAgenda(null); loadAgenda() }}
+        />
+      )}
+      {showFormAgenda && (
+        <PengeluaranModal editData={editAgenda} onClose={handleBatalFormAgenda} onSaved={handleAgendaSaved} />
+      )}
       {selectedBooking && (
         <BookingDetailModal
           booking={selectedBooking}
