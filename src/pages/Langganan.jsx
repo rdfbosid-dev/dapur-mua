@@ -10,9 +10,9 @@ import './Langganan.css'
 // nge-export PLANS-nya), tapi nilainya harus selalu disinkronin manual
 // kalau harga di landing page berubah.
 const PAKET = [
-  { id: '1bulan', label: '1 Bulan', harga: 35000, period: 'per bulan' },
-  { id: '6bulan', label: '6 Bulan', harga: 200000, period: 'untuk akses enam bulan' },
-  { id: '1tahun', label: '1 Tahun', harga: 380000, period: 'untuk akses satu tahun' },
+  { id: '1bulan', label: '1 Bulan', harga: 35000, period: 'semua fitur aktif' },
+  { id: '6bulan', label: '6 Bulan', harga: 200000, period: 'semua fitur aktif' },
+  { id: '1tahun', label: '1 Tahun', harga: 380000, period: 'semua fitur aktif' },
 ]
 
 function formatRupiah(n) {
