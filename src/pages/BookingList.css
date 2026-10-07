@@ -80,7 +80,12 @@
    nggak numpang), sesuai konvensi project ini. ---- */
 .booking-pagination { display: flex; align-items: center; justify-content: space-between; padding: 14px 4px 0; flex-wrap: wrap; gap: 10px; }
 .booking-pagination-info { font-size: 12px; color: var(--ink-soft); }
-.booking-pagination-buttons { display: flex; align-items: center; gap: 6px; }
+/* flex-wrap + max-width:100% = jaring pengaman: kalau (karena apa pun) tombolnya
+   nggak muat satu baris, turun ke baris bawah -- BUKAN melebar sampai bikin
+   seluruh halaman bisa digeser ke samping. */
+.booking-pagination-buttons { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: flex-end; max-width: 100%; min-width: 0; }
+/* Penanda "…" (halaman yang dilompati) -- bukan tombol, cuma teks. */
+.booking-pagination-gap { min-width: 20px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--ink-soft); opacity: 0.7; user-select: none; }
 .booking-pagination-buttons button {
   min-width: 32px; height: 32px; padding: 0 6px; display: flex; align-items: center; justify-content: center;
   border: 1px solid color-mix(in srgb, var(--h5) 40%, transparent); border-radius: 9px; background: color-mix(in srgb, var(--h5) 40%, transparent); color: var(--h5); cursor: pointer; font-size: 12px; transition: background 0.15s, color 0.15s;
@@ -114,6 +119,11 @@
 }
 
 @media (max-width: 480px) {
+  /* Tombol paginasi sedikit lebih kecil: 2 panah + 7 item harus muat di lebar
+     HP (area isi = layar - padding 18px kiri/kanan). */
+  .booking-pagination-buttons { gap: 4px; }
+  .booking-pagination-buttons button { min-width: 30px; height: 30px; }
+  .booking-pagination-gap { min-width: 14px; height: 30px; }
   .search-box-booking { padding: 8px 12px; }
   .btn-booking-primary { padding: 9px 12px; font-size: 12.5px; }
 
@@ -126,4 +136,11 @@
      global (yang dipakai bareng di halaman lain juga). */
   .booking-table .status-pill { font-size: 9.5px; padding: 4px 9px; }
   .selesai-badge { font-size: 7.5px; padding: 1px 5px; }
+}
+
+/* HP sangat sempit (<= 360px): tombol paginasi dikecilin lagi biar tetap muat 1 baris. */
+@media (max-width: 360px) {
+  .booking-pagination-buttons { gap: 3px; }
+  .booking-pagination-buttons button { min-width: 28px; height: 28px; padding: 0 4px; }
+  .booking-pagination-gap { min-width: 12px; height: 28px; }
 }

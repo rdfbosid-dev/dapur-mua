@@ -4,6 +4,7 @@ import Sidebar from '../components/Sidebar'
 import CustomSelect from '../components/CustomSelect'
 import BookingModal from '../components/BookingModal'
 import BookingDetailModal from '../components/BookingDetailModal'
+import { daftarHalaman } from '../lib/paginasi'
 import './BookingList.css'
 
 const BULAN_PENUH = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
@@ -209,8 +210,13 @@ export default function BookingList() {
               <button type="button" disabled={pageSafe <= 1} onClick={() => setPage(pageSafe - 1)}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6" /></svg>
               </button>
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
-                <button type="button" key={n} className={n === pageSafe ? 'sel' : ''} onClick={() => setPage(n)}>{n}</button>
+              {/* Paginasi RINGKAS (maks 7 item, sisanya "…") -- dulu semua nomor
+                  halaman ditampilin, dan di HP baris tombolnya jadi lebih lebar
+                  dari layar sampai seluruh halaman bisa digeser ke samping. */}
+              {daftarHalaman(pageSafe, totalPages).map((n, i) => (
+                typeof n === 'number'
+                  ? <button type="button" key={n} className={n === pageSafe ? 'sel' : ''} onClick={() => setPage(n)}>{n}</button>
+                  : <span className="booking-pagination-gap" key={`lompat-${i}`} aria-hidden="true">{n}</span>
               ))}
               <button type="button" disabled={pageSafe >= totalPages} onClick={() => setPage(pageSafe + 1)}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6" /></svg>
