@@ -50,6 +50,26 @@
 .cdate-cell.density-3 { background: var(--pill); color: var(--h8); font-weight: 700; }
 .cdate-cell.density-4 { background: var(--notif); color: var(--h8); font-weight: 700; }
 
+/* AGENDA pelatihan/portofolio (--pill-later) -- lihat agendaDates di
+   CustomDatePicker.jsx. 2 lapis biar tetap kebaca walau tanggalnya juga
+   sudah berwarna kepadatan booking:
+   - .agenda-solo (tanggal TANPA booking): isi lembut --pill-later,
+   - .agenda (semua tanggal beragenda): titik --pill-later di bawah angka.
+   Ditaruh SEBELUM .outside/.today/.selected, biar yang terpilih tetap menang. */
+.cdate-cell.agenda { position: relative; }
+.cdate-cell.agenda-solo { background: var(--pill-later); color: var(--h7); font-weight: 700; }
+.cdate-cell.agenda::after {
+  content: ''; position: absolute; bottom: 3px; left: 50%; width: 5px; height: 5px; margin-left: -2.5px;
+  border-radius: 50%; background: var(--pill-later);
+  box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--box-dashboard) 90%, transparent);
+}
+/* Di luar bulan yang lagi dilihat: nggak diisi warna (sama kayak kepadatan), titiknya diredam. */
+.cdate-cell.outside.agenda-solo { background: none; color: var(--ink-faint); }
+.cdate-cell.outside.agenda::after { opacity: 0.55; }
+
+.cdate-legend { display: flex; align-items: center; gap: 6px; margin-top: 10px; padding-top: 8px; border-top: 1px solid color-mix(in srgb, var(--button-border) 45%, transparent); font-size: 10.5px; color: var(--ink-soft); }
+.cdate-legend-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--pill-later); flex-shrink: 0; }
+
 /* Sel di luar bulan (numpang dari bulan sebelum/sesudah) yang kebetulan
    ada booking-nya -- ditimpa jadi warna netral tetap (bukan warna
    density asli), sama persis alasannya kayak di Kalender.css: biar

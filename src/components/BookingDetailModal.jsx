@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import CustomSelect from './CustomSelect'
 import CustomDatePicker from './CustomDatePicker'
+import { muatAgendaPengeluaran } from '../lib/agendaPengeluaran'
 import CustomTimePicker from './CustomTimePicker'
 import { EVENT_OPTIONS, EVENT_CUSTOM_SENTINEL, KATEGORI_MAKEUP_OPTIONS } from '../lib/constants'
 import { cariAtauBuatKlien } from '../lib/klien'
@@ -101,6 +102,15 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
   const [confirmDeletePaymentId, setConfirmDeletePaymentId] = useState(null)
   const [saving, setSaving] = useState(false)
   const [bookingDates, setBookingDates] = useState([])
+  // Agenda pelatihan/portofolio (dari halaman Pengeluaran) -- ditandai warna
+  // --pill-later di kalender field "Tanggal Acara", biar user tahu hari itu
+  // sudah ada kegiatan lain sebelum menerima booking.
+  const [agendaDates, setAgendaDates] = useState([])
+  useEffect(() => {
+    let batal = false
+    muatAgendaPengeluaran().then((daftar) => { if (!batal) setAgendaDates(daftar) })
+    return () => { batal = true }
+  }, [])
 
   // Sama persis pola & alasannya kayak di BookingModal.jsx -- dipakai
   // CustomDatePicker buat nampilin indikator kepadatan di field "Tanggal
@@ -924,7 +934,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
               <div className="field-grid-booking cols-tanggal-jam-event" style={{ marginTop: 12 }}>
                 <div className="field">
                   <label>Tanggal Acara</label>
-                  <CustomDatePicker value={tanggalAcara} onChange={setTanggalAcara} variant="modal" bookingDates={bookingDates} />
+                  <CustomDatePicker value={tanggalAcara} onChange={setTanggalAcara} variant="modal" bookingDates={bookingDates} agendaDates={agendaDates} />
                 </div>
                 <div className="field">
                   <label>Jam Mulai</label>

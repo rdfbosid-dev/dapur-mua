@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { formatAngkaInput, parseAngkaInput } from '../lib/format'
 import { KATEGORI_PENGELUARAN, KATEGORI_LAINNYA, LABEL_TEMPAT_DEFAULT, ITEM_LAINNYA, cariKategori, cariOpsiItem } from '../lib/pengeluaran'
+import { kategoriPunyaAgenda, muatJadwalBooking } from '../lib/agendaPengeluaran'
 import CustomDatePicker from './CustomDatePicker'
 import CustomSelect from './CustomSelect'
 import './PengeluaranModal.css'
@@ -102,6 +103,21 @@ export default function PengeluaranModal({ onClose, onSaved, editData = null }) 
         setLoadingItems(false)
       })
   }, [editData])
+
+  // Kategori Portofolio / Pelatihan & Kelas = kegiatan yang makan waktu, jadi
+  // kalender di field Tanggal nampilin JADWAL BOOKING yang udah ada (warna
+  // kepadatan yang sama kayak field Tanggal Acara di form Booking) -- biar user
+  // tahu hari mana yang udah penuh sebelum ikut kelas / bikin portofolio.
+  // Kategori lain nggak butuh, jadi kalendernya tetap polos (& datanya nggak
+  // dimuat sama sekali).
+  const tampilkanJadwalBooking = kategoriPunyaAgenda(kategori)
+  const [jadwalBooking, setJadwalBooking] = useState([])
+  useEffect(() => {
+    if (!tampilkanJadwalBooking || !user) return undefined
+    let batal = false
+    muatJadwalBooking(user.id).then((daftar) => { if (!batal) setJadwalBooking(daftar) })
+    return () => { batal = true }
+  }, [tampilkanJadwalBooking, user])
 
   const infoKategori = cariKategori(kategori)
   // true = Nama Item kategori ini dropdown (punya `opsiItem`), bukan ketik bebas.
@@ -264,7 +280,10 @@ export default function PengeluaranModal({ onClose, onSaved, editData = null }) 
               </div>
               <div className="field">
                 <label>Tanggal</label>
-                <CustomDatePicker value={tanggal} onChange={setTanggal} variant="modal" />
+                <CustomDatePicker value={tanggal} onChange={setTanggal} variant="modal" bookingDates={tampilkanJadwalBooking ? jadwalBooking : []} />
+                {tampilkanJadwalBooking && (
+                  <div className="tanggal-catatan">Tanggal yang berwarna sudah ada jadwal booking (makin pekat makin padat).</div>
+                )}
               </div>
             </div>
 

@@ -180,7 +180,7 @@ export default function Pengeluaran() {
             Pengeluaran ini. Ditaruh DI ATAS filter (setelah topbar),
             selebar halaman, & tampil terus (nggak ikut disembunyiin pas
             loading/error). */}
-        <div className="pgl-hint"><a>PETUNJUK:</a> Catat semua data pengeluaran bisnismu di sini. Seperti belanja produk rutin, alat, portofolio, iklan di media sosial, dan lainnya. Biaya pengeluaran untuk bayar ke tim/vendor, produk Add On (sewa), dan Add On (beli) yang ada di booking klien nggak usah dicatat di sini, karena udah otomatis terhitung di grafik <b>Pengeluaran dalam Booking</b> di halaman <b>Keuangan</b>.</div>
+        <div className="pgl-hint"><a>PETUNJUK:</a> Catat semua data pengeluaran bisnismu di sini. Seperti belanja produk rutin, alat, portofolio, iklan di media sosial, dan lainnya. Biaya pengeluaran untuk bayar ke tim/vendor, produk Add On (Sewa), dan Add On (Beli) yang ada di booking klien nggak usah dicatat di sini, karena udah otomatis terhitung di grafik <b>Pengeluaran dalam Booking</b> di halaman <b>Keuangan</b>.</div>
 
         <div className="pgl-filter-bar">
           <div className="pgl-search">

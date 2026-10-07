@@ -67,6 +67,8 @@
 /* Dropdown Kategori (CustomSelect) & Tanggal (CustomDatePicker) --
    dua-duanya pakai tombol .cselect-trigger, tingginya disamain 40px. */
 .pengeluaran-modal-overlay .cselect-trigger { height: 40px; }
+/* Catatan kecil di bawah field Tanggal (cuma muncul buat kategori Portofolio/Pelatihan & Kelas). */
+.pengeluaran-modal-overlay .tanggal-catatan { font-size: 11px; line-height: 1.45; color: var(--ink-soft); opacity: 0.85; margin-top: 2px; }
 
 .pengeluaran-modal-overlay .form-divider { height: 1px; background: color-mix(in srgb, var(--button-border) 45%, transparent); margin: 8px 0; }
 

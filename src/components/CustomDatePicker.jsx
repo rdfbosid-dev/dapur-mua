@@ -34,7 +34,7 @@ function buildGrid(year, month) {
   return cells
 }
 
-export default function CustomDatePicker({ value, onChange, placeholder = 'Pilih Tanggal', variant = null, bookingDates = [] }) {
+export default function CustomDatePicker({ value, onChange, placeholder = 'Pilih Tanggal', variant = null, bookingDates = [], agendaDates = [], agendaLabel = 'Ada agenda pelatihan / portofolio' }) {
   const [open, setOpen] = useState(false)
   const selected = parseISO(value)
   const today = new Date()
@@ -57,6 +57,17 @@ export default function CustomDatePicker({ value, onChange, placeholder = 'Pilih
   function densityOf(count) {
     return count === 0 ? 0 : count === 1 ? 1 : count === 2 ? 2 : count === 3 ? 3 : 4
   }
+
+  // AGENDA (pelatihan/portofolio dari halaman Pengeluaran) -- peta "tanggal ISO
+  // -> daftar nama agenda". BEDA dari kepadatan booking di atas: ini ditandai
+  // pakai warna --pill-later (isi lembut kalau tanggal itu belum ada booking)
+  // + titik kecil yang SELALU kelihatan, jadi tetap terbaca walau tanggal itu
+  // juga sudah berwarna kepadatan booking. agendaDates = [{ tanggal, label }].
+  const agendaByDate = {}
+  agendaDates.forEach(({ tanggal, label }) => {
+    if (!tanggal) return
+    ;(agendaByDate[tanggal] = agendaByDate[tanggal] || []).push(label || 'Agenda')
+  })
 
   useEffect(() => {
     function handleClickOutside(e) {
@@ -134,11 +145,13 @@ export default function CustomDatePicker({ value, onChange, placeholder = 'Pilih
               const isToday = cell.date.toDateString() === today.toDateString()
               const cellIso = toISO(cell.date.getFullYear(), cell.date.getMonth(), cell.date.getDate())
               const density = densityOf(densityByDate[cellIso] || 0)
+              const agenda = agendaByDate[cellIso]
               return (
                 <button
                   type="button"
                   key={i}
-                  className={`cdate-cell density-${density}${cell.inMonth ? '' : ' outside'}${isSelected ? ' selected' : ''}${isToday ? ' today' : ''}`}
+                  className={`cdate-cell density-${density}${agenda ? ` agenda${density === 0 ? ' agenda-solo' : ''}` : ''}${cell.inMonth ? '' : ' outside'}${isSelected ? ' selected' : ''}${isToday ? ' today' : ''}`}
+                  title={agenda ? agenda.join('\n') : undefined}
                   onClick={() => pickDay(cell.date)}
                 >
                   {cell.date.getDate()}
@@ -146,6 +159,11 @@ export default function CustomDatePicker({ value, onChange, placeholder = 'Pilih
               )
             })}
           </div>
+          {/* Penjelasan warna agenda -- cuma muncul kalau form yang memakainya
+              memang ngasih data agenda (field Tanggal Acara di form Booking). */}
+          {agendaDates.length > 0 && (
+            <div className="cdate-legend"><span className="cdate-legend-dot"></span>{agendaLabel}</div>
+          )}
         </div>
       )}
     </div>
