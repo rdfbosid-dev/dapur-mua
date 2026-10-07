@@ -239,8 +239,6 @@ export default function PengeluaranModal({ onClose, onSaved, editData = null }) 
 
         <form onSubmit={handleSubmit} className="pengeluaran-form">
           <div className="modal-body">
-            <div className="pengeluaran-info">Catat biaya pengeluaran bisnis di luar kebutuhan booking klien, misalnya belanja alat, portofolio, atau promosi. Biaya ke tim/vendor dari booking udah otomatis kehitung, nggak perlu dicatat di sini.</div>
-
             {/* Kategori -- dropdown (CustomSelect, sama kayak field Event di
                 form Booking). Opsi "Lainnya (ketik manual)" munculin field
                 teks di bawahnya buat nulis nama kategori sendiri. */}

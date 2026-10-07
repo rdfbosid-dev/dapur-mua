@@ -46,8 +46,6 @@
 }
 .pengeluaran-modal-overlay .foot-right { display: flex; gap: 10px; margin-left: auto; }
 
-.pengeluaran-modal-overlay .pengeluaran-info { padding: 8px; background: color-mix(in srgb, var(--button-prm-hover) 30%, transparent); border-radius: 10px; font-size: 12px; line-height: 1.5; color: var(--h9); opacity: 0.85; margin: 4px 0 14px; }
-
 /* ---------- Field -- nilai SAMA PERSIS kayak BookingModal.css ---------- */
 .pengeluaran-modal-overlay .field-grid-pengeluaran { display: grid; gap: 8px; margin-bottom: 5px; }
 .pengeluaran-modal-overlay .field-grid-pengeluaran.cols-2 { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
