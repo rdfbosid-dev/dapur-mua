@@ -34,7 +34,7 @@ function buildGrid(year, month) {
   return cells
 }
 
-export default function CustomDatePicker({ value, onChange, placeholder = 'Pilih Tanggal', variant = null, bookingDates = [], agendaDates = [], agendaLabel = 'Ada agenda pelatihan / portofolio' }) {
+export default function CustomDatePicker({ value, onChange, placeholder = 'Pilih Tanggal', variant = null, bookingDates = [], agendaDates = [], agendaLabel = 'Ada agenda' }) {
   const [open, setOpen] = useState(false)
   const selected = parseISO(value)
   const today = new Date()
@@ -62,12 +62,23 @@ export default function CustomDatePicker({ value, onChange, placeholder = 'Pilih
   // -> daftar nama agenda". BEDA dari kepadatan booking di atas: ini ditandai
   // pakai warna --pill-later (isi lembut kalau tanggal itu belum ada booking)
   // + titik kecil yang SELALU kelihatan, jadi tetap terbaca walau tanggal itu
-  // juga sudah berwarna kepadatan booking. agendaDates = [{ tanggal, label }].
+  // juga sudah berwarna kepadatan booking. agendaDates = [{ tanggal, label, kategori }].
   const agendaByDate = {}
   agendaDates.forEach(({ tanggal, label }) => {
     if (!tanggal) return
     ;(agendaByDate[tanggal] = agendaByDate[tanggal] || []).push(label || 'Agenda')
   })
+
+  // LEGEND -- cuma buat agenda yang jatuh di BULAN YANG LAGI DILIHAT (bukan semua
+  // bulan): bulan tanpa agenda nggak dikasih keterangan apa-apa. Isinya kategori
+  // yang ada di bulan itu ("Agenda Pelatihan & Kelas" dan/atau "Agenda Portofolio"),
+  // sama kayak legend di halaman Kalender. Tanggal numpang dari bulan lain (sel
+  // redup di ujung grid) SENGAJA nggak dihitung. Data tanpa `kategori` (pemanggil
+  // lain) jatuh ke tulisan umum `agendaLabel`.
+  const awalanBulan = `${viewYear}-${pad2(viewMonth + 1)}-`
+  const agendaBulanIni = agendaDates.filter(({ tanggal }) => tanggal && tanggal.startsWith(awalanBulan))
+  const kategoriLegend = [...new Set(agendaBulanIni.map((a) => a.kategori).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'id'))
+  const adaTanpaKategori = agendaBulanIni.some((a) => !a.kategori)
 
   useEffect(() => {
     function handleClickOutside(e) {
@@ -159,10 +170,15 @@ export default function CustomDatePicker({ value, onChange, placeholder = 'Pilih
               )
             })}
           </div>
-          {/* Penjelasan warna agenda -- cuma muncul kalau form yang memakainya
-              memang ngasih data agenda (field Tanggal Acara di form Booking). */}
-          {agendaDates.length > 0 && (
-            <div className="cdate-legend"><span className="cdate-legend-dot"></span>{agendaLabel}</div>
+          {/* Penjelasan warna agenda -- cuma muncul kalau bulan yang lagi dilihat
+              MEMANG ada agenda pelatihan/portofolio (field Tanggal Acara di form Booking). */}
+          {agendaBulanIni.length > 0 && (
+            <div className="cdate-legend">
+              {kategoriLegend.map((k) => (
+                <span className="cdate-legend-item" key={k}><span className="cdate-legend-dot"></span>Agenda {k}</span>
+              ))}
+              {adaTanpaKategori && <span className="cdate-legend-item"><span className="cdate-legend-dot"></span>{agendaLabel}</span>}
+            </div>
           )}
         </div>
       )}

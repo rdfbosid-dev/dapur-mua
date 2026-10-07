@@ -57,10 +57,10 @@
    - .agenda (semua tanggal beragenda): titik --pill-later di bawah angka.
    Ditaruh SEBELUM .outside/.today/.selected, biar yang terpilih tetap menang. */
 .cdate-cell.agenda { position: relative; }
-/* Angka pakai --h9 (warna teks utama, ikut berubah di mode terang/gelap), BUKAN putih --h7 kayak
-   level kepadatan -- isi hijau lembut ini terang, teks putih cuma ~1.6:1 di mode terang (nggak
-   terbaca). --h9 lolos kontras 4.5:1 di kedua mode. */
-.cdate-cell.agenda-solo { background: color-mix(in srgb, var(--pill-later) 85%, transparent); color: var(--h9); font-weight: 700; }
+/* Isi 85% + angka putih (--h7, sama kayak level kepadatan). CATATAN KONTRAS (terukur): putih di atas
+   isi ini ~2.4:1 di mode terang & ~3.7:1 di mode gelap. Kalau di mode terang terasa kurang jelas,
+   ganti `color` ke var(--h9) (~3.5:1 di isi 85%) atau turunkan isi ke ~45% (--h9 jadi ~5:1). */
+.cdate-cell.agenda-solo { background: color-mix(in srgb, var(--pill-later) 85%, transparent); color: var(--h7); font-weight: 700; }
 .cdate-cell.agenda::after {
   content: ''; position: absolute; bottom: 5px; left: 50%; width: 3px; height: 3px; margin-left: -1.5px;
   border-radius: 50%; background: var(--pill-later);
@@ -70,7 +70,9 @@
 .cdate-cell.outside.agenda-solo { background: none; color: var(--ink-faint); }
 .cdate-cell.outside.agenda::after { opacity: 0.55; }
 
-.cdate-legend { display: flex; align-items: center; gap: 6px; margin-top: 10px; padding-top: 8px; border-top: 1px solid color-mix(in srgb, var(--button-border) 45%, transparent); font-size: 10.5px; color: var(--ink-soft); }
+.cdate-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin-top: 10px; padding-top: 8px; border-top: 1px solid color-mix(in srgb, var(--button-border) 45%, transparent); font-size: 10.5px; color: var(--ink-soft); }
+/* 1 item legend = titik + "Agenda <kategori>"; beberapa item berjejer & turun baris kalau nggak muat. */
+.cdate-legend-item { display: inline-flex; align-items: center; gap: 6px; }
 .cdate-legend-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--pill-later); flex-shrink: 0; }
 
 /* Sel di luar bulan (numpang dari bulan sebelum/sesudah) yang kebetulan

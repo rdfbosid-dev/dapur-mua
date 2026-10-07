@@ -326,7 +326,7 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
   }
 
   // Keterangan kecil di bawah angka -- CUMA muncul kalau angka yang lagi
-  // ditampilin itu BUKAN biaya penuh (jadi nunjukkin komisi/untung).
+  // ditampilin itu BUKAN biaya penuh (jadi nunjukin komisi/untung).
   // Makeup/Tambahan: cuma baris Tim yang dapet keterangan (baris Me
   // selalu nampilin biaya penuh apapun kartunya, jadi nggak butuh
   // keterangan). Add On: cuma pas kartu Penghasilan (Omzet masih pake

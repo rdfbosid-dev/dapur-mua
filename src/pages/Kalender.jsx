@@ -157,6 +157,18 @@ export default function Kalender() {
     return map
   }, [agendaList])
 
+  // Isi LEGEND di bawah kalender = kategori agenda yang ada di BULAN YANG LAGI DILIHAT
+  // ("Agenda Pelatihan & Kelas" dan/atau "Agenda Portofolio") -- namanya sama persis
+  // kayak kategori yang dipilih di halaman Pengeluaran. Bulan tanpa agenda nggak
+  // dikasih keterangan sama sekali, dan bulan yang cuma punya Portofolio nggak
+  // dibikin bingung sama keterangan Pelatihan. Tanggal numpang dari bulan lain
+  // (sel redup di ujung grid) SENGAJA nggak dihitung. Urut abjad biar tetap.
+  const kategoriLegend = useMemo(() => {
+    const awalanBulan = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-`
+    const diBulanIni = agendaList.filter((a) => String(a.tanggal || '').startsWith(awalanBulan))
+    return KATEGORI_AGENDA.filter((k) => diBulanIni.some((a) => a.kategori === k)).sort((a, b) => a.localeCompare(b, 'id'))
+  }, [agendaList, viewYear, viewMonth])
+
   const bookingsByDay = useMemo(() => {
     const map = new Map()
     bookings.forEach((b) => {
@@ -335,8 +347,12 @@ export default function Kalender() {
                 )
               })}
             </div>
-            {agendaList.length > 0 && (
-              <div className="kalender-legend"><span className="legend-agenda-dot"></span>Agenda pelatihan / portofolio</div>
+            {kategoriLegend.length > 0 && (
+              <div className="kalender-legend">
+                {kategoriLegend.map((k) => (
+                  <span className="kalender-legend-item" key={k}><span className="legend-agenda-dot"></span>Agenda {k}</span>
+                ))}
+              </div>
             )}
           </div>
 

@@ -37,9 +37,9 @@ const LANGKAH = [
     title: 'Baca Dashboard & Laporan',
     ringkas: 'Pantau omzet, penghasilan, dan progres bisnis.',
     isi: [
-      'Dashboard nunjukkin ringkasan cepat: booking mendatang, penghasilan bulan ini, dan tren omzet.',
-      'Menu Keuangan nunjukkin rekap bulanan sepanjang tahun mulai dari omzet, transport, dan komisi.',
-      'Menu Laporan nunjukkin insight lebih dalam: jenis event makeup, sumber booking (Instagram/WhatsApp/dll), dan jenis paket favorit.',
+      'Dashboard nunjukin ringkasan cepat: booking mendatang, penghasilan bulan ini, dan tren omzet.',
+      'Menu Keuangan nunjukin rekap bulanan sepanjang tahun mulai dari omzet, transport, dan komisi.',
+      'Menu Laporan nunjukin insight lebih dalam: jenis event makeup, sumber booking (Instagram/WhatsApp/dll), dan jenis paket favorit.',
       'Semua angka di halaman-halaman ini terhitung OTOMATIS dari data booking yang udah kamu input, jadi nggak perlu catat manual di tempat lain.',
     ],
   },

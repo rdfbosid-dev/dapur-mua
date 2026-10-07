@@ -14,7 +14,9 @@ export function kategoriPunyaAgenda(kategori) {
   return KATEGORI_AGENDA.includes(kategori)
 }
 
-// Tanggal agenda pelatihan/portofolio milik user ini -> [{ tanggal, label }].
+// Tanggal agenda pelatihan/portofolio milik user ini -> [{ tanggal, label, kategori }].
+// `kategori` dipakai CustomDatePicker buat nulis legend ("Agenda Portofolio" /
+// "Agenda Pelatihan & Kelas") -- cuma buat bulan yang lagi dilihat.
 // Dibaca dari VIEW pengeluaran_summary (security_invoker, jadi RLS tabel asli
 // ikut berlaku: otomatis cuma punya user yang login). Gagal -> daftar kosong
 // (kalender tetap jalan, cuma tanpa penanda).
@@ -27,7 +29,7 @@ export function muatAgendaPengeluaran() {
       if (error || !data) return []
       return data
         .filter((r) => r.tanggal)
-        .map((r) => ({ tanggal: r.tanggal, label: r.judul ? `${r.kategori}: ${r.judul}` : r.kategori }))
+        .map((r) => ({ tanggal: r.tanggal, label: r.judul ? `${r.kategori}: ${r.judul}` : r.kategori, kategori: r.kategori }))
     })
 }
 
