@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { formatAngkaInput, parseAngkaInput } from '../lib/format'
 import { KATEGORI_PENGELUARAN, KATEGORI_LAINNYA, LABEL_TEMPAT_DEFAULT, ITEM_LAINNYA, cariKategori, cariOpsiItem } from '../lib/pengeluaran'
-import { kategoriPunyaAgenda, muatJadwalBooking } from '../lib/agendaPengeluaran'
+import { kategoriPunyaAgenda, muatAgendaPengeluaran, muatJadwalBooking } from '../lib/agendaPengeluaran'
 import CustomDatePicker from './CustomDatePicker'
 import CustomSelect from './CustomSelect'
 import './PengeluaranModal.css'
@@ -118,6 +118,20 @@ export default function PengeluaranModal({ onClose, onSaved, editData = null }) 
     muatJadwalBooking(user.id).then((daftar) => { if (!batal) setJadwalBooking(daftar) })
     return () => { batal = true }
   }, [tampilkanJadwalBooking, user])
+
+  // Kalender yang sama ngasih tahu juga AGENDA Portofolio/Pelatihan & Kelas yang
+  // udah dicatat (warna --pill-later, kayak di form Booking & halaman Kalender) --
+  // dua-duanya kegiatan yang makan waktu, jadi nggak boleh tabrakan satu sama lain.
+  // Pas MENGEDIT, entri yang lagi diedit dikecualiin (lewat id) biar tanggalnya
+  // sendiri nggak ikut ditandai sebagai "agenda lain".
+  const [agendaTercatat, setAgendaTercatat] = useState([])
+  useEffect(() => {
+    if (!tampilkanJadwalBooking) return undefined
+    let batal = false
+    muatAgendaPengeluaran().then((daftar) => { if (!batal) setAgendaTercatat(daftar) })
+    return () => { batal = true }
+  }, [tampilkanJadwalBooking])
+  const agendaLain = tampilkanJadwalBooking ? agendaTercatat.filter((a) => !editData || a.id !== editData.id) : []
 
   const infoKategori = cariKategori(kategori)
   // true = Nama Item kategori ini dropdown (punya `opsiItem`), bukan ketik bebas.
@@ -280,10 +294,7 @@ export default function PengeluaranModal({ onClose, onSaved, editData = null }) 
               </div>
               <div className="field">
                 <label>Tanggal</label>
-                <CustomDatePicker value={tanggal} onChange={setTanggal} variant="modal" bookingDates={tampilkanJadwalBooking ? jadwalBooking : []} />
-                {tampilkanJadwalBooking && (
-                  <div className="tanggal-catatan">Tanggal yang berwarna sudah ada jadwal booking (makin pekat makin padat).</div>
-                )}
+                <CustomDatePicker value={tanggal} onChange={setTanggal} variant="modal" bookingDates={tampilkanJadwalBooking ? jadwalBooking : []} agendaDates={agendaLain} />
               </div>
             </div>
 

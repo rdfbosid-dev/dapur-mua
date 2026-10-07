@@ -444,6 +444,26 @@
   .booking-detail-overlay .toggle-row-rambut { display: flex; gap: 3px; }
 }
 
+/* ADD ON LAYANAN RAMBUT -- 3 tombol (Tidak / Hairdo / Hijabdo+) di HP.
+     MASALAH (iPhone 15 = 393px, makin parah di layar yang lebih sempit): tombol
+     pakai "flex: 1" + ukuran minimum otomatis, jadi lebar ALAMINYA (padding 5px +
+     teks, total ~160px) nggak bisa menyusut, padahal setengah baris cuma ~149px
+     di 393px -- barisnya melebar keluar kolom & nempel/numpuk sama tombol "Me" di
+     sebelahnya. PERBAIKAN: padding samping dikecilin & ukuran huruf ikut lebar
+     layar (12px mulai ~393px, turun pelan sampai 10.5px) biar SELALU muat
+     setengah baris; di layar <= 355px (nggak cukup walau udah dikecilin) kedua
+     kelompok ("Add On Layanan Rambut" & "Dikerjakan oleh") ditumpuk 1 kolom.
+     Cuma berlaku di HP (<= 640px) -- desktop/tablet nggak berubah. */
+@media (max-width: 640px) {
+  .booking-detail-overlay .toggle-row-rambut { gap: 2px; }
+  .booking-detail-overlay .toggle-opt-rambut { flex: 1 1 auto; min-width: 0; padding: 7px 2px; white-space: nowrap; font-size: clamp(10.5px, 3.05vw, 12px); }
+}
+@media (max-width: 355px) {
+  .booking-detail-overlay .field-grid-peserta.cols-2:has(.toggle-row-rambut) { grid-template-columns: minmax(0, 1fr); }
+  .booking-detail-overlay .toggle-row-rambut { gap: 3px; }
+  .booking-detail-overlay .toggle-opt-rambut { font-size: 12px; padding: 7px 5px; }
+}
+
 /* Garis pembatas antar bagian form peserta -- 3 titik: bawah Jumlah
    Sesi Makeup, atas Add On Layanan Rambut, atas Add On Item. Polanya
    numpang .rincian-note-divider di RincianKeuanganModal.css (garis
