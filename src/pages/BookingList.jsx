@@ -5,6 +5,7 @@ import CustomSelect from '../components/CustomSelect'
 import BookingModal from '../components/BookingModal'
 import BookingDetailModal from '../components/BookingDetailModal'
 import { daftarHalaman } from '../lib/paginasi'
+import { bookingSelesai } from '../lib/durasiBooking'
 import './BookingList.css'
 
 const BULAN_PENUH = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
@@ -23,24 +24,6 @@ function formatTanggal(dateStr) {
 function initialsOf(name) {
   return (name || '?').split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase()
 }
-function isSelesai(dateStr, jamStartMakeup) {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  const target = new Date(dateStr)
-  target.setHours(0, 0, 0, 0)
-
-  if (target < today) return true
-  if (target > today) return false
-
-  // Booking hari ini -- baru dianggap selesai kalau udah lewat 3 jam dari
-  // jam mulai makeup (sama persis kayak logika di Dashboard).
-  if (!jamStartMakeup) return false
-  const [jam, menit] = jamStartMakeup.split(':').map(Number)
-  const mulai = new Date(dateStr)
-  mulai.setHours(jam, menit || 0, 0, 0)
-  return (new Date() - mulai) / 3600000 >= 3
-}
-
 export default function BookingList() {
   const [bookings, setBookings] = useState([])
   const [loading, setLoading] = useState(true)
@@ -177,12 +160,12 @@ export default function BookingList() {
                   <tr key={b.id} onClick={() => setSelectedBooking(b)}>
                     <td>
                       <div className="tbl-klien">
-                        <div className={`bl-avatar${isSelesai(b.tanggal_acara, b.jam_start_makeup) ? ' selesai' : ''}`}>{initialsOf(b.nama_klien)}</div>
+                        <div className={`bl-avatar${bookingSelesai(b) ? ' selesai' : ''}`}>{initialsOf(b.nama_klien)}</div>
                         <div>
                           <div className="b-name-bookinglist">{b.nama_klien}</div>
                           <div className="b-meta-bookinglist">
                             {b.kode_booking}
-                            {isSelesai(b.tanggal_acara, b.jam_start_makeup) && <span className="selesai-badge">Selesai</span>}
+                            {bookingSelesai(b) && <span className="selesai-badge">Selesai</span>}
                           </div>
                         </div>
                       </div>

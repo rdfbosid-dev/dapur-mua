@@ -12,6 +12,10 @@ function pad(n) {
 // salah satu, ubah dua-duanya. Nama HARUS sama persis kayak di database.
 const KATEGORI_AGENDA = ['Portofolio', 'Pelatihan & Kelas']
 
+// Durasi default per klien (jam) kalau jam selesai nggak diisi. Salinan dari
+// DURASI_DEFAULT_JAM di src/lib/durasiBooking.js.
+const DURASI_DEFAULT_JAM = 2
+
 // Karakter khusus (koma, titik-koma, newline, backslash) WAJIB di-escape
 // di format iCalendar, kalau nggak bisa bikin file .ics-nya rusak/nggak
 // kebaca sama app kalender.
@@ -106,7 +110,7 @@ export default async function handler(req, res) {
 
   const { data: bookings, error: bookingError } = await supabaseAdmin
     .from('bookings')
-    .select('id, nama_klien, event, tanggal_acara, jam_start_makeup, lokasi, nomor_whatsapp')
+    .select('id, nama_klien, event, tanggal_acara, jam_start_makeup, jam_selesai, lokasi, nomor_whatsapp')
     .eq('user_id', profile.id)
     .order('tanggal_acara', { ascending: true })
 
@@ -187,11 +191,21 @@ export default async function handler(req, res) {
     if (b.jam_start_makeup) {
       const [jam, menit] = b.jam_start_makeup.slice(0, 5).split(':').map(Number)
       dtStart = `${y}${pad(m)}${pad(d)}T${pad(jam)}${pad(menit)}00`
-      // Data kita nggak nyimpen jam SELESAI eksplisit -- default durasi
-      // 3 jam per booking (angka wajar buat sesi makeup, bisa disesuaikan
-      // di sini kalau perlu).
+      // Jam selesai: pakai yang diisi user. Kalau kosong, 2 jam PER KLIEN dari
+      // jam mulai (1 booking isi 3 klien = 6 jam). Jam selesai lebih kecil dari
+      // jam mulai = lewat tengah malam. ATURAN INI SALINAN dari
+      // src/lib/durasiBooking.js (status "Selesai" di app) -- ubah dua-duanya.
       const end = new Date(y, m - 1, d, jam, menit)
-      end.setHours(end.getHours() + 3)
+      const mulaiMs = end.getTime()
+      const akhirIsi = b.jam_selesai ? String(b.jam_selesai).slice(0, 5).split(':').map(Number) : null
+      if (akhirIsi && Number.isFinite(akhirIsi[0])) {
+        end.setHours(akhirIsi[0], akhirIsi[1] || 0, 0, 0)
+        if (end.getTime() < mulaiMs) end.setDate(end.getDate() + 1)
+      }
+      if (end.getTime() <= mulaiMs) {
+        const klien = Math.max(1, jumlahPesertaMap[b.id] || 0)
+        end.setTime(mulaiMs + DURASI_DEFAULT_JAM * klien * 3600000)
+      }
       dtEnd = `${end.getFullYear()}${pad(end.getMonth() + 1)}${pad(end.getDate())}T${pad(end.getHours())}${pad(end.getMinutes())}00`
     } else {
       allDay = true

@@ -7,6 +7,7 @@ import BookingDetailModal from '../components/BookingDetailModal'
 import PengeluaranModal from '../components/PengeluaranModal'
 import PengeluaranDetailModal from '../components/PengeluaranDetailModal'
 import { KATEGORI_AGENDA } from '../lib/agendaPengeluaran'
+import { bookingSelesai } from '../lib/durasiBooking'
 import './Kalender.css'
 
 const BULAN_PENUH = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
@@ -33,25 +34,6 @@ function kunciTanggal(str) {
 
 function sameDate(a, b) {
   return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate()
-}
-
-// Sama persis logikanya kayak di BookingList.jsx -- booking dianggap
-// "selesai" kalau tanggalnya udah lewat, ATAU hari ini tapi udah lewat 3
-// jam dari jam mulai makeup.
-function isSelesai(dateStr, jamStartMakeup) {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  const target = new Date(dateStr)
-  target.setHours(0, 0, 0, 0)
-
-  if (target < today) return true
-  if (target > today) return false
-
-  if (!jamStartMakeup) return false
-  const [jam, menit] = jamStartMakeup.split(':').map(Number)
-  const mulai = new Date(dateStr)
-  mulai.setHours(jam, menit || 0, 0, 0)
-  return (new Date() - mulai) / 3600000 >= 3
 }
 
 // Bikin grid 6x7 (42 sel) buat 1 bulan, termasuk tanggal numpang dari
@@ -370,7 +352,7 @@ export default function Kalender() {
                   aplikasi kalender biasa; baru booking berjam di bawahnya. */}
               {agendaPengeluaranHariIni.map((a) => (
                 <div className="dash-booking-row" key={`agenda-${a.id}`} onClick={() => setDetailAgenda(a)} style={{ cursor: 'pointer' }}>
-                  <div className={`dash-b-avatar agenda${isSelesai(a.tanggal, null) ? ' selesai' : ''}`}>{SINGKATAN_AGENDA[a.kategori] || 'AG'}</div>
+                  <div className={`dash-b-avatar agenda${bookingSelesai({ tanggal_acara: a.tanggal }) ? ' selesai' : ''}`}>{SINGKATAN_AGENDA[a.kategori] || 'AG'}</div>
                   <div className="b-info">
                     <div className="b-name">{a.judul || a.kategori}</div>
                     <div className="b-meta">{[a.judul ? a.kategori : null, a.tempat, a.penyelenggara].filter(Boolean).join(' · ') || 'Agenda'}</div>
@@ -380,7 +362,7 @@ export default function Kalender() {
               ))}
               {agendaHariIni.map((b) => (
                 <div className="dash-booking-row" key={b.id} onClick={() => setSelectedBooking(b)} style={{ cursor: 'pointer' }}>
-                  <div className={`dash-b-avatar${isSelesai(b.tanggal_acara, b.jam_start_makeup) ? ' selesai' : ''}`}>{initialsOf(b.nama_klien)}</div>
+                  <div className={`dash-b-avatar${bookingSelesai(b) ? ' selesai' : ''}`}>{initialsOf(b.nama_klien)}</div>
                   <div className="b-info">
                     <div className="b-name">{b.nama_klien}</div>
                     <div className="b-meta">

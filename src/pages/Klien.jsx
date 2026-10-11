@@ -8,6 +8,7 @@ import CustomSelect from '../components/CustomSelect'
 import './Klien.css'
 import IconClose from '../components/IconClose'
 import { daftarHalaman } from '../lib/paginasi'
+import { bookingSelesai } from '../lib/durasiBooking'
 
 
 function formatRupiah(n) {
@@ -33,23 +34,6 @@ function initialsOf(name) {
 // (misal "Dapur MUA" jadi "DapurMUA"), biar nama filenya bersih & valid.
 function studioFilePrefix(name) {
   return (name || 'DapurMUA').replace(/\s+/g, '')
-}
-
-// Sama persis rumus "Selesai" yang udah dipakai di Dashboard & BookingList --
-// booking dianggap Selesai kalau tanggalnya udah lewat, atau kalau hari ini
-// tapi udah lebih dari 3 jam dari jam mulai makeup.
-function isBookingSelesai(tanggalAcara, jamStartMakeup) {
-  if (!tanggalAcara) return false
-  const now = new Date()
-  const todayStr = now.toISOString().slice(0, 10)
-  if (tanggalAcara < todayStr) return true
-  if (tanggalAcara > todayStr) return false
-  if (!jamStartMakeup) return false
-  const [h, m] = jamStartMakeup.slice(0, 5).split(':').map(Number)
-  const start = new Date(now)
-  start.setHours(h, m, 0, 0)
-  const cutoff = new Date(start.getTime() + 3 * 60 * 60 * 1000)
-  return now >= cutoff
 }
 
 const PAGE_SIZE = 10
@@ -148,10 +132,10 @@ export default function Klien() {
     return Array.from(map.values())
       .filter((c) => c.bookingList.length > 0)
       .map((c) => {
-        const selesaiCount = c.bookingList.filter((b) => isBookingSelesai(b.tanggal_acara, b.jam_start_makeup)).length
+        const selesaiCount = c.bookingList.filter((b) => bookingSelesai(b)).length
         const totalCount = c.bookingList.length
         const latest = c.bookingList.reduce((a, b) => (new Date(b.tanggal_acara) > new Date(a.tanggal_acara) ? b : a))
-        const latestSelesai = isBookingSelesai(latest.tanggal_acara, latest.jam_start_makeup)
+        const latestSelesai = bookingSelesai(latest)
         return {
           ...c,
           selesaiCount,

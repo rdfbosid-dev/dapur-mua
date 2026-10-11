@@ -662,7 +662,7 @@ export default function BookingModal({ onClose, onSaved }) {
                 {event === EVENT_CUSTOM_SENTINEL && (
                   <input
                     type="text"
-                    placeholder="Tulis nama event..."
+                    placeholder="Tulis nama event ..."
                     value={eventCustom}
                     onChange={(e) => setEventCustom(e.target.value)}
                     style={{ marginTop: 8 }}

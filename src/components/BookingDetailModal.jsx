@@ -26,31 +26,12 @@ import RincianKeuanganModal from './RincianKeuanganModal'
 import IconClose from './IconClose'
 import { cariAngkaTakWajar, itemKewajaranRow } from '../lib/validasiBooking'
 import PeringatanKewajaran from './PeringatanKewajaran'
+import { bookingSelesai } from '../lib/durasiBooking'
 
 function formatRupiah(n) {
   const num = Number(n) || 0
   const sign = num < 0 ? '-' : ''
   return sign + 'Rp' + Math.abs(num).toLocaleString('id-ID')
-}
-
-// Sama persis logikanya kayak di Kalender.jsx/BookingList.jsx -- booking
-// dianggap "selesai" kalau tanggalnya udah lewat, ATAU hari ini tapi
-// udah lewat 3 jam dari jam mulai makeup. Dipakai buat nentuin warna
-// avatar di list Klien (b-avatar.selesai).
-function isSelesai(dateStr, jamStartMakeup) {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  const target = new Date(dateStr)
-  target.setHours(0, 0, 0, 0)
-
-  if (target < today) return true
-  if (target > today) return false
-
-  if (!jamStartMakeup) return false
-  const [jam, menit] = jamStartMakeup.split(':').map(Number)
-  const mulai = new Date(dateStr)
-  mulai.setHours(jam, menit || 0, 0, 0)
-  return (new Date() - mulai) / 3600000 >= 3
 }
 
 // Sama persis kayak di BookingModal.jsx -- cuma nyentuh huruf PERTAMA tiap
@@ -880,7 +861,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
               <div className="section-label">Klien ({peserta.length})</div>
               {peserta.map((p) => (
                 <div className="peserta-view-row" key={p.id}>
-                  <div className={`b-avatar${isSelesai(liveBooking.tanggal_acara, liveBooking.jam_start_makeup) ? ' selesai' : ''}`}>{(p.nama_anggota || '?').slice(0, 2).toUpperCase()}</div>
+                  <div className={`b-avatar${bookingSelesai(liveBooking) ? ' selesai' : ''}`}>{(p.nama_anggota || '?').slice(0, 2).toUpperCase()}</div>
                   <div className="b-info">
                     <div className="b-name">{p.nama_anggota} {p.peran ? `— (${p.peran})` : ''}</div>
                     <div className="b-meta">
@@ -955,7 +936,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                   {event === EVENT_CUSTOM_SENTINEL && (
                     <input
                       type="text"
-                      placeholder="Tulis nama event..."
+                      placeholder="Tulis nama event ..."
                       value={eventCustom}
                       onChange={(e) => setEventCustom(e.target.value)}
                       style={{ marginTop: 8 }}

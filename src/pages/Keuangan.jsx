@@ -165,12 +165,16 @@ export default function Keuangan() {
         // difilter cuma yang dikerjain Tim, bukan dikerjain sendiri) --
         // tinggal jumlahin langsung, nggak perlu diitung ulang manual.
         komisi: bulanBookings.reduce((s, b) => s + (Number(b.komisi_makeup_tim) || 0) + (Number(b.komisi_tambahan_tim) || 0), 0),
-        // Komisi dari Vendor & Untung Produk -- DUA-DUANYA udah ada
-        // langsung sebagai kolom jadi di VIEW booking_summary
-        // (bundling_keuntungan_total & keuntungan_lainnya_total),
-        // nggak perlu diitung ulang manual dari tabel lain kayak
-        // "Bayar ke Tim/Vendor/Belanja Produk" di monthlyPengeluaranStats.
-        komisiVendor: bulanBookings.reduce((s, b) => s + (Number(b.bundling_keuntungan_total) || 0), 0),
+        // Komisi dari Vendor & Untung Produk -- semuanya udah ada langsung
+        // sebagai kolom jadi di VIEW booking_summary (bundling_keuntungan_total,
+        // untung_sewa_total & keuntungan_lainnya_total), nggak perlu diitung
+        // ulang manual dari tabel lain kayak "Bayar ke Tim/Vendor/Belanja Produk"
+        // di monthlyPengeluaranStats.
+        // Komisi dari Vendor = untung Paket Bundling + untung Add On Item (Sewa) --
+        // SEPASANG sama "Bayar ke Vendor" yang menghitung modal Bundling + Sewa.
+        // (Dulu cuma Bundling, untung Sewa kelewat di sini; padahal view-nya juga
+        // memasukkan untung_sewa_total ke Omzet & Penghasilan.)
+        komisiVendor: bulanBookings.reduce((s, b) => s + (Number(b.bundling_keuntungan_total) || 0) + (Number(b.untung_sewa_total) || 0), 0),
         untungProduk: bulanBookings.reduce((s, b) => s + (Number(b.keuntungan_lainnya_total) || 0), 0),
         penghasilan: bulanBookings.reduce((s, b) => s + (Number(b.penghasilan) || 0), 0),
       }
@@ -717,6 +721,7 @@ export default function Keuangan() {
                     { label: 'Untung Produk', values: monthlyStats.map((m) => m.untungProduk), color: 'var(--bar-untung-produk)', format: formatRupiah },
                   ]}
                 />
+                <div className="chart-keterangan-keuangan">Sumber data: total nilai dari harga Add On Item (Beli) dalam booking yang ditagihkan ke klien dan keuntungan buatmu</div>
               </div>
             </div>
 

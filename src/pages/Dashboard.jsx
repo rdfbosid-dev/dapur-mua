@@ -10,6 +10,7 @@ import OnboardingModal from '../components/OnboardingModal'
 import DonutChart from '../components/DonutChart'
 import TrendChart from '../components/TrendChart'
 import { useInViewAnimate } from '../hooks/useInViewAnimate'
+import { bookingSelesai } from '../lib/durasiBooking'
 import './Dashboard.css'
 
 function formatRupiah(n) {
@@ -25,25 +26,18 @@ function initialsOf(name) {
     .toUpperCase()
 }
 
-function dayLabel(tanggalAcara, jamStartMakeup) {
+function dayLabel(b) {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
-  const target = new Date(tanggalAcara)
+  const target = new Date(b.tanggal_acara)
   target.setHours(0, 0, 0, 0)
   const diffDays = Math.round((target - today) / 86400000)
 
   if (diffDays === 0) {
-    // Booking hari ini -- kalau udah lewat 3 jam dari jam mulai makeup,
-    // kemungkinan besar sesi makeup-nya udah kelar, jadi badge-nya diganti
-    // "Selesai" (netral) daripada tetap nampilin "Hari ini" (merah/mendesak)
-    // sepanjang hari.
-    if (jamStartMakeup) {
-      const [jam, menit] = jamStartMakeup.split(':').map(Number)
-      const mulai = new Date(tanggalAcara)
-      mulai.setHours(jam, menit || 0, 0, 0)
-      const jamBerlalu = (new Date() - mulai) / 3600000
-      if (jamBerlalu >= 3) return { text: 'Selesai', cls: 'selesai' }
-    }
+    // Booking hari ini -- badge diganti "Selesai" (netral) begitu lewat jam
+    // selesai: jam selesai yang diisi, atau 2 jam per klien dari jam mulai
+    // kalau kosong (aturan di lib/durasiBooking.js, sama di semua halaman).
+    if (bookingSelesai(b)) return { text: 'Selesai', cls: 'selesai' }
     return { text: 'Hari ini', cls: 'today' }
   }
   if (diffDays === 1) return { text: 'H-1', cls: 'today' }
@@ -152,7 +146,7 @@ export default function Dashboard() {
 
   // Gabungin tanggal_acara + jam_start_makeup jadi 1 Date persis. Kalau
   // jam_start_makeup kosong, fallback-nya "akhir hari itu" -- konsisten
-  // sama pola isSelesai() yang udah dipakai di Kalender.jsx/
+  // sama pola bookingSelesai() yang dipakai di Kalender.jsx/
   // BookingDetailModal.jsx (booking tanpa jam dianggap belum lewat
   // selama masih di tanggal yang sama).
   function waktuMulai(b) {
@@ -524,7 +518,7 @@ export default function Dashboard() {
                   <div className="empty-state-dashboard-grid">Belum ada booking mendatang.</div>
                 ) : (
                   bookingTerdekat.map((b) => {
-                    const day = dayLabel(b.tanggal_acara, b.jam_start_makeup)
+                    const day = dayLabel(b)
                     return (
                       <div className="dash-booking-row" key={b.id} onClick={() => setSelectedBooking(b)} style={{ cursor: 'pointer' }}>
                         <div className={`dash-b-avatar${day.cls === 'selesai' ? ' selesai' : ''}`}>{initialsOf(b.nama_klien)}</div>
