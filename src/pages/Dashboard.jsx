@@ -394,9 +394,12 @@ export default function Dashboard() {
             <div className="notif-drag-handle"></div>
             <div className="notif-panel-head">
               <span>Notifikasi</span>
-              {hasUnreadNotif && (
-                <button type="button" className="notif-tandai-baca" onClick={tandaiSudahDibaca}>
-                  Tandai sudah dibaca
+              {/* Selalu tampil selama ada notifikasi: kalau semuanya sudah dibaca,
+                  tombolnya redup & nonaktif (bukan hilang), biar user tahu
+                  fiturnya ada dan statusnya jelas. */}
+              {notifications.length > 0 && (
+                <button type="button" className="notif-tandai-baca" onClick={tandaiSudahDibaca} disabled={!hasUnreadNotif}>
+                  {hasUnreadNotif ? 'Tandai sudah dibaca' : 'Sudah dibaca'}
                 </button>
               )}
               <div
