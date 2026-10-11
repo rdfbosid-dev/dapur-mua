@@ -20,6 +20,7 @@ import Panduan from './pages/Panduan'
 import AdminDashboard from './pages/AdminDashboard'
 import AdminUsers from './pages/AdminUsers'
 import AdminLangganan from './pages/AdminLangganan'
+import PasangAplikasi from './components/PasangAplikasi'
 
 function ProtectedRoute({ children }) {
   const { user, loading, isLocked, isAdmin } = useAuth()
@@ -248,6 +249,9 @@ export default function App() {
             />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+          {/* Banner ajakan pasang aplikasi -- di dalam AuthProvider karena
+              cuma muncul buat user yang sudah login. */}
+          <PasangAplikasi />
         </AuthProvider>
       </BrowserRouter>
     </ThemeProvider>

@@ -240,6 +240,16 @@ export default function Dashboard() {
   ]
   const notifKey = notifications.map((n) => n.id).join(',')
   const hasUnreadNotif = notifications.length > 0 && notifReadKey !== notifKey
+
+  // Titik merah di lonceng HANYA hilang lewat tombol "Tandai sudah dibaca" di
+  // panel (membuka panel / mengetuk satu notifikasi nggak menghilangkannya).
+  // Yang disimpan = daftar ID notifikasi saat ini, jadi begitu ada notifikasi
+  // BARU (ID-nya beda), titiknya otomatis muncul lagi.
+  function tandaiSudahDibaca() {
+    setNotifReadKey(notifKey)
+    if (!user) return
+    try { localStorage.setItem(`dapurmua-notif-read-${user.id}`, notifKey) } catch { /* penyimpanan diblokir: tetap hilang selama sesi ini */ }
+  }
   const omzetBulanIni = bookingBulanIni.reduce((sum, b) => sum + (Number(b.omzet) || 0), 0)
   const penghasilanBulanIni = bookingBulanIni.reduce((sum, b) => sum + (Number(b.penghasilan) || 0), 0)
   const belanjaKlienBulanIni = bookingBulanIni.reduce((sum, b) => sum + (Number(b.belanja_klien) || 0), 0)
@@ -372,16 +382,7 @@ export default function Dashboard() {
       <button
         type="button"
         className={`icon-btn${hasUnreadNotif ? ' has-dot' : ''}`}
-        onClick={() => {
-          setNotifOpen((v) => {
-            const opening = !v
-            if (opening) {
-              setNotifReadKey(notifKey)
-              if (user) localStorage.setItem(`dapurmua-notif-read-${user.id}`, notifKey)
-            }
-            return opening
-          })
-        }}
+        onClick={() => setNotifOpen((v) => !v)}
       >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
       </button>
@@ -393,6 +394,11 @@ export default function Dashboard() {
             <div className="notif-drag-handle"></div>
             <div className="notif-panel-head">
               <span>Notifikasi</span>
+              {hasUnreadNotif && (
+                <button type="button" className="notif-tandai-baca" onClick={tandaiSudahDibaca}>
+                  Tandai sudah dibaca
+                </button>
+              )}
               <div
                 className="notif-close-btn"
                 onClick={() => setNotifOpen(false)}
