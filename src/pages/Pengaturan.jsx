@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import Sidebar from '../components/Sidebar'
 import './Pengaturan.css'
+import { cekPassword, pesanErrorPassword, PANJANG_MIN_PASSWORD, PETUNJUK_PASSWORD } from '../lib/aturanPassword'
 
 function initialsOf(name) {
   return (name || '?').split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase()
@@ -203,8 +204,10 @@ export default function Pengaturan() {
     e.preventDefault()
     setPasswordMessage(null)
 
-    if (newPassword.length < 6) {
-      setPasswordMessage({ type: 'error', text: 'Kata sandi minimal 6 karakter.' })
+    // Aturan sama dengan halaman Daftar & Reset (lib/aturanPassword.js).
+    const masalahPassword = cekPassword(newPassword)
+    if (masalahPassword) {
+      setPasswordMessage({ type: 'error', text: masalahPassword })
       return
     }
 
@@ -212,7 +215,7 @@ export default function Pengaturan() {
     const { error } = await supabase.auth.updateUser({ password: newPassword })
     setSavingPassword(false)
 
-    if (error) setPasswordMessage({ type: 'error', text: error.message })
+    if (error) setPasswordMessage({ type: 'error', text: pesanErrorPassword(error) })
     else {
       setPasswordMessage({ type: 'success', text: 'Kata sandi berhasil diubah.' })
       setNewPassword('')
@@ -341,7 +344,9 @@ export default function Pengaturan() {
                       type={showNewPassword ? 'text' : 'password'}
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      placeholder="Minimal 6 karakter"
+                      placeholder={`Minimal ${PANJANG_MIN_PASSWORD} karakter`}
+                      autoComplete="new-password"
+                      aria-describedby="ubah-password-petunjuk"
                     />
                     <button
                       type="button"
@@ -356,6 +361,7 @@ export default function Pengaturan() {
                       )}
                     </button>
                   </div>
+                  <span className="field-hint" id="ubah-password-petunjuk">{PETUNJUK_PASSWORD}</span>
                 </div>
                 <button className="btn-primary" type="submit" disabled={savingPassword}>
                   {savingPassword ? 'Menyimpan...' : 'Ubah Kata Sandi'}
