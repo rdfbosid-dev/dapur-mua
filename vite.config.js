@@ -1,9 +1,18 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import cadanganColorMix from './postcss-cadangan-color-mix.js'
 
 // https://vite.dev/config/
 export default defineConfig({
+  // Cadangan warna untuk browser bermesin lama yang belum kenal color-mix()
+  // (contoh: Huawei Browser). Tampilan di browser modern TIDAK berubah --
+  // penjelasan lengkap di postcss-cadangan-color-mix.js.
+  css: {
+    postcss: {
+      plugins: [cadanganColorMix()],
+    },
+  },
   plugins: [
     react(),
     VitePWA({
