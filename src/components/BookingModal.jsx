@@ -11,6 +11,7 @@ import { cariAtauBuatKlien } from '../lib/klien'
 import { cariAngkaTakWajar, itemKewajaranForm } from '../lib/validasiBooking'
 import PeringatanKewajaran from './PeringatanKewajaran'
 import './BookingModal.css'
+import { adaNilaiTagihan } from '../lib/statusPembayaran'
 
 // Nomor WhatsApp dianggap terisi kalau berisi minimal 8 ANGKA (spasi, "+",
 // "-" diabaikan) -- isian asal kayak "-" atau "0" nggak lolos, tapi format
@@ -379,6 +380,8 @@ export default function BookingModal({ onClose, onSaved }) {
   // Ref area isian (.modal-body) -- dipakai tolakSimpan buat nggulir ke
   // pesan error / peringatan.
   const bodyRef = useRef(null)
+  // Sudah diingatkan soal tagihan Rp0 di form ini? (lihat handleSubmit)
+  const [konfirmasiRp0, setKonfirmasiRp0] = useState(false)
 
   // Tolak simpan karena isian nggak valid. Banner error ada di BAGIAN
   // ATAS area isian, sementara tombol Simpan ada di bawah -- kalau user
@@ -428,6 +431,16 @@ export default function BookingModal({ onClose, onSaved }) {
     if (kartuBermasalah.length > 0) {
       const daftarKlien = kartuBermasalah.map((k) => `Klien ${k.i + 1}`).join(', ')
       tolakSimpan(`Booking belum bisa disimpan: ada angka yang tidak masuk akal (komisi/untung lebih besar dari biayanya) di ${daftarKlien}. Cek kotak peringatan merah di kartu klien tersebut.`, { keKartu: true })
+      return
+    }
+
+    // Pengingat tagihan Rp0 -- BUKAN larangan (makeup gratis/endorse atau harga
+    // yang belum disepakati itu sah). Tekan Simpan pertama: muncul pesan;
+    // tekan Simpan sekali lagi: tetap disimpan. Status di database jadi
+    // "Belum Ada Tagihan", bukan "Lunas".
+    if (!konfirmasiRp0 && !adaNilaiTagihan({ biayaTransport }, pesertaList)) {
+      setKonfirmasiRp0(true)
+      tolakSimpan('Total tagihan booking ini masih Rp0 (biaya makeup, layanan, add on, dan transport belum ada yang diisi). Tekan Simpan Booking sekali lagi kalau memang mau disimpan dengan Rp0.')
       return
     }
 

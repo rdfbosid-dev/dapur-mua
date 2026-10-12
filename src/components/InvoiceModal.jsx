@@ -323,8 +323,10 @@ function InvoicePaper({ profile, booking, peserta, payments, bundlingItems = [],
         </div>
         {/* sisa <= 0 (bukan cuma === 0) -- ngecover juga kasus klien
             bayar lebih dari tagihan (overpay), tetep dianggap lunas,
-            bukan cuma pas pas persis Rp0. */}
-        {sisa <= 0 && <div className="inv-lunas-badge">LUNAS</div>}
+            bukan cuma pas pas persis Rp0. TAPI total tagihannya harus
+            > 0: booking yang biayanya belum diisi (total Rp0) itu
+            "Belum Ada Tagihan", bukan lunas -- cap LUNAS nggak dipasang. */}
+        {Number(booking.belanja_klien) > 0 && sisa <= 0 && <div className="inv-lunas-badge">LUNAS</div>}
       </div>
 
       <div className="inv-footer">Terima kasih atas kepercayaan Anda karena telah menggunakan jasa kami.</div>
@@ -450,6 +452,8 @@ export default function InvoiceModal({ booking, peserta, payments, bundlingItems
   }
 
   function handleWhatsApp() {
+  // Pengingat: invoice bertagihan Rp0 biasanya tanda biayanya belum diisi.
+  if (!(Number(booking.belanja_klien) > 0) && !window.confirm('Total tagihan booking ini masih Rp0. Tetap kirim invoice ke WhatsApp klien?')) return
   const nomor = (booking.nomor_whatsapp || '').replace(/[^0-9]/g, '').replace(/^0/, '62')
   const namaStudio = profile?.studio_name || 'Studio Saya'
   const pesan = `Halo, Kak!\n\nBerikut kami kirimkan ringkasan invoice makeup untuk *Kak ${booking.nama_klien}*.\n\n*Kode Booking*: ${booking.kode_booking}\n*Tanggal Makeup*: ${formatTanggal(booking.tanggal_acara)}\n*Event*: ${booking.event}\n\n*Total Biaya*: ${formatRupiah(booking.belanja_klien)}\n\n*Sudah Dibayar*: ${formatRupiah(totalDibayar)}\n*Kekurangan*: ${formatRupiah(sisa)}\n\nTerima kasih!\n\nSalam hangat,\n*${namaStudio}*.`

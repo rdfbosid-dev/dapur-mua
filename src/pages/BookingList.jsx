@@ -6,6 +6,7 @@ import BookingModal from '../components/BookingModal'
 import BookingDetailModal from '../components/BookingDetailModal'
 import { daftarHalaman } from '../lib/paginasi'
 import { bookingSelesai } from '../lib/durasiBooking'
+import { kelasStatusPembayaran } from '../lib/statusPembayaran'
 import './BookingList.css'
 
 const BULAN_PENUH = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
@@ -175,7 +176,7 @@ export default function BookingList() {
                     <td>{b.lokasi || '-'}</td>
                     <td className="right mono">{formatRupiah(b.sisa_kekurangan)}</td>
                     <td className="center mono">
-                      <span className={`status-pill ${b.status_pembayaran === 'Lunas' ? 'lunas' : 'belum'}`}>
+                      <span className={`status-pill ${kelasStatusPembayaran(b.status_pembayaran)}`}>
                         {b.status_pembayaran}
                       </span>
                     </td>

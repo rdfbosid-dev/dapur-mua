@@ -1,0 +1,10 @@
+/* Pill status "Belum Ada Tagihan" (total tagihan Rp0) -- warna NETRAL
+   (bukan merah "Belum Lunas" / hijau "Lunas"), pasangan token yang sama
+   dengan ikon notifikasi booking & tombol toggle yang belum dipilih, jadi
+   kebaca di tema terang maupun gelap. Ukuran/padding tetap ikut aturan
+   .status-pill / .dashboard-status-pill di halaman masing-masing. */
+.status-pill.kosong,
+.dashboard-status-pill.kosong {
+  background: var(--ink-faint);
+  color: var(--ink-soft);
+}

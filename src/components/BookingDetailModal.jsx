@@ -35,6 +35,7 @@ import IconClose from './IconClose'
 import { cariAngkaTakWajar, itemKewajaranRow } from '../lib/validasiBooking'
 import PeringatanKewajaran from './PeringatanKewajaran'
 import { bookingSelesai } from '../lib/durasiBooking'
+import { kelasStatusPembayaran, adaNilaiTagihan } from '../lib/statusPembayaran'
 
 function formatRupiah(n) {
   const num = Number(n) || 0
@@ -444,6 +445,8 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
   // Ref area isian (.modal-body) -- dipakai tolakSimpan buat nggulir ke
   // pesan error / peringatan.
   const bodyRef = useRef(null)
+  // Sudah diingatkan soal tagihan Rp0 di modal ini? (lihat handleSaveEdit)
+  const [konfirmasiRp0, setKonfirmasiRp0] = useState(false)
 
   // Tolak simpan karena isian nggak valid. Banner error ada di BAGIAN
   // ATAS area isian, sementara tombol Simpan ada di bawah -- kalau user
@@ -495,6 +498,16 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
     if (kartuBermasalah.length > 0) {
       const daftarKlien = kartuBermasalah.map((k) => `Klien ${k.i + 1}`).join(', ')
       tolakSimpan(`Perubahan belum bisa disimpan: ada angka yang tidak masuk akal (komisi/untung lebih besar dari biayanya) di ${daftarKlien}. Cek kotak peringatan merah di kartu klien tersebut.`, { keKartu: true })
+      return
+    }
+
+    // Pengingat tagihan Rp0 -- BUKAN larangan (makeup gratis/endorse atau harga
+    // yang belum disepakati itu sah). Tekan Simpan pertama: muncul pesan;
+    // tekan Simpan sekali lagi: tetap disimpan. Status di database jadi
+    // "Belum Ada Tagihan", bukan "Lunas".
+    if (!konfirmasiRp0 && !adaNilaiTagihan({ biayaTransport }, editPeserta)) {
+      setKonfirmasiRp0(true)
+      tolakSimpan('Total tagihan booking ini masih Rp0 (biaya makeup, layanan, add on, dan transport belum ada yang diisi). Tekan Simpan Perubahan sekali lagi kalau memang mau disimpan dengan Rp0.')
       return
     }
 
@@ -770,7 +783,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
           {!loading && !editMode && (
             <>
               <div className="detail-header">
-                <span className={`status-pill ${liveBooking.status_pembayaran === 'Lunas' ? 'lunas' : 'belum'}`}>
+                <span className={`status-pill ${kelasStatusPembayaran(liveBooking.status_pembayaran)}`}>
                   {liveBooking.status_pembayaran}
                 </span>
                 <div className="detail-actions">

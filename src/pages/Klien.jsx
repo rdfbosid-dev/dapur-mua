@@ -9,6 +9,7 @@ import './Klien.css'
 import IconClose from '../components/IconClose'
 import { daftarHalaman } from '../lib/paginasi'
 import { bookingSelesai } from '../lib/durasiBooking'
+import { kelasStatusPembayaran } from '../lib/statusPembayaran'
 
 
 function formatRupiah(n) {
@@ -457,7 +458,7 @@ export default function Klien() {
                   <div className="riwayat-row" key={b.id} onClick={() => setSelectedBooking(b)}>
                     <span className="riwayat-event">{b.event || 'Booking'}</span>
                     <span className="riwayat-tanggal">{formatTanggal(b.tanggal_acara)}</span>
-                    <span className={`status-pill ${b.status_pembayaran === 'Lunas' ? 'lunas' : 'belum'}`}>
+                    <span className={`status-pill ${kelasStatusPembayaran(b.status_pembayaran)}`}>
                       {b.status_pembayaran}
                     </span>
                   </div>

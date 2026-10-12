@@ -11,6 +11,7 @@ import DonutChart from '../components/DonutChart'
 import TrendChart from '../components/TrendChart'
 import { useInViewAnimate } from '../hooks/useInViewAnimate'
 import { bookingSelesai } from '../lib/durasiBooking'
+import { kelasStatusPembayaran, STATUS_BELUM_ADA_TAGIHAN } from '../lib/statusPembayaran'
 import './Dashboard.css'
 
 function formatRupiah(n) {
@@ -262,7 +263,11 @@ export default function Dashboard() {
   // + Bayar ke Vendor Bundling -- bukan Komisi dari Tim sama sekali.
   // Sekarang dijumlahin LANGSUNG dari kolom yang emang udah ada di VIEW.
   const komisiTimBulanIni = bookingBulanIni.reduce((sum, b) => sum + (Number(b.komisi_makeup_tim) || 0) + (Number(b.komisi_tambahan_tim) || 0), 0)
+  // Booking bertagihan Rp0 ('Belum Ada Tagihan') SENGAJA nggak masuk hitungan
+  // Belum Lunas -- nggak ada uang yang perlu ditagih. Dihitung terpisah buat
+  // pengingat di strip insight bawah.
   const belumLunas = bookingBulanIni.filter((b) => b.status_pembayaran === 'Belum Lunas')
+  const belumAdaTagihan = bookingBulanIni.filter((b) => b.status_pembayaran === STATUS_BELUM_ADA_TAGIHAN)
   const bookingHariIni = bookings.filter(isToday)
 
   function countBy(arr, key) {
@@ -540,7 +545,7 @@ export default function Dashboard() {
                         </div>
                         <div className="dash-booking-row-right">
                           <span className={`dashboard-day-pill ${day.cls}`}>{day.text}</span>
-                          <span className={`dashboard-status-pill ${b.status_pembayaran === 'Lunas' ? 'lunas' : 'belum'}`}>
+                          <span className={`dashboard-status-pill ${kelasStatusPembayaran(b.status_pembayaran)}`}>
                             {b.status_pembayaran}
                           </span>
                         </div>
@@ -729,7 +734,9 @@ export default function Dashboard() {
                   {' · '}Event <b>{eventCounts[0]?.[0]}</b> mendominasi <b>({Math.round((eventCounts[0]?.[1] / bookingBulanIni.length) * 100)}%)</b>
                   {belumLunas.length > 0
                     ? <> · Ingatkan <b>{belumLunas.length} klien</b> yang belum lunas bulan ini, ya!</>
-                    : ' · Semua booking bulan ini sudah lunas 🎉'}
+                    : belumAdaTagihan.length > 0
+                      ? <> · Ada <b>{belumAdaTagihan.length} booking</b> yang tagihannya masih Rp0, lengkapi biayanya, ya!</>
+                      : ' · Semua booking bulan ini sudah lunas 🎉'}
                 </span>
               </div>
             )}

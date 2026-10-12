@@ -8,6 +8,7 @@ import PengeluaranModal from '../components/PengeluaranModal'
 import PengeluaranDetailModal from '../components/PengeluaranDetailModal'
 import { KATEGORI_AGENDA } from '../lib/agendaPengeluaran'
 import { bookingSelesai } from '../lib/durasiBooking'
+import { kelasStatusPembayaran } from '../lib/statusPembayaran'
 import './Kalender.css'
 
 const BULAN_PENUH = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
@@ -369,7 +370,7 @@ export default function Kalender() {
                       {b.event || 'Booking'}{b.jam_start_makeup ? ` · ${b.jam_start_makeup.slice(0, 5)} WIB` : ''}
                     </div>
                   </div>
-                  <span className={`status-pill ${b.status_pembayaran === 'Lunas' ? 'lunas' : 'belum'}`}>
+                  <span className={`status-pill ${kelasStatusPembayaran(b.status_pembayaran)}`}>
                     {b.status_pembayaran}
                   </span>
                 </div>
