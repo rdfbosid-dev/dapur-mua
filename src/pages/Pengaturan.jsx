@@ -37,8 +37,17 @@ export default function Pengaturan() {
 
   const [linkCopied, setLinkCopied] = useState(false)
 
+  // Isi form dari profil SEKALI saja (pas profil pertama kali kebaca).
+  // SEBELUMNYA efek ini jalan tiap kali objek `profile` berubah -- dan
+  // AuthContext memuat ulang profil tiap ada perubahan status login,
+  // termasuk saat user balik ke Dapur MUA dari aplikasi lain (token sesi
+  // diperbarui). Akibatnya isian yang BELUM disimpan ketimpa data lama dari
+  // database -> kelihatan "kosong lagi". Setelah disimpan, isian form sudah
+  // sama dengan database, jadi nggak perlu diisi ulang dari profil.
+  const formSudahDiisiRef = useRef(false)
   useEffect(() => {
-    if (profile) {
+    if (profile && !formSudahDiisiRef.current) {
+      formSudahDiisiRef.current = true
       setStudioName(profile.studio_name || '')
       setKodePrefix(profile.kode_prefix || '')
       setInstagram(profile.instagram || '')
