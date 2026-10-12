@@ -472,3 +472,16 @@
   height: 1px; background: color-mix(in srgb, var(--button-border) 45%, transparent);
   margin: 8px 0;
 }
+
+/* Tombol "Pakai nama klien utama" di bawah Nama Klien kartu Klien 1 (form
+   Edit) -- SAMA PERSIS tampilannya kayak di form Booking Baru
+   (.booking-modal-overlay .quickfill-btn di BookingModal.css). Perlu ditulis
+   ulang di sini karena aturan di sana cuma berlaku di dalam
+   .booking-modal-overlay. align-self:flex-start biar tombolnya selebar
+   teksnya saja (.field itu flex-column). */
+.booking-detail-overlay .quickfill-btn {
+  font-size: 10px; font-weight: 500; color: var(--h1); background: var(--ink-faint);
+  border: none; border-radius: 5px; padding: 4px 6px; cursor: pointer; transition: background 0.15s;
+  align-self: flex-start; margin-top: 2px; font-family: inherit;
+}
+.booking-detail-overlay .quickfill-btn:hover { background: color-mix(in srgb, var(--ink-faint) 50%, transparent); }

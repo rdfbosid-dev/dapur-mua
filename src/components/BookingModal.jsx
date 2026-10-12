@@ -11,6 +11,14 @@ import { cariAtauBuatKlien } from '../lib/klien'
 import { cariAngkaTakWajar, itemKewajaranForm } from '../lib/validasiBooking'
 import PeringatanKewajaran from './PeringatanKewajaran'
 import './BookingModal.css'
+
+// Nomor WhatsApp dianggap terisi kalau berisi minimal 8 ANGKA (spasi, "+",
+// "-" diabaikan) -- isian asal kayak "-" atau "0" nggak lolos, tapi format
+// apa pun (0812..., +62 812-..., nomor luar negeri) tetap diterima.
+// SAMA PERSIS dengan yang di BookingDetailModal.jsx -- ubah dua-duanya.
+function nomorWhatsAppValid(nomor) {
+  return (String(nomor || '').match(/\d/g) || []).length >= 8
+}
 import IconClose from './IconClose'
 
 function todayStr() {
@@ -379,14 +387,20 @@ export default function BookingModal({ onClose, onSaved }) {
   // ke kotak peringatan di kartu klien (keKartu) atau ke paling atas
   // (nama klien / tanggal acara). requestAnimationFrame biar gulirnya
   // jalan SETELAH banner error-nya ke-render.
-  function tolakSimpan(pesan, { keKartu = false } = {}) {
+  // `pesertaKosong` (nomor urut kartu) -> gulir ke kolom Nama Klien di kartu
+  // itu & langsung fokus ke kolomnya, biar user tahu persis mana yang kurang.
+  function tolakSimpan(pesan, { keKartu = false, pesertaKosong = null } = {}) {
     setError(pesan)
     requestAnimationFrame(() => {
       const body = bodyRef.current
       if (!body) return
-      const target = keKartu ? body.querySelector('.peringatan-kewajaran') : null
-      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' })
-      else body.scrollTo({ top: 0, behavior: 'smooth' })
+      const target = pesertaKosong !== null
+        ? body.querySelector(`[data-nama-peserta="${pesertaKosong}"]`)
+        : keKartu ? body.querySelector('.peringatan-kewajaran') : null
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        if (pesertaKosong !== null) target.focus({ preventScroll: true })
+      } else body.scrollTo({ top: 0, behavior: 'smooth' })
     })
   }
 
@@ -394,11 +408,16 @@ export default function BookingModal({ onClose, onSaved }) {
     e.preventDefault()
     setError('')
 
-    // WAJIB diisi: Nama Klien & Tanggal Acara. Kolom biaya/komisi dll
-    // BOLEH kosong (dianggap Rp0) -- itu sengaja nggak dicek di sini.
+    // WAJIB diisi: Nama Klien, Nomor WhatsApp, Tanggal Acara, dan Nama Klien
+    // di SETIAP kartu klien (urutannya ngikutin urutan di form). Kolom
+    // biaya/komisi dll BOLEH kosong (dianggap Rp0) -- itu sengaja nggak dicek.
     if (!namaKlien.trim()) { tolakSimpan('Nama klien wajib diisi.'); return }
+    if (!nomorWhatsApp.trim()) { tolakSimpan('Nomor WhatsApp wajib diisi.'); return }
+    if (!nomorWhatsAppValid(nomorWhatsApp)) { tolakSimpan('Nomor WhatsApp belum benar (minimal 8 angka).'); return }
     if (!tanggalAcara) { tolakSimpan('Tanggal acara wajib diisi.'); return }
     if (pesertaList.length === 0) { tolakSimpan('Tambahkan minimal 1 peserta.'); return }
+    const iNamaKosong = pesertaList.findIndex((p) => !String(p.nama || '').trim())
+    if (iNamaKosong !== -1) { tolakSimpan(`Nama klien di Klien ${iNamaKosong + 1} wajib diisi.`, { pesertaKosong: iNamaKosong }); return }
 
     // Angka yang nggak masuk akal (komisi/untung > biayanya) DITOLAK.
     // Detailnya udah kelihatan di kotak peringatan tiap kartu klien
@@ -662,7 +681,7 @@ export default function BookingModal({ onClose, onSaved }) {
                 {event === EVENT_CUSTOM_SENTINEL && (
                   <input
                     type="text"
-                    placeholder="Tulis nama event ..."
+                    placeholder="Tulis nama event..."
                     value={eventCustom}
                     onChange={(e) => setEventCustom(e.target.value)}
                     style={{ marginTop: 8 }}
@@ -733,7 +752,7 @@ export default function BookingModal({ onClose, onSaved }) {
                       <div className="field-grid-peserta cols-2">
                         <div className="field">
                           <label>Nama Klien</label>
-                          <input type="text" placeholder="contoh: Jenny Black Pink" value={p.nama} onChange={(e) => updatePeserta(i, 'nama', e.target.value)} onBlur={(e) => updatePeserta(i, 'nama', capitalizeWords(e.target.value))} />
+                          <input type="text" placeholder="contoh: Jenny Black Pink" data-nama-peserta={i} value={p.nama} onChange={(e) => updatePeserta(i, 'nama', e.target.value)} onBlur={(e) => updatePeserta(i, 'nama', capitalizeWords(e.target.value))} />
                           {/* Tombol quickfill SENGAJA dipindah ke BAWAH input
                               (bukan nempel di sebelah label "Nama Klien" lagi)
                               -- sebelumnya, di layar sempit (misal iPhone 15,

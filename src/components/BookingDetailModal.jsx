@@ -21,6 +21,14 @@ import './BookingModal.css'
 // giliran CSS Invoice/RincianKeuangan (yang di-import setelahnya)
 // yang ke-load belakangan & menang buat elemen mereka sendiri.
 import './BookingDetailModal.css'
+
+// Nomor WhatsApp dianggap terisi kalau berisi minimal 8 ANGKA (spasi, "+",
+// "-" diabaikan) -- isian asal kayak "-" atau "0" nggak lolos, tapi format
+// apa pun (0812..., +62 812-..., nomor luar negeri) tetap diterima.
+// SAMA PERSIS dengan yang di BookingModal.jsx -- ubah dua-duanya.
+function nomorWhatsAppValid(nomor) {
+  return (String(nomor || '').match(/\d/g) || []).length >= 8
+}
 import InvoiceModal from './InvoiceModal'
 import RincianKeuanganModal from './RincianKeuanganModal'
 import IconClose from './IconClose'
@@ -445,26 +453,38 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
   // (nama klien / tanggal acara). requestAnimationFrame biar gulirnya
   // jalan SETELAH banner error-nya ke-render. (Sama persis kayak di
   // BookingModal.jsx.)
-  function tolakSimpan(pesan, { keKartu = false } = {}) {
+  // `pesertaKosong` (nomor urut kartu) -> gulir ke kolom Nama Klien di kartu
+  // itu & langsung fokus ke kolomnya, biar user tahu persis mana yang kurang.
+  function tolakSimpan(pesan, { keKartu = false, pesertaKosong = null } = {}) {
     setError(pesan)
     requestAnimationFrame(() => {
       const body = bodyRef.current
       if (!body) return
-      const target = keKartu ? body.querySelector('.peringatan-kewajaran') : null
-      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' })
-      else body.scrollTo({ top: 0, behavior: 'smooth' })
+      const target = pesertaKosong !== null
+        ? body.querySelector(`[data-nama-peserta="${pesertaKosong}"]`)
+        : keKartu ? body.querySelector('.peringatan-kewajaran') : null
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        if (pesertaKosong !== null) target.focus({ preventScroll: true })
+      } else body.scrollTo({ top: 0, behavior: 'smooth' })
     })
   }
 
   async function handleSaveEdit() {
     setError('')
 
-    // WAJIB diisi: Nama Klien & Tanggal Acara. SEBELUMNYA form Edit ini
-    // nggak ngecek sama sekali (beda dari form Booking Baru), jadi
-    // keduanya bisa dikosongin lalu disimpan. Kolom biaya/komisi dll
-    // BOLEH kosong (dianggap Rp0) -- itu sengaja nggak dicek di sini.
+    // WAJIB diisi -- SAMA dengan form Booking Baru: Nama Klien, Nomor
+    // WhatsApp, Tanggal Acara, dan Nama Klien di SETIAP kartu klien. Kolom
+    // biaya/komisi dll BOLEH kosong (dianggap Rp0) -- itu sengaja nggak dicek.
+    // Booking lama yang dulu tersimpan tanpa nomor WA/nama klien baru bisa
+    // disimpan ulang setelah kolom itu dilengkapi.
     if (!namaKlien.trim()) { tolakSimpan('Nama klien wajib diisi.'); return }
+    if (!nomorWhatsApp.trim()) { tolakSimpan('Nomor WhatsApp wajib diisi.'); return }
+    if (!nomorWhatsAppValid(nomorWhatsApp)) { tolakSimpan('Nomor WhatsApp belum benar (minimal 8 angka).'); return }
     if (!tanggalAcara) { tolakSimpan('Tanggal acara wajib diisi.'); return }
+    if (editPeserta.length === 0) { tolakSimpan('Tambahkan minimal 1 peserta.'); return }
+    const iNamaKosong = editPeserta.findIndex((p) => !String(p.nama_anggota || '').trim())
+    if (iNamaKosong !== -1) { tolakSimpan(`Nama klien di Klien ${iNamaKosong + 1} wajib diisi.`, { pesertaKosong: iNamaKosong }); return }
 
     // Angka yang nggak masuk akal (komisi/untung > biayanya) DITOLAK.
     // Detailnya udah kelihatan di kotak peringatan tiap kartu klien
@@ -986,7 +1006,20 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
                             <label>Nama Klien</label>
                           </div>
-                          <input type="text" placeholder="contoh: Jenny Black Pink" value={p.nama_anggota} onChange={(e) => updateEditPeserta(i, 'nama_anggota', e.target.value)} onBlur={(e) => updateEditPeserta(i, 'nama_anggota', capitalizeWords(e.target.value))} />
+                          <input type="text" placeholder="contoh: Jenny Black Pink" data-nama-peserta={i} value={p.nama_anggota} onChange={(e) => updateEditPeserta(i, 'nama_anggota', e.target.value)} onBlur={(e) => updateEditPeserta(i, 'nama_anggota', capitalizeWords(e.target.value))} />
+                          {/* Quickfill -- SAMA kayak di form Booking Baru: cuma di
+                              Klien 1, cuma kalau Nama Klien utama sudah diisi, dan
+                              ditaruh di BAWAH input (alasannya lihat komentar di
+                              BookingModal.jsx). */}
+                          {i === 0 && namaKlien.trim() && (
+                            <button
+                              type="button"
+                              className="quickfill-btn"
+                              onClick={() => updateEditPeserta(0, 'nama_anggota', namaKlien.trim())}
+                            >
+                              Pakai nama klien utama
+                            </button>
+                          )}
                         </div>
                         <div className="field">
                           <label>Peran (Opsional)</label>
