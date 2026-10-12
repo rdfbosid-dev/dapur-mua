@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import ThemeToggleButton from '../components/ThemeToggleButton'
 import { useTheme } from '../context/ThemeContext'
 import './Auth.css'
+import { cekPassword, pesanErrorPassword, PETUNJUK_PASSWORD } from '../lib/aturanPassword'
 
 export default function ResetPassword() {
   const { theme } = useTheme()
@@ -21,8 +22,9 @@ export default function ResetPassword() {
     e.preventDefault()
     setError('')
 
-    if (password.length < 6) {
-      setError('Kata sandi minimal 6 karakter.')
+    const masalahPassword = cekPassword(password)
+    if (masalahPassword) {
+      setError(masalahPassword)
       return
     }
     if (password !== confirmPassword) {
@@ -38,7 +40,7 @@ export default function ResetPassword() {
       setError(
         error.message.includes('session')
           ? 'Link reset udah nggak berlaku atau kadaluarsa. Coba minta link baru lagi.'
-          : error.message
+          : pesanErrorPassword(error)
       )
       return
     }
@@ -81,6 +83,7 @@ export default function ResetPassword() {
             <div className="auth-field-control auth-field-control--pw">
               <input
                 id="reset-password"
+                aria-describedby="reset-password-petunjuk"
                 name="new-password"
                 type={showPassword ? 'text' : 'password'}
                 value={password}
@@ -103,6 +106,7 @@ export default function ResetPassword() {
                 )}
               </button>
             </div>
+            <div className="auth-hint" id="reset-password-petunjuk">{PETUNJUK_PASSWORD}</div>
           </div>
           <div className="auth-field">
             <div className="auth-field-control auth-field-control--pw">

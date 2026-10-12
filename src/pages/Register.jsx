@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import ThemeToggleButton from '../components/ThemeToggleButton'
 import { useTheme } from '../context/ThemeContext'
 import './Auth.css'
+import { cekPassword, pesanErrorPassword, PETUNJUK_PASSWORD } from '../lib/aturanPassword'
 
 export default function Register() {
   const { theme } = useTheme()
@@ -21,8 +22,9 @@ export default function Register() {
     setError('')
     setLoading(true)
 
-    if (password.length < 6) {
-      setError('Kata sandi minimal 6 karakter.')
+    const masalahPassword = cekPassword(password)
+    if (masalahPassword) {
+      setError(masalahPassword)
       setLoading(false)
       return
     }
@@ -35,7 +37,7 @@ export default function Register() {
 
     if (error) {
       setLoading(false)
-      setError(error.message)
+      setError(pesanErrorPassword(error))
       return
     }
 
@@ -134,6 +136,7 @@ export default function Register() {
             <div className="auth-field-control auth-field-control--pw">
               <input
                 id="register-password"
+                aria-describedby="register-password-petunjuk"
                 name="password"
                 type={showPassword ? 'text' : 'password'}
                 value={password}
@@ -156,6 +159,7 @@ export default function Register() {
                 )}
               </button>
             </div>
+            <div className="auth-hint" id="register-password-petunjuk">{PETUNJUK_PASSWORD}</div>
           </div>
           <button className="auth-btn" type="submit" disabled={loading}>
             {loading ? 'Memproses...' : 'Daftar'}

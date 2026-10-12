@@ -159,6 +159,17 @@
 .auth-toggle-pw svg { width: 18px; height: 18px; }
 .auth-toggle-pw:hover { color: var(--h5); }
 
+/* Petunjuk aturan kata sandi di bawah kolomnya (Daftar & Buat Kata Sandi
+   Baru) -- teksnya dari PETUNJUK_PASSWORD di lib/aturanPassword.js. Jarak
+   ke kolom diatur gap .auth-field (6px); padding kiri disamakan dengan
+   teks di dalam kolom (14px) biar sejajar. */
+.auth-hint {
+  font-size: 11.5px;
+  color: var(--ink);
+  padding-left: 14px;
+  line-height: 1.4;
+}
+
 .auth-btn {
   width: 100%;
   display: block;
