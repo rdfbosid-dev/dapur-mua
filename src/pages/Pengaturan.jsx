@@ -9,6 +9,30 @@ function initialsOf(name) {
   return (name || '?').split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase()
 }
 
+// Nilai form Profil dari data profil tersimpan. Kalau rekening kosong,
+// tetap 1 baris kosong biar form-nya langsung ada tempat buat isi.
+function isiDariProfil(profile) {
+  return {
+    studioName: profile.studio_name || '',
+    kodePrefix: profile.kode_prefix || '',
+    instagram: profile.instagram || '',
+    whatsapp: profile.whatsapp || '',
+    rekening: profile.rekening && profile.rekening.length > 0 ? profile.rekening : [{ bank: '', nomor: '' }],
+  }
+}
+
+const UMUR_DRAF_MS = 24 * 60 * 60 * 1000
+function bacaDraf(kunci) {
+  if (!kunci) return null
+  try {
+    const simpanan = JSON.parse(localStorage.getItem(kunci))
+    if (!simpanan || !simpanan.isi || Date.now() - simpanan.waktu > UMUR_DRAF_MS) return null
+    return simpanan.isi
+  } catch {
+    return null
+  }
+}
+
 export default function Pengaturan() {
   const { user, profile, refreshProfile } = useAuth()
 
@@ -37,28 +61,46 @@ export default function Pengaturan() {
 
   const [linkCopied, setLinkCopied] = useState(false)
 
-  // Isi form dari profil SEKALI saja (pas profil pertama kali kebaca).
-  // SEBELUMNYA efek ini jalan tiap kali objek `profile` berubah -- dan
-  // AuthContext memuat ulang profil tiap ada perubahan status login,
-  // termasuk saat user balik ke Dapur MUA dari aplikasi lain (token sesi
-  // diperbarui). Akibatnya isian yang BELUM disimpan ketimpa data lama dari
-  // database -> kelihatan "kosong lagi". Setelah disimpan, isian form sudah
-  // sama dengan database, jadi nggak perlu diisi ulang dari profil.
-  const formSudahDiisiRef = useRef(false)
+  // DRAF isian Profil yang belum disimpan -- disimpan di penyimpanan HP
+  // (localStorage, per akun, berlaku 24 jam), biar nggak hilang kalau
+  // halaman dimuat ulang saat user pindah ke aplikasi lain: HP menutup
+  // aplikasi di latar belakang karena memori, atau aplikasi memuat versi
+  // terbaru setelah ada update. Kata sandi & logo SENGAJA nggak masuk draf.
+  // Draf dihapus begitu isian sama lagi dengan data tersimpan / disimpan.
+  const kunciDraf = user ? `dapurmua:draf-pengaturan:${user.id}` : null
+  const [formSiap, setFormSiap] = useState(false)
+
+  // Isi form SEKALI saja, pas profil pertama kali kebaca (pakai draf kalau
+  // ada). SEBELUMNYA form diisi ulang tiap kali objek `profile` berubah --
+  // dan AuthContext memuat ulang profil tiap sesi login diperbarui (misal
+  // saat user balik dari aplikasi lain), jadi isian yang belum disimpan
+  // ketimpa data lama dari database.
+  // setState di efek ini SENGAJA (sekali jalan, nyalin data luar ke form) --
+  // bukan pola render beruntun yang dikhawatirkan aturan lint ini.
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
-    if (profile && !formSudahDiisiRef.current) {
-      formSudahDiisiRef.current = true
-      setStudioName(profile.studio_name || '')
-      setKodePrefix(profile.kode_prefix || '')
-      setInstagram(profile.instagram || '')
-      setWhatsapp(profile.whatsapp || '')
-      // Kalau profile.rekening kosong/belum ada, tetep pasang 1 baris
-      // kosong (bukan array kosong beneran) -- biar form-nya langsung
-      // ada tempat buat isi, bukan cuma tombol "+ Tambah" doang.
-      setRekening(profile.rekening && profile.rekening.length > 0 ? profile.rekening : [{ bank: '', nomor: '' }])
-      setLoading(false)
-    }
-  }, [profile])
+    if (!profile || formSiap) return
+    const draf = bacaDraf(kunciDraf)
+    const isi = draf || isiDariProfil(profile)
+    setStudioName(isi.studioName)
+    setKodePrefix(isi.kodePrefix)
+    setInstagram(isi.instagram)
+    setWhatsapp(isi.whatsapp)
+    setRekening(isi.rekening)
+    setFormSiap(true)
+    setLoading(false)
+  }, [profile, formSiap, kunciDraf])
+  /* eslint-enable react-hooks/set-state-in-effect */
+
+  // Simpan/hapus draf tiap isian berubah (baru jalan setelah form terisi).
+  useEffect(() => {
+    if (!formSiap || !kunciDraf || !profile) return
+    const isi = { studioName, kodePrefix, instagram, whatsapp, rekening }
+    try {
+      if (JSON.stringify(isi) === JSON.stringify(isiDariProfil(profile))) localStorage.removeItem(kunciDraf)
+      else localStorage.setItem(kunciDraf, JSON.stringify({ waktu: Date.now(), isi }))
+    } catch { /* penyimpanan diblokir/penuh: form tetap jalan, cuma tanpa draf */ }
+  }, [formSiap, kunciDraf, profile, studioName, kodePrefix, instagram, whatsapp, rekening])
 
   useEffect(() => {
     // Jaring pengaman -- kalau karena sebab tak terduga `profile` nggak
@@ -121,6 +163,7 @@ export default function Pengaturan() {
     if (error) {
       setMessage({ type: 'error', text: error.message })
     } else {
+      try { localStorage.removeItem(`dapurmua:draf-pengaturan:${user.id}`) } catch { /* abaikan */ }
       setMessage({ type: 'success', text: 'Perubahan berhasil disimpan.' })
       await refreshProfile(user.id) // biar Sidebar (nama studio) langsung ikut update
     }
