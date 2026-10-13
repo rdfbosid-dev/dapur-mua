@@ -5,6 +5,7 @@ import './InvoiceModal.css'
 import IconClose from './IconClose'
 import { labelMakeup as labelMakeupDari } from '../lib/layanan'
 import { jamZona, kodeZona } from '../lib/zonaWaktu'
+import { labelDiskon } from '../lib/tagihan'
 
 function formatRupiah(n) {
   return 'Rp' + (Number(n) || 0).toLocaleString('id-ID')
@@ -303,6 +304,14 @@ function InvoicePaper({ profile, booking, peserta, payments, bundlingItems = [],
       )}
 
       <div className="inv-summary">
+        {/* Subtotal & Diskon CUMA nongol kalau booking ini dikasih diskon --
+            tanpa diskon, ringkasannya persis kayak dulu. */}
+        {Number(booking.diskon) > 0 && (
+          <>
+            <div className="inv-summary-row"><span>Subtotal</span><b>{formatRupiah(booking.belanja_sebelum_diskon)}</b></div>
+            <div className="inv-summary-row"><span>{labelDiskon(booking.keterangan_diskon)}</span><b>−{formatRupiah(booking.diskon)}</b></div>
+          </>
+        )}
         <div className="inv-summary-row"><span>Total Tagihan</span><b>{formatRupiah(booking.belanja_klien)}</b></div>
         <div className="inv-summary-row"><span>Sudah Dibayar</span><b>{formatRupiah(totalDibayar)}</b></div>
         <div className="inv-summary-row inv-summary-final"><span>Sisa Tagihan</span><b>{formatRupiah(sisa)}</b></div>
@@ -461,7 +470,11 @@ export default function InvoiceModal({ booking, peserta, payments, bundlingItems
   if (!(Number(booking.belanja_klien) > 0) && !window.confirm('Total tagihan booking ini masih Rp0. Tetap kirim invoice ke WhatsApp klien?')) return
   const nomor = (booking.nomor_whatsapp || '').replace(/[^0-9]/g, '').replace(/^0/, '62')
   const namaStudio = profile?.studio_name || 'Studio Saya'
-  const pesan = `Halo, Kak!\n\nBerikut kami kirimkan ringkasan invoice makeup untuk *Kak ${booking.nama_klien}*.\n\n*Kode Booking*: ${booking.kode_booking}\n*Tanggal Makeup*: ${formatTanggal(booking.tanggal_acara)}\n*Event*: ${booking.event}\n\n*Total Biaya*: ${formatRupiah(booking.belanja_klien)}\n\n*Sudah Dibayar*: ${formatRupiah(totalDibayar)}\n*Kekurangan*: ${formatRupiah(sisa)}\n\nTerima kasih!\n\nSalam hangat,\n*${namaStudio}*.`
+  // Rincian diskon di pesan WhatsApp -- cuma kalau booking ini ada diskon.
+  const barisDiskon = Number(booking.diskon) > 0
+    ? `*Subtotal*: ${formatRupiah(booking.belanja_sebelum_diskon)}\n*${labelDiskon(booking.keterangan_diskon)}*: −${formatRupiah(booking.diskon)}\n`
+    : ''
+  const pesan = `Halo, Kak!\n\nBerikut kami kirimkan ringkasan invoice makeup untuk *Kak ${booking.nama_klien}*.\n\n*Kode Booking*: ${booking.kode_booking}\n*Tanggal Makeup*: ${formatTanggal(booking.tanggal_acara)}\n*Event*: ${booking.event}\n\n${barisDiskon}*Total Biaya*: ${formatRupiah(booking.belanja_klien)}\n\n*Sudah Dibayar*: ${formatRupiah(totalDibayar)}\n*Kekurangan*: ${formatRupiah(sisa)}\n\nTerima kasih!\n\nSalam hangat,\n*${namaStudio}*.`
   const pesanEncoded = encodeURIComponent(pesan)
   const waUrl = `https://wa.me/${nomor}?text=${pesanEncoded}`
 

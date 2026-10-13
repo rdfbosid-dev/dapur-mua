@@ -10,7 +10,7 @@
 .lyn-card { background: color-mix(in srgb, var(--box-dashboard) 90%, transparent); border-radius: 20px; padding: 22px; border: 1px solid var(--line-box); box-shadow: var(--shadow-card); }
 
 /* Teks polos di atas kolom PETUNJUK (tanpa latar). */
-.lyn-opsional { font-size: 13px; color: var(--ink-soft); margin-bottom: 8px; line-height: 1.5; }
+.lyn-opsional { font-size: 14px; color: var(--ink-soft); margin-bottom: 16px; line-height: 1.5; }
 
 .lyn-hint { padding: 8px 16px; border-radius: 12px; border: 3px solid color-mix(in srgb, var(--pill-alt) 30%, transparent); font-size: 13px; color: var(--h9); background: var(--card-langganan); margin-bottom: 18px; line-height: 1.5; text-align: justify; }
 .lyn-hint a { font-weight: 800; }
@@ -44,7 +44,8 @@
 .lyn-badge { font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 6px; white-space: nowrap; background: var(--ink-faint); color: var(--ink-soft); }
 
 @media (max-width: 900px) {
-  .lyn-hint, .lyn-opsional { font-size: 11px; }
+  .lyn-hint { font-size: 11px; }
+  .lyn-opsional { font-size: 12px; }
 }
 @media (max-width: 640px) {
   .lyn-daftar { padding: 16px; }

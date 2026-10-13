@@ -177,6 +177,10 @@ export default function Keuangan() {
         komisiVendor: bulanBookings.reduce((s, b) => s + (Number(b.bundling_keuntungan_total) || 0) + (Number(b.untung_sewa_total) || 0), 0),
         untungProduk: bulanBookings.reduce((s, b) => s + (Number(b.keuntungan_lainnya_total) || 0), 0),
         penghasilan: bulanBookings.reduce((s, b) => s + (Number(b.penghasilan) || 0), 0),
+        // Diskon booking (lib/tagihan.js) -- Pembayaran Klien, Omzet &
+        // Penghasilan di atas SUDAH dipotong diskon (langsung dari VIEW).
+        // Ini cuma buat info total diskon (penjelasan + export Excel).
+        diskon: bulanBookings.reduce((s, b) => s + (Number(b.diskon) || 0), 0),
       }
     })
   }, [bookings, filterTahun])
@@ -323,7 +327,8 @@ export default function Keuangan() {
     komisiVendor: acc.komisiVendor + m.komisiVendor,
     untungProduk: acc.untungProduk + m.untungProduk,
     penghasilan: acc.penghasilan + m.penghasilan,
-  }), { booking: 0, klien: 0, belanja: 0, transport: 0, omzet: 0, komisi: 0, komisiVendor: 0, untungProduk: 0, penghasilan: 0 })
+    diskon: acc.diskon + m.diskon,
+  }), { booking: 0, klien: 0, belanja: 0, transport: 0, omzet: 0, komisi: 0, komisiVendor: 0, untungProduk: 0, penghasilan: 0, diskon: 0 })
 
   const adaData = monthlyStats.some((m) => m.booking > 0)
 
@@ -387,7 +392,7 @@ export default function Keuangan() {
     const wb = new ExcelJS.Workbook()
     const ws = wb.addWorksheet(`Keuangan ${filterTahun}`)
 
-    ws.columns = [
+    const kolom = [
       { header: 'Bulan', key: 'bulan', width: 12 },
       { header: 'Booking', key: 'booking', width: 10 },
       { header: 'Klien', key: 'klien', width: 8 },
@@ -403,6 +408,11 @@ export default function Keuangan() {
       { header: 'Penghasilan', key: 'penghasilan', width: 15 },
       { header: 'Pengeluaran Bisnis', key: 'pengeluaranUsaha', width: 18 },
     ]
+    // Kolom Diskon (setelah Pembayaran) CUMA ditambahkan kalau tahun ini ada
+    // booking yang diberi diskon -- tanpa diskon, isi file-nya persis kayak
+    // sebelumnya (key "diskon" di addRow diabaikan kalau kolomnya nggak ada).
+    if (totalTahun.diskon > 0) kolom.splice(4, 0, { header: 'Diskon', key: 'diskon', width: 13 })
+    ws.columns = kolom
 
     // Style baris header -- bold, teks putih, background biru
     ws.getRow(1).eachCell((cell) => {
@@ -420,6 +430,7 @@ export default function Keuangan() {
         belanjaProduk: monthlyPengeluaranStats[i].belanjaProduk, untungProduk: m.untungProduk,
         penghasilan: m.penghasilan,
         pengeluaranUsaha: monthlyPengeluaranUsaha[i],
+        diskon: m.diskon,
       })
     })
 
@@ -432,6 +443,7 @@ export default function Keuangan() {
       belanjaProduk: totalPengeluaranTahun.belanjaProduk, untungProduk: totalTahun.untungProduk,
       penghasilan: totalTahun.penghasilan,
       pengeluaranUsaha: totalPengeluaranUsaha,
+      diskon: totalTahun.diskon,
     })
     totalRow.eachCell((cell) => {
       cell.font = { bold: true }
@@ -443,6 +455,7 @@ export default function Keuangan() {
     ;['belanja', 'transport', 'omzet', 'bayarTim', 'komisi', 'bayarVendor', 'komisiVendor', 'belanjaProduk', 'untungProduk', 'penghasilan', 'pengeluaranUsaha'].forEach((key) => {
       ws.getColumn(key).numFmt = '#,##0'
     })
+    if (totalTahun.diskon > 0) ws.getColumn('diskon').numFmt = '#,##0'
 
     // ExcelJS nggak punya "writeFile" langsung buat browser (itu cuma
     // jalan di Node.js lewat fs) -- jadi file-nya di-generate sebagai
@@ -558,6 +571,7 @@ export default function Keuangan() {
                   <li><b>Pengeluaran dalam Booking</b> (grafik Tren Pengeluaran dalam Booking di bawah) adalah biaya yang dikeluarkan untuk bayar ke tim, bayar ke vendor, bayar produk Add On (Sewa), dan modal produk Add On (Beli). Dihitung otomatis dari data booking dan <b>tidak digabung</b> dengan Pengeluaran Bisnis.</li>
                   <li><b>Dapur MUA tidak menghitung Laba Bersih untukmu.</b> Untuk perkiraan kasar, Laba Bersih ≈ Penghasilan − Pengeluaran Bisnis.</li>
                   <li>Hati-hati dengan barang yang kamu jual lagi ke klien lewat Add On (Beli): modalnya sudah terpotong dari Penghasilan, jadi kalau pembelian barang yang sama juga kamu catat di Pengeluaran Bisnis, modalnya <b>terhitung dua kali</b>.</li>
+                  {totalTahun.diskon > 0 && <li><b>Diskon booking</b> tahun ini totalnya <b>{formatRupiah(totalTahun.diskon)}</b>. Pembayaran Klien, Omzet, dan Penghasilan sudah dipotong diskon. Komisi dan pembayaran ke tim maupun vendor tidak ikut berkurang, karena diskon ditanggung kamu.</li>}
                   <li>Penghasilan dihitung berdasarkan <b>tanggal acara</b> booking, sedangkan Pengeluaran Bisnis berdasarkan <b>tanggal pengeluaran</b>.</li>
                 </ul>
               </div>

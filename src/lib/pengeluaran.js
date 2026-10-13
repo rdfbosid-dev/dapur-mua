@@ -118,7 +118,7 @@ export const KATEGORI_PENGELUARAN = [
     namaItemSetengah: true,
     contohJudul: 'contoh: Biaya operasional bulan Oktober',
     contohTempat: '',
-    saran: ['Pulsa/Internet', 'Langganan Aplikasi', 'Sewa Tempat', 'Listrik'],
+    saran: ['Gaji Staf', 'Pulsa/Internet', 'Langganan Aplikasi', 'Sewa Tempat', 'Listrik'],
   },
 ]
 

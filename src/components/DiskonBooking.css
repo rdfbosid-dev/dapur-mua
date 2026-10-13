@@ -1,0 +1,61 @@
+/* Isian Diskon per booking (DiskonBooking.jsx) -- dipakai di modal
+   Booking Baru (.booking-modal-overlay) & Edit Booking
+   (.booking-detail-overlay). .field / .toggle-row / input ikut gaya
+   masing-masing modal; di sini cuma tata letak & ringkasannya. */
+
+.booking-modal-overlay .diskon-grid,
+.booking-detail-overlay .diskon-grid {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.diskon-booking .field label .field-note { margin-left: 2px; font-weight: 400; }
+
+.booking-modal-overlay .diskon-booking .field input.diskon-input-galat,
+.booking-detail-overlay .diskon-booking .field input.diskon-input-galat {
+  border-color: var(--h8);
+}
+
+.diskon-ringkasan {
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  background: color-mix(in srgb, var(--ink-faint) 45%, transparent);
+  border-radius: 10px;
+  padding: 9px 12px;
+  margin: 0 0 12px;
+}
+.diskon-ringkasan b { color: var(--h5); font-weight: 700; }
+.diskon-ringkasan.galat { background: var(--pill); color: var(--h8); font-weight: 600; }
+.diskon-ringkasan.galat .diskon-catatan { color: var(--h8); }
+.diskon-catatan {
+  margin-top: 3px;
+  font-size: 10.5px;
+  font-style: italic;
+  font-weight: 400;
+  color: var(--ink-soft);
+  opacity: 0.8;
+}
+
+@media (max-width: 640px) {
+  .booking-modal-overlay .diskon-grid,
+  .booking-detail-overlay .diskon-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .booking-modal-overlay .diskon-grid > .diskon-keterangan,
+  .booking-detail-overlay .diskon-grid > .diskon-keterangan {
+    grid-column: 1 / -1;
+  }
+  .diskon-ringkasan {
+    font-size: 10px;}
+}
+
+/* Baris diskon di mode LIHAT Detail Booking (di bawah ringkasan
+   Pembayaran) -- cuma muncul kalau booking-nya ada diskon. */
+.booking-detail-overlay .diskon-detail {
+  display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 10px;
+  font-size: 12px; color: var(--ink-soft); background: color-mix(in srgb, var(--ink-faint) 30%, transparent);;
+  border: none; border-radius: 10px;
+  padding: 8px 14px; margin: -4px 0 12px;
+}
+.booking-detail-overlay .diskon-detail b { font-family: 'Poppins', sans-serif; color: var(--ink-soft); font-weight: 700; }
+.booking-detail-overlay .diskon-detail .diskon-detail-asal { flex-basis: 100%; font-size: 10.5px; font-style: italic; opacity: 0.8; }

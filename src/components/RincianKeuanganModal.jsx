@@ -2,6 +2,7 @@ import { useState } from 'react'
 import RemittanceAdviceModal from './RemittanceAdviceModal'
 import './RincianKeuanganModal.css'
 import IconClose from './IconClose'
+import { labelDiskon } from '../lib/tagihan'
 
 function formatRupiah(n) {
   const num = Number(n) || 0
@@ -251,7 +252,15 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
   // biar rumus ini jelasin KONSEPNYA ("dari mana asalnya Omzet"),
   // bukan sekadar ngulang angka yang udah keliatan di kartu Omzet/
   // Penghasilan & baris-baris rincian di atas.
-  const rumusBelanja = [
+  // Diskon per booking (lib/tagihan.js) -- DITANGGUNG MUA: ngurangin
+  // Belanja Klien, Omzet & Penghasilan, TIDAK ngurangin Pengeluaran (komisi
+  // tim & bayar ke vendor tetap utuh). Semua bagian diskon di modal ini
+  // cuma nongol kalau booking-nya memang ada diskon.
+  const diskon = Number(booking.diskon) || 0
+  // Rumus + " − Diskon" (kalau rumusnya kosong, mulai dari Rp0).
+  const denganDiskon = (rumus) => (diskon > 0 ? `${rumus || 'Rp0'} − Diskon` : rumus)
+
+  const rumusBelanja = denganDiskon([
     makeupRows.length > 0 && 'Biaya Makeup',
     tambahanRows.length > 0 && 'Biaya Layanan Tambahan',
     retouchRows.length > 0 && 'Biaya Retouch',
@@ -260,9 +269,9 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
     bundlingTop.length > 0 && 'Biaya Paket Bundling',
     transport > 0 && 'Biaya Transport',
     transportTimRows.length > 0 && 'Fee Transport Tim',
-  ].filter(Boolean).join(' + ')
+  ].filter(Boolean).join(' + '))
 
-  const rumusOmzet = [
+  const rumusOmzet = denganDiskon([
     makeupMeAda && 'Biaya Makeup (Me)',
     makeupTimAda && 'Komisi Makeup (Tim)',
     tambahanMeAda && 'Biaya Layanan Tambahan (Me)',
@@ -272,9 +281,9 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
     sewaRows.length > 0 && 'Untung Add On (Sewa)',
     bundlingTop.length > 0 && 'Untung Paket Bundling',
     transport > 0 && 'Biaya Transport',
-  ].filter(Boolean).join(' + ')
+  ].filter(Boolean).join(' + '))
 
-  const rumusPenghasilan = [
+  const rumusPenghasilan = denganDiskon([
     makeupMeAda && 'Biaya Makeup (Me)',
     makeupTimAda && 'Komisi Makeup (Tim)',
     tambahanMeAda && 'Biaya LayananTambahan (Me)',
@@ -283,7 +292,7 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
     addOnItems.length > 0 && 'Untung Add On',
     sewaRows.length > 0 && 'Untung Add On (Sewa)',
     bundlingTop.length > 0 && 'Untung Paket Bundling',
-  ].filter(Boolean).join(' + ')
+  ].filter(Boolean).join(' + '))
 
   // Pengeluaran -- BEDA konsep dari 3 rumus di atas (yang jumlahin
   // biaya/komisi APA ADANYA dari data booking). Ini SELISIH: biaya
@@ -565,6 +574,18 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
             </div>
           )}
 
+          {/* Diskon -- nongol di kartu Belanja Klien/Omzet/Penghasilan (yang
+              dipotong diskon), NGGAK di Pengeluaran. */}
+          {diskon > 0 && activeCard !== 'pengeluaran' && (
+            <div className="rincian-section">
+              <div className="rincian-section-title">Diskon</div>
+              <div className="rincian-row">
+                <span>{labelDiskon(booking.keterangan_diskon)}</span>
+                <b>{formatRupiah(-diskon)}</b>
+              </div>
+            </div>
+          )}
+
           <div className="rincian-note">
             <div className="rincian-note-title">Rumus</div>
             {activeCard === 'belanja' && <div className="rincian-rumus"><b>Belanja Klien</b> = {rumusBelanja}</div>}
@@ -583,6 +604,7 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
             <div className="rincian-penjelasan"><b>Belanja Klien</b> = total semua yang ditagihkan ke klien dalam sebuah booking. Apapun jenisnya dan siapapun yang mengerjakan. Termasuk biaya Retouch, seluruh harga Add On (Beli), biaya Add On (Sewa), biaya Paket Bundling, dan Fee Transport Tim, jika ada.</div>
             <div className="rincian-penjelasan"><b>Omzet</b> = total pemasukan dalam sebuah booking yang terdiri dari biaya jasa/layanan yang dikerjain sendiri (Me) dihitung penuh, yang dikerjain Tim cuma dihitung komisinya (jika ada), ditambah biaya Retouch (selalu penuh), harga penuh dari Add On (Beli), untung dari Add On (Sewa) dan untung dari Paket Bundling (jika ada), dan biaya transport.</div>
             <div className="rincian-penjelasan"><b>Penghasilan</b> = bagian yang beneran jadi keuntungan bagi MUA. Sama kayak Omzet, tapi Add On (Beli) cuma dihitung untungnya (bukan biaya penuh), Add On (Sewa) dan Paket Bundling cuma dihitung untung/komisinya, biaya Retouch tetap dihitung penuh, dan biaya transport nggak dihitung sama sekali (karena biaya transport itu ongkos, bukan keuntungan).</div>
+            {diskon > 0 && <div className="rincian-penjelasan"><b>Diskon</b> = potongan harga yang kamu berikan ke klien di booking ini. Diskon ditanggung kamu sepenuhnya, jadi mengurangi Belanja Klien, Omzet, dan Penghasilan. Komisi tim, Fee Transport Tim, dan pembayaran ke vendor tidak ikut berkurang, sehingga Pengeluaran tetap sama.</div>}
             <div className="rincian-penjelasan"><b>Pengeluaran</b> = bagian dari Belanja Klien yang KELUAR LAGI ke tim/vendor luar, bukan masuk kantong MUA. Selisih antara biaya penuh yang ditagih ke klien dan komisi/untung yang di-set user, dari Makeup/Layanan Tambahan yang dikerjain Tim, Add On (Beli), Add On (Sewa), dan Paket Bundling. Biaya Transport dan Fee Transport Tim TIDAK termasuk pengeluaran, karena keduanya dianggap ongkos perjalanan (Fee Transport Tim tetap tercantum di Remittance Advice ke tim yang bersangkutan).</div>
           </div>
         </div>

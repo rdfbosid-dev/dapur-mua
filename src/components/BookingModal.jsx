@@ -14,6 +14,8 @@ import './BookingModal.css'
 import { adaNilaiTagihan } from '../lib/statusPembayaran'
 import { muatLayanan, biayaKeForm, layananDipakai, namaLayanan, eventDariForm, peringatanKategoriEvent, kategoriKlien } from '../lib/layanan'
 import PilihLayanan, { PetunjukEventLayanan, CatatanKategoriKartu, CatatanHargaLayanan, pesanKonfirmasiKategori } from './PilihLayanan'
+import DiskonBooking from './DiskonBooking'
+import { tagihanSebelumDiskonForm, pesanDiskonTidakValid, nilaiSimpanDiskon } from '../lib/tagihan'
 
 // Nomor WhatsApp dianggap terisi kalau berisi minimal 8 ANGKA (spasi, "+",
 // "-" diabaikan) -- isian asal kayak "-" atau "0" nggak lolos, tapi format
@@ -146,6 +148,10 @@ export default function BookingModal({ onClose, onSaved }) {
   const [biayaTransport, setBiayaTransport] = useState('')
   const [dp, setDp] = useState('')
   const [dpMetode, setDpMetode] = useState('Transfer Bank')
+  // Diskon per booking -- OPSIONAL (default "Tidak"). Lihat lib/tagihan.js.
+  const [adaDiskon, setAdaDiskon] = useState(false)
+  const [diskon, setDiskon] = useState('')
+  const [keteranganDiskon, setKeteranganDiskon] = useState('')
   const [catatan, setCatatan] = useState('')
   const [pesertaList, setPesertaList] = useState([blankPeserta()])
 
@@ -278,6 +284,13 @@ export default function BookingModal({ onClose, onSaved }) {
   // isian Kategori). Dipakai buat peringatan & konfirmasi Event vs kategori.
   const kategoriPerKlien = pesertaList.map((p) => kategoriKlien(daftarLayanan, p.layananId, p.kategoriMakeup))
   const peringatanEvent = peringatanKategoriEvent(kategoriPerKlien, eventSekarang)
+  // Total tagihan SEBELUM diskon (rumus sama dengan VIEW booking_summary) --
+  // buat ringkasan & pengecekan diskon. Angka resminya tetap dari database.
+  const tagihanSebelumDiskon = tagihanSebelumDiskonForm(biayaTransport, pesertaList)
+  function ubahAdaDiskon(ya) {
+    setAdaDiskon(ya)
+    if (!ya) { setDiskon(''); setKeteranganDiskon('') }
+  }
 
   // Pilih Layanan di kartu Klien i -> Kategori & Jenis Makeup ikut layanan
   // (fieldnya disembunyiin & disimpan dari layanan), Biaya Makeup keisi harga
@@ -494,6 +507,12 @@ export default function BookingModal({ onClose, onSaved }) {
       return
     }
 
+    // Diskon nggak boleh lebih besar dari total tagihan sebelum diskon.
+    if (adaDiskon) {
+      const pesanDiskon = pesanDiskonTidakValid(diskon, tagihanSebelumDiskon)
+      if (pesanDiskon) { tolakSimpan(`Booking belum bisa disimpan: ${pesanDiskon}`, { selector: '[data-diskon-nominal]' }); return }
+    }
+
     // Konfirmasi Event vs kategori -- BUKAN larangan (polanya sama kayak
     // pengingat Rp0 di bawah): Simpan pertama munculin banner kuning di atas
     // form; Simpan kedua tetap menyimpan. Ditanya lagi kalau kombinasinya
@@ -541,6 +560,7 @@ export default function BookingModal({ onClose, onSaved }) {
         lokasi: lokasi.trim(),
         event: eventSekarang,
         biaya_transport: Number(biayaTransport) || 0,
+        ...nilaiSimpanDiskon(adaDiskon, diskon, keteranganDiskon),
         catatan: catatan.trim(),
       })
       .select()
@@ -821,6 +841,16 @@ export default function BookingModal({ onClose, onSaved }) {
               )}
               </div>
             </div>
+
+            <DiskonBooking
+              ada={adaDiskon}
+              onUbahAda={ubahAdaDiskon}
+              diskon={diskon}
+              onUbahDiskon={setDiskon}
+              keterangan={keteranganDiskon}
+              onUbahKeterangan={setKeteranganDiskon}
+              tagihanSebelumDiskon={tagihanSebelumDiskon}
+            />
 
             <div className="field-grid-booking cols-catatan">
               <div className="field">

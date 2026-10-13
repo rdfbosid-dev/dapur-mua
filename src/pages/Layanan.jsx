@@ -2,16 +2,17 @@ import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import Sidebar from '../components/Sidebar'
 import LayananModal from '../components/LayananModal'
-import { KOLOM_LAYANAN, namaLayanan } from '../lib/layanan'
+import { KOLOM_LAYANAN, labelHalamanLayanan, bandingHalamanLayanan } from '../lib/layanan'
 import './Layanan.css'
 
 function formatRupiah(n) {
   return 'Rp' + (Number(n) || 0).toLocaleString('id-ID')
 }
 
-// Label baris "Kategori - Jenis Makeup", misal "Wedding - Premium".
+// Label baris, misal "Wedding - Premium", "Wedding" (paket dasar, Jenis
+// kosong), "Regular - Standard (Jogja)" (Keterangan dalam kurung).
 function labelPaket(l) {
-  return `${l.kategori_makeup} - ${namaLayanan(l)}`
+  return labelHalamanLayanan(l)
 }
 
 // Halaman PAKET LAYANAN -- daftar paket layanan makeup milik user ini.
@@ -56,14 +57,11 @@ export default function Layanan() {
     muatUlang()
   }
 
-  // Urut ABJAD berdasarkan label lengkapnya (Kategori dulu, lalu Jenis),
-  // misal Regular - Standard, Regular - VIP, Special Occasion - VIP,
-  // Wedding - Premium, Wedding - Ultimate. Paket nonaktif tetap di posisi
-  // abjadnya (cuma diredupkan + label Nonaktif).
-  const urut = useMemo(
-    () => [...daftar].sort((a, b) => labelPaket(a).localeCompare(labelPaket(b), 'id', { sensitivity: 'base', numeric: true })),
-    [daftar],
-  )
+  // Urut Kategori A-Z, lalu paket dasar (tanpa Jenis) dulu, Jenis A-Z, dan
+  // varian Keterangan nempel di bawah Jenis yang sama, misal Regular - Standard,
+  // Regular - Standard (Jogja), Regular - VIP, Wedding, Wedding (Jogja),
+  // Wedding - Premium. Paket nonaktif tetap di posisinya (diredupkan + label).
+  const urut = useMemo(() => [...daftar].sort(bandingHalamanLayanan), [daftar])
   const jumlahAktif = daftar.filter((l) => l.aktif).length
 
   return (

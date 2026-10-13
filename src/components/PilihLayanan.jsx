@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { kelompokOpsiLayanan, labelLayanan, layananDipakai, namaLayanan, tampilkanPilihanLayanan, PILIHAN_ISI_MANUAL } from '../lib/layanan'
+import { kelompokOpsiLayanan, labelLayanan, labelLengkapLayanan, layananDipakai, namaLayanan, tampilkanPilihanLayanan, kategoriLebihTinggi, PILIHAN_ISI_MANUAL } from '../lib/layanan'
 import './CustomSelect.css'
 import './PilihLayanan.css'
 
@@ -106,21 +106,41 @@ export function PetunjukEventLayanan({ daftar }) {
   return <div className="pilih-layanan-catatan">Layanan yang cocok untuk acara ini akan muncul paling atas di pilihan Paket Layanan Makeup.</div>
 }
 
-// Catatan di kartu klien (warna kuning lembut = "cek lagi", BUKAN error):
-// muncul kalau peringatanKategoriEvent aktif & klien ini udah punya kategori.
-// Nggak ngeblok apa pun -- konfirmasinya ada waktu Simpan.
+// Catatan di kartu klien (warna kuning lembut = "cek lagi", BUKAN error).
+// Nggak ngeblok apa pun -- konfirmasinya ada waktu Simpan. Muncul kalau:
+// - kategori klien ini LEBIH TINGGI dari kategori acara (misal Wedding di
+//   Wisuda) -- cuma di kartu klien itu; atau
+// - NGGAK SATU PUN klien cocok sama acara -- di semua kartu yang udah
+//   punya kategori.
 export function CatatanKategoriKartu({ peringatan, kategori }) {
-  if (!peringatan || !String(kategori || '').trim()) return null
+  const k = String(kategori || '').trim()
+  if (!peringatan || !k) return null
+  if (kategoriLebihTinggi(k, peringatan.kategori)) {
+    return (
+      <div className="pilih-layanan-peringatan" role="note">
+        Kategori klien ini <b>{k}</b>, lebih tinggi dari kategori yang biasa dipakai acara <b>{peringatan.event}</b> (<b>{peringatan.kategori}</b>). Pastikan sudah benar.
+      </div>
+    )
+  }
+  if (!peringatan.tidakAdaYangCocok) return null
   return (
     <div className="pilih-layanan-peringatan" role="note">
-      Kategori klien ini <b>{kategori}</b>, sedangkan acara <b>{peringatan.event}</b> biasanya pakai kategori <b>{peringatan.kategori}</b>. Pastikan sudah benar.
+      Kategori klien ini <b>{k}</b>, sedangkan acara <b>{peringatan.event}</b> biasanya pakai kategori <b>{peringatan.kategori}</b>. Pastikan sudah benar.
     </div>
   )
 }
 
 // Teks konfirmasi waktu Simpan (dipakai BookingModal & BookingDetailModal).
 export function pesanKonfirmasiKategori(peringatan, namaTombol) {
-  return `Acara ${peringatan.event} biasanya pakai kategori ${peringatan.kategori}, tapi kategori klien di booking ini ${peringatan.kategoriKlien.join(', ')}. Kalau sudah benar, tekan ${namaTombol} sekali lagi.`
+  const kalimat = []
+  if (peringatan.lebihTinggi && peringatan.lebihTinggi.length > 0) {
+    const daftar = peringatan.lebihTinggi.map((x) => `Klien ${x.nomor} (${x.kategori})`).join(', ')
+    kalimat.push(`${daftar} memakai kategori yang lebih tinggi dari kategori yang biasa dipakai acara ${peringatan.event} (${peringatan.kategori}).`)
+  } else {
+    kalimat.push(`Acara ${peringatan.event} biasanya pakai kategori ${peringatan.kategori}, tapi kategori klien di booking ini ${peringatan.kategoriKlien.join(', ')}.`)
+  }
+  kalimat.push(`Kalau sudah benar, tekan ${namaTombol} sekali lagi.`)
+  return kalimat.join(' ')
 }
 
 // Keterangan di bawah field Biaya Makeup: muncul kalau biaya yang diisi beda
@@ -129,5 +149,5 @@ export function CatatanHargaLayanan({ layanan, biaya }) {
   if (!layanan) return null
   const hargaLayanan = Math.round(Number(layanan.biaya_makeup) || 0)
   if (Math.round(Number(biaya) || 0) === hargaLayanan) return null
-  return <div className="pilih-layanan-catatan">Harga layanan {layanan.kategori_makeup} · {namaLayanan(layanan)}: <b>{formatRupiah(hargaLayanan)}</b></div>
+  return <div className="pilih-layanan-catatan">Harga layanan {labelLengkapLayanan(layanan)}: <b>{formatRupiah(hargaLayanan)}</b></div>
 }

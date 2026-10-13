@@ -21,7 +21,15 @@ import { EVENT_OPTIONS, EVENT_CUSTOM_SENTINEL, EVENT_KELOMPOK, SARAN_KATEGORI, K
 // Biar tetap terarah tanpa ngunci: tiap Event standar punya kategori yang
 // BIASA dipakai (EVENT_KELOMPOK di constants.js). Dropdown Layanan naikin
 // layanan berkategori itu ke paling atas, dan ada peringatan halus kalau
-// semua layanan yang dipilih kategorinya beda dari acaranya.
+// semua layanan yang dipilih kategorinya beda dari acaranya, ATAU ada klien
+// yang kategorinya lebih TINGGI dari kategori acaranya (lihat
+// peringatanKategoriEvent).
+//
+// Identitas paket = KATEGORI + JENIS MAKEUP (opsional) + KETERANGAN (opsional):
+// - Jenis kosong = "paket dasar" kategori itu (di invoice: "Makeup Wedding").
+// - Keterangan = pembeda harga INTERNAL (misal "Jogja", "Weekend") -- cuma
+//   tampil di pilihan paket & halaman Paket Layanan, NGGAK pernah disimpan ke
+//   booking, jadi nggak pernah tampil di invoice.
 
 // Opsi pertama dropdown Layanan di kartu Klien = isi manual (perilaku lama).
 export const PILIHAN_ISI_MANUAL = 'Pilih Manual'
@@ -29,7 +37,7 @@ export const PILIHAN_ISI_MANUAL = 'Pilih Manual'
 // Label layanan nonaktif yang masih nempel di peserta booking lama.
 const AKHIRAN_NONAKTIF = ' (nonaktif)'
 
-export const KOLOM_LAYANAN = 'id, nama, kategori_makeup, jenis_makeup, biaya_makeup, aktif'
+export const KOLOM_LAYANAN = 'id, nama, kategori_makeup, jenis_makeup, keterangan, biaya_makeup, aktif'
 
 // Semua layanan milik user ini (aktif & nonaktif), urut nama. Gagal muat ->
 // [] (form booking tetap jalan normal kayak sebelum ada fitur ini).
@@ -64,15 +72,63 @@ export function biayaKeForm(biaya) {
   return n > 0 ? String(n) : ''
 }
 
-// Nama tampilan layanan = Jenis Makeup (data lama yang Jenis-nya kosong ->
-// pakai Nama). Di menu dropdown udah dikelompokkan per Kategori, jadi cukup
-// Jenis-nya; di tombol dropdown (labelLayanan) ditulis lengkap "Kategori · Jenis".
+// Jenis Makeup paket -- INI yang disimpan ke booking (peserta.jenis_paket).
+// '' = paket dasar (Jenis sengaja dikosongkan). Kolom `nama` di database
+// diisi otomatis (= Jenis, atau = Kategori buat paket dasar); data lama yang
+// Jenis-nya kosong tapi Nama-nya beda dari Kategori -> pakai Nama.
 export function namaLayanan(l) {
-  return String(l.jenis_makeup || '').trim() || String(l.nama || '').trim()
+  const jenis = String(l.jenis_makeup || '').trim()
+  if (jenis) return jenis
+  const nama = String(l.nama || '').trim()
+  return nama && normalKategori(nama) !== normalKategori(l.kategori_makeup) ? nama : ''
+}
+
+export function keteranganLayanan(l) {
+  return String(l.keterangan || '').trim()
+}
+
+// Label PENDEK (anak di menu dropdown, udah di bawah judul Kategori):
+// "Premium", "Standard · Jogja", "Wedding (paket dasar)".
+export function labelPendekLayanan(l) {
+  const inti = namaLayanan(l) || `${l.kategori_makeup} (paket dasar)`
+  const ket = keteranganLayanan(l)
+  return ket ? `${inti} · ${ket}` : inti
+}
+
+// Label LENGKAP (tombol dropdown, catatan harga): "Wedding · Premium",
+// "Regular · Standard · Jogja", "Wedding (paket dasar)".
+export function labelLengkapLayanan(l) {
+  const jenis = namaLayanan(l)
+  const inti = jenis ? `${l.kategori_makeup} · ${jenis}` : `${l.kategori_makeup} (paket dasar)`
+  const ket = keteranganLayanan(l)
+  return ket ? `${inti} · ${ket}` : inti
+}
+
+// Label di halaman Paket Layanan: "Wedding - Premium", "Wedding",
+// "Regular - Standard (Jogja)", "Wedding (Jogja)".
+export function labelHalamanLayanan(l) {
+  const jenis = namaLayanan(l)
+  const ket = keteranganLayanan(l)
+  return `${l.kategori_makeup}${jenis ? ` - ${jenis}` : ''}${ket ? ` (${ket})` : ''}`
+}
+
+// Urutan di halaman Paket Layanan: Kategori A-Z, lalu sama kayak di dropdown
+// (paket dasar dulu, Jenis A-Z, tanpa Keterangan dulu). Paket nonaktif tetap
+// di posisi urutannya.
+export function bandingHalamanLayanan(a, b) {
+  return String(a.kategori_makeup || '').localeCompare(String(b.kategori_makeup || ''), 'id', { sensitivity: 'base' }) || bandingPaket(a, b)
 }
 
 function labelDari(l) {
-  return l.aktif ? namaLayanan(l) : namaLayanan(l) + AKHIRAN_NONAKTIF
+  return l.aktif ? labelPendekLayanan(l) : labelPendekLayanan(l) + AKHIRAN_NONAKTIF
+}
+
+// Urutan paket di dalam 1 kategori: paket dasar dulu, lalu Jenis A-Z; Jenis
+// yang sama -> tanpa Keterangan dulu, lalu Keterangan A-Z. Jadi "Standard"
+// & "Standard · Jogja" selalu berdampingan.
+function bandingPaket(a, b) {
+  const banding = (x, y) => (x === y ? 0 : x === '' ? -1 : y === '' ? 1 : x.localeCompare(y, 'id', { sensitivity: 'base', numeric: true }))
+  return banding(namaLayanan(a), namaLayanan(b)) || banding(keteranganLayanan(a), keteranganLayanan(b))
 }
 
 // Objek layanan yang lagi dipakai baris ini (null = isi manual / layanannya
@@ -95,8 +151,8 @@ export function kategoriUntukEvent(ev) {
   return k ? k.kategori : null
 }
 
-// "Regular" (nilai lama) & "Regular" dianggap kategori yang SAMA -- data
-// lama banyak yang "Regular", pilihan sekarang "Regular".
+// "Reguler" (data lama) & "Regular" dianggap kategori yang SAMA -- jaga-jaga
+// kalau masih ada data lama bertuliskan "Reguler".
 function normalKategori(k) {
   const t = String(k || '').trim().toLowerCase()
   return t === 'regular' ? 'reguler' : t
@@ -129,21 +185,54 @@ export function kategoriKlien(daftar, idLayanan, kategoriManual) {
   return l ? l.kategori_makeup : String(kategoriManual || '').trim()
 }
 
-// Peringatan (bukan larangan): ada klien yang kategorinya udah dipilih, tapi
-// NGGAK SATU PUN berkategori yang biasa dipakai acara ini. Klien manual ikut
-// dihitung. Booking campuran (misal pengantin Wedding + ibu Regular di Akad)
-// aman, karena minimal 1 klien cocok.
-// Hasil: { event, kategori, kategoriKlien: [unik], kunci } atau null.
-// `kunci` dipakai buat konfirmasi Simpan: kalau kombinasinya berubah,
-// user ditanya lagi.
+// TINGKATAN kategori: Wedding > Special Occasion > Regular. Kategori lain
+// (data lama/aneh) -> 0 = nggak ikut dibandingkan.
+const TINGKAT_KATEGORI = { wedding: 3, 'special occasion': 2, reguler: 1 }
+export function tingkatKategori(k) {
+  return TINGKAT_KATEGORI[normalKategori(k)] || 0
+}
+
+// Klien ini kategorinya LEBIH TINGGI dari kategori acaranya? (misal Wedding
+// di acara Wisuda). Lebih RENDAH itu wajar (ibu/keluarga pakai Regular di
+// acara Wedding), jadi nggak dianggap masalah.
+export function kategoriLebihTinggi(kategoriKlien, kategoriAcara) {
+  const a = tingkatKategori(kategoriAcara)
+  const k = tingkatKategori(kategoriKlien)
+  return a > 0 && k > a
+}
+
+// Peringatan (bukan larangan) Event vs kategori klien. Klien manual ikut
+// dihitung. Muncul kalau SALAH SATU:
+// 1. NGGAK SATU PUN klien berkategori yang biasa dipakai acara ini (misal
+//    Akad tapi semua klien Regular).
+// 2. Ada klien yang kategorinya LEBIH TINGGI dari kategori acara (misal
+//    Wisuda, klien 1 Regular tapi klien 2 Wedding).
+// Booking campuran yang wajar (pengantin Wedding + ibu Regular di Akad) aman.
+// Jenis Makeup (Standard/VIP/...) NGGAK dibandingkan -- cuma kategorinya.
+// Hasil: { event, kategori, kategoriKlien: [unik], tidakAdaYangCocok,
+// lebihTinggi: [{ nomor, kategori }], kunci } atau null.
+// `kunci` dipakai buat konfirmasi Simpan: kalau kategori klien mana pun
+// berubah, user ditanya lagi.
 export function peringatanKategoriEvent(daftarKategori, ev) {
   const kategori = kategoriUntukEvent(ev)
   if (!kategori) return null
-  const terisi = daftarKategori.map((k) => String(k || '').trim()).filter(Boolean)
+  const semua = daftarKategori.map((k) => String(k || '').trim())
+  const terisi = semua.filter(Boolean)
   if (terisi.length === 0) return null
-  if (terisi.some((k) => normalKategori(k) === normalKategori(kategori))) return null
+  const tidakAdaYangCocok = !terisi.some((k) => normalKategori(k) === normalKategori(kategori))
+  const lebihTinggi = semua
+    .map((k, i) => ({ nomor: i + 1, kategori: k }))
+    .filter((x) => x.kategori && kategoriLebihTinggi(x.kategori, kategori))
+  if (!tidakAdaYangCocok && lebihTinggi.length === 0) return null
   const unik = [...new Set(terisi)]
-  return { event: String(ev).trim(), kategori, kategoriKlien: unik, kunci: `${String(ev).trim()}|${unik.join(',')}` }
+  return {
+    event: String(ev).trim(),
+    kategori,
+    kategoriKlien: unik,
+    tidakAdaYangCocok,
+    lebihTinggi,
+    kunci: `${String(ev).trim()}|${semua.map(normalKategori).join(',')}`,
+  }
 }
 
 // Kelompok pilihan dropdown Layanan di kartu Klien: per Kategori, kategori
@@ -158,9 +247,9 @@ export function kelompokOpsiLayanan(daftar, idTerpilih, eventAktif = '') {
   const kelompok = urutan.map((k) => ({
     judul: k === kategoriCocok ? `${k} · sesuai acara ${String(eventAktif).trim()}` : k,
     cocok: k === kategoriCocok,
-    opsi: daftar.filter((l) => normalKategori(l.kategori_makeup) === normalKategori(k) && (l.aktif || l.id === idTerpilih)).map((l) => ({ id: l.id, label: labelDari(l) })),
+    opsi: daftar.filter((l) => normalKategori(l.kategori_makeup) === normalKategori(k) && (l.aktif || l.id === idTerpilih)).sort(bandingPaket).map((l) => ({ id: l.id, label: labelDari(l) })),
   }))
-  kelompok.push({ judul: 'Lainnya', cocok: false, opsi: lainnya.filter((l) => l.aktif || l.id === idTerpilih).map((l) => ({ id: l.id, label: labelDari(l) })) })
+  kelompok.push({ judul: 'Lainnya', cocok: false, opsi: lainnya.filter((l) => l.aktif || l.id === idTerpilih).sort(bandingPaket).map((l) => ({ id: l.id, label: labelDari(l) })) })
   return kelompok.filter((k) => k.opsi.length > 0)
 }
 
@@ -169,7 +258,8 @@ export function kelompokOpsiLayanan(daftar, idTerpilih, eventAktif = '') {
 export function labelLayanan(daftar, id) {
   if (!id) return PILIHAN_ISI_MANUAL
   const l = daftar.find((x) => x.id === id)
-  return l ? `${l.kategori_makeup} · ${labelDari(l)}` : PILIHAN_ISI_MANUAL
+  if (!l) return PILIHAN_ISI_MANUAL
+  return l.aktif ? labelLengkapLayanan(l) : labelLengkapLayanan(l) + AKHIRAN_NONAKTIF
 }
 
 // Dropdown Layanan perlu ditampilin di kartu Klien? Cuma kalau user punya

@@ -38,6 +38,8 @@ import { bookingSelesai } from '../lib/durasiBooking'
 import { kelasStatusPembayaran, adaNilaiTagihan } from '../lib/statusPembayaran'
 import { muatLayanan, layananDipakai, namaLayanan, eventDariForm, peringatanKategoriEvent, kategoriKlien, labelMakeup } from '../lib/layanan'
 import PilihLayanan, { PetunjukEventLayanan, CatatanKategoriKartu, CatatanHargaLayanan, pesanKonfirmasiKategori } from './PilihLayanan'
+import DiskonBooking from './DiskonBooking'
+import { tagihanSebelumDiskonRow, pesanDiskonTidakValid, nilaiSimpanDiskon, labelDiskon } from '../lib/tagihan'
 
 function formatRupiah(n) {
   const num = Number(n) || 0
@@ -140,6 +142,10 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
   const [event, setEvent] = useState('')
   const [eventCustom, setEventCustom] = useState('')
   const [biayaTransport, setBiayaTransport] = useState('')
+  // Diskon per booking -- OPSIONAL. Lihat lib/tagihan.js.
+  const [adaDiskon, setAdaDiskon] = useState(false)
+  const [diskon, setDiskon] = useState('')
+  const [keteranganDiskon, setKeteranganDiskon] = useState('')
   const [catatan, setCatatan] = useState('')
   const [editPeserta, setEditPeserta] = useState([])
   const [removedPesertaIds, setRemovedPesertaIds] = useState([])
@@ -224,6 +230,9 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
       setEventCustom(liveBooking.event || '')
     }
     setBiayaTransport(liveBooking.biaya_transport ?? '')
+    setAdaDiskon(Number(liveBooking.diskon) > 0)
+    setDiskon(Number(liveBooking.diskon) > 0 ? String(Number(liveBooking.diskon)) : '')
+    setKeteranganDiskon(Number(liveBooking.diskon) > 0 ? (liveBooking.keterangan_diskon || '') : '')
     setCatatan(liveBooking.catatan || '')
     // Vendor yang UDAH ADA (dari bundlingItems, di-filter per peserta_id
     // masing-masing klien) dimuat jadi array "vendors" nested di tiap
@@ -400,6 +409,13 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
   // isian Kategori). Dipakai buat peringatan & konfirmasi Event vs kategori.
   const kategoriPerKlien = editPeserta.map((p) => kategoriKlien(daftarLayanan, p.layanan_id, p.kategori_makeup))
   const peringatanEvent = peringatanKategoriEvent(kategoriPerKlien, eventSekarang)
+  // Total tagihan SEBELUM diskon dari isian form edit (rumus sama dengan
+  // VIEW booking_summary) -- buat ringkasan & pengecekan diskon.
+  const tagihanSebelumDiskon = tagihanSebelumDiskonRow(biayaTransport, editPeserta)
+  function ubahAdaDiskon(ya) {
+    setAdaDiskon(ya)
+    if (!ya) { setDiskon(''); setKeteranganDiskon('') }
+  }
 
   // Pilih Layanan di kartu Klien i -> Kategori & Jenis Makeup ikut layanan
   // (fieldnya disembunyiin & disimpan dari layanan), Biaya Makeup keisi harga
@@ -552,6 +568,12 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
       return
     }
 
+    // Diskon nggak boleh lebih besar dari total tagihan sebelum diskon.
+    if (adaDiskon) {
+      const pesanDiskon = pesanDiskonTidakValid(diskon, tagihanSebelumDiskon)
+      if (pesanDiskon) { tolakSimpan(`Perubahan belum bisa disimpan: ${pesanDiskon}`, { selector: '[data-diskon-nominal]' }); return }
+    }
+
     // Konfirmasi Event vs kategori -- sama kayak di BookingModal.jsx.
     if (peringatanEvent && konfirmasiKategori !== peringatanEvent.kunci) {
       setKonfirmasiKategori(peringatanEvent.kunci)
@@ -595,6 +617,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
         lokasi: lokasi.trim(),
         event: eventSekarang,
         biaya_transport: Number(biayaTransport) || 0,
+        ...nilaiSimpanDiskon(adaDiskon, diskon, keteranganDiskon),
         catatan: catatan.trim(),
       })
       .eq('id', booking.id)
@@ -875,6 +898,15 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                 <div><span className="detail-label-summary">Sisa Tagihan</span><div className="pay-value" style={{ color: sisa > 0 ? 'var(--notif)' : 'var(--ink-soft)' }}>{formatRupiah(sisa)}</div></div>
               </div>
 
+              {/* Diskon CUMA nongol kalau booking ini memang dikasih diskon. */}
+              {Number(liveBooking.diskon) > 0 && (
+                <div className="diskon-detail">
+                  <span>{labelDiskon(liveBooking.keterangan_diskon)}</span>
+                  <b>−{formatRupiah(liveBooking.diskon)}</b>
+                  <span className="diskon-detail-asal">Total Tagihan di atas sudah dipotong diskon (sebelum diskon {formatRupiah(liveBooking.belanja_sebelum_diskon)}).</span>
+                </div>
+              )}
+
               <div className="detail-label-history">Riwayat Pembayaran</div>
               {payments.length > 0 && (
                 <div className="pay-history">
@@ -1070,6 +1102,16 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                   <textarea value={catatan} onChange={(e) => setCatatan(e.target.value)} />
                 </div>
               </div>
+
+              <DiskonBooking
+                ada={adaDiskon}
+                onUbahAda={ubahAdaDiskon}
+                diskon={diskon}
+                onUbahDiskon={setDiskon}
+                keterangan={keteranganDiskon}
+                onUbahKeterangan={setKeteranganDiskon}
+                tagihanSebelumDiskon={tagihanSebelumDiskon}
+              />
 
             <div className="section-label">Klien</div>
               {editPeserta.map((p, i) => (

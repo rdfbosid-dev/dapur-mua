@@ -381,7 +381,7 @@ export default function PengeluaranModal({ onClose, onSaved, editData = null }) 
                           options={[...infoKategori.opsiItem.map((o) => o.nama), ITEM_LAINNYA.label]}
                           value={it.nama}
                           onChange={(label) => pilihNamaItem(idx, label)}
-                          placeholder="Pilih item"
+                          placeholder="Pilih Item"
                           variant="modal"
                         />
                         {/* Sama kayak field Event di form Booking: opsi

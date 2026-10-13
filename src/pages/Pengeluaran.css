@@ -43,7 +43,7 @@
    ATAS baris filter & selebar halaman penuh (nggak dibatasin max-width). */
 /* Teks polos di atas kolom PETUNJUK (tanpa latar) -- sama kayak .lyn-opsional
    di Layanan.css. */
-.pgl-opsional { font-size: 13px; color: var(--ink-soft); margin-bottom: 8px; line-height: 1.5; }
+.pgl-opsional { font-size: 14px; color: var(--ink-soft); margin-bottom: 16px; line-height: 1.5; }
 .pgl-hint { padding: 8px 16px; border-radius: 12px; border: 3px solid color-mix(in srgb, var(--pill-alt) 30%, transparent); font-size: 13px; color: var(--h9); background: var(--card-langganan); margin-bottom: 18px; line-height: 1.5; text-align: justify; }
 .pgl-hint a { font-weight: 800; }
 .pgl-hint b { color: var(--teks-khusus); opacity: 0.8; }
@@ -99,14 +99,21 @@
   .pgl-search { max-width: none; flex: 1 1 100%; }
   .pgl-filter-select { flex: 1 1 calc(50% - 6px); width: auto; }
   .pgl-kategori-list { grid-template-columns: minmax(0, 1fr); }
-  .pgl-hint, .pgl-opsional { font-size: 11px; }
+  .pgl-hint { font-size: 11px; }
+  .pgl-opsional { font-size: 12px; }
+  .pgl-judul { font-size: 13px }
+  .pgl-meta { font-size: 11px; }
 }
 @media (max-width: 640px) {
   .pgl-bulan { padding: 16px; }
   .pgl-total { font-size: 22px; }
   .pgl-hint { font-size: 11px; }
+  .pgl-judul { font-size: 13px }
+  .pgl-meta { font-size: 11px; }
 }
 @media (max-width: 480px) {
   .pgl-search { padding: 8px 12px; }
   .pgl-hint { font-size: 11px; }
+  .pgl-judul { font-size: 13px }
+  .pgl-meta { font-size: 11px; }
 }

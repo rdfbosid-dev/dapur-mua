@@ -4,10 +4,11 @@ import { useAuth } from '../context/AuthContext'
 import IconClose from './IconClose'
 import { KATEGORI_MAKEUP_OPTIONS } from '../lib/constants'
 import { formatAngkaInput, parseAngkaInput } from '../lib/format'
-import { biayaKeForm, saranKategoriDariNama } from '../lib/layanan'
+import { biayaKeForm, saranKategoriDariNama, namaLayanan, keteranganLayanan, labelHalamanLayanan } from '../lib/layanan'
 import './LayananModal.css'
 
 const PANJANG_MAKS_NAMA = 80
+const PANJANG_MAKS_KETERANGAN = 40
 
 // Placeholder Jenis Makeup -- ikut Kategori yang dipilih. Belum pilih
 // Kategori (atau kategori lain) -> PLACEHOLDER_JENIS_UMUM.
@@ -18,6 +19,14 @@ const PLACEHOLDER_JENIS = {
   Regular: 'contoh: Standard, VIP',
 }
 
+// Contoh label invoice di catatan bawah Jenis Makeup -- ikut Kategori yang
+// dipilih (catatannya baru tampil setelah Kategori dipilih).
+const CONTOH_INVOICE = {
+  Wedding: 'Makeup Wedding Premium',
+  'Special Occasion': 'Makeup Special Occasion VVIP',
+  Regular: 'Makeup Regular VIP',
+}
+
 function capitalizeWords(str) {
   return str.replace(/\b\w/g, (c) => c.toUpperCase())
 }
@@ -26,9 +35,11 @@ function capitalizeWords(str) {
 // (nggak terikat ke Event -- lihat lib/layanan.js). Alurnya kayak form
 // Pengeluaran: yang tampil pertama cuma KATEGORI & NAMA LAYANAN; field lain
 // baru kebuka setelah Kategori dipilih.
-// Identitas layanan = KATEGORI + JENIS MAKEUP (nggak ada field Nama terpisah;
-// kolom `nama` di database diisi otomatis = Jenis Makeup). Contoh:
-// Wedding · Premium, Wedding · Ultimate, Regular · Ibu Pengantin.
+// Identitas paket = KATEGORI + JENIS MAKEUP (opsional) + KETERANGAN (opsional).
+// - Jenis kosong = paket dasar kategori itu (invoice: "Makeup Wedding").
+// - Keterangan = pembeda harga internal (misal "Jogja"), NGGAK tampil di invoice.
+// Kolom `nama` di database diisi otomatis (= Jenis, atau = Kategori kalau
+// Jenis kosong). Contoh: Wedding · Premium, Regular · Standard · Jogja.
 // - editData null  -> mode tambah.
 // - editData diisi -> mode edit (semua field langsung kebuka), plus Hapus.
 export default function LayananModal({ editData = null, onClose, onSaved }) {
@@ -38,8 +49,9 @@ export default function LayananModal({ editData = null, onClose, onSaved }) {
   const [kategori, setKategori] = useState(
     editData && KATEGORI_MAKEUP_OPTIONS.includes(editData.kategori_makeup) ? editData.kategori_makeup : '',
   )
-  // Layanan lama yang Jenis-nya kosong -> pakai Nama-nya sebagai Jenis.
-  const [jenis, setJenis] = useState(editData ? (String(editData.jenis_makeup || '').trim() || editData.nama || '') : '')
+  // Layanan lama yang Jenis-nya kosong -> pakai Nama-nya (lihat namaLayanan).
+  const [jenis, setJenis] = useState(editData ? namaLayanan(editData) : '')
+  const [keterangan, setKeterangan] = useState(editData ? keteranganLayanan(editData) : '')
   const [biaya, setBiaya] = useState(isEdit ? biayaKeForm(editData.biaya_makeup) : '')
   const [aktif, setAktif] = useState(isEdit ? editData.aktif !== false : true)
 
@@ -54,17 +66,19 @@ export default function LayananModal({ editData = null, onClose, onSaved }) {
     if (saving) return
     setError('')
 
-    const jenisBersih = jenis.trim()
+    const jenisBersih = capitalizeWords(jenis.trim())
+    const keteranganBersih = capitalizeWords(keterangan.trim())
     const biayaAngka = Math.round(Number(biaya) || 0)
 
     if (!kategori) { setError('Kategori wajib dipilih.'); return }
-    if (!jenisBersih) { setError('Jenis Makeup wajib diisi.'); return }
     if (biayaAngka <= 0) { setError('Biaya makeup per sesi wajib diisi.'); return }
 
     const payload = {
-      nama: jenisBersih,
+      // Jenis kosong (paket dasar) -> nama = Kategori (kolom nama wajib terisi).
+      nama: jenisBersih || kategori,
       kategori_makeup: kategori,
       jenis_makeup: jenisBersih,
+      keterangan: keteranganBersih,
       biaya_makeup: biayaAngka,
       aktif,
     }
@@ -76,7 +90,9 @@ export default function LayananModal({ editData = null, onClose, onSaved }) {
     setSaving(false)
 
     if (err) {
-      setError(err.code === '23505' ? `Layanan ${kategori} · ${jenisBersih} sudah ada. Pakai Jenis Makeup lain.` : err.message)
+      setError(err.code === '23505'
+        ? `Paket ${labelHalamanLayanan({ kategori_makeup: kategori, jenis_makeup: jenisBersih, keterangan: keteranganBersih })}${jenisBersih ? '' : ' (paket dasar)'} sudah ada. Bedakan lewat Jenis Makeup atau Keterangan.`
+        : err.message)
       return
     }
     onSaved()
@@ -128,7 +144,7 @@ export default function LayananModal({ editData = null, onClose, onSaved }) {
             </div>
 
             <div className="field">
-              <label>Jenis Makeup</label>
+              <label>Jenis Makeup (opsional)</label>
               <input
                 type="text"
                 placeholder={PLACEHOLDER_JENIS[kategori] || PLACEHOLDER_JENIS_UMUM}
@@ -137,7 +153,9 @@ export default function LayananModal({ editData = null, onClose, onSaved }) {
                 onChange={(e) => setJenis(e.target.value)}
                 onBlur={(e) => setJenis(capitalizeWords(e.target.value.trim()))}
               />
-              <div className="layanan-catatan">Nama ini yang akan tampil di invoice, misal "Makeup Wedding Premium".</div>
+              {kategori && (
+                <div className="layanan-catatan">Nama ini yang akan tampil di invoice, misal "{CONTOH_INVOICE[kategori] || `Makeup ${kategori}`}". Boleh dikosongkan kalau di kategori ini kamu cuma punya satu paket, di invoice jadi "Makeup {kategori}".</div>
+              )}
             </div>
 
             {!kategori && (
@@ -146,6 +164,19 @@ export default function LayananModal({ editData = null, onClose, onSaved }) {
 
             {kategori && (
               <>
+                <div className="field">
+                  <label>Keterangan (opsional)</label>
+                  <input
+                    type="text"
+                    placeholder="contoh: Solo, Jogja, Dalam Kota, Luar Kota, Weekdays, Weekend"
+                    maxLength={PANJANG_MAKS_KETERANGAN}
+                    value={keterangan}
+                    onChange={(e) => setKeterangan(e.target.value)}
+                    onBlur={(e) => setKeterangan(capitalizeWords(e.target.value.trim()))}
+                  />
+                  <div className="layanan-catatan">Field ini berfungsi untuk membedakan harga paket dengan kategori dan jenis makeup yang sama, misalnya per wilayah (Dalam Kota, Luar Kota) atau waktu (Weekdays, Weekend). Keterangan cuma tampil di pilihan paket saat membuat booking, nggak tampil di invoice.</div>
+                </div>
+
                 <div className="field-grid-layanan cols-2">
                   <div className="field">
                     <label>Biaya Makeup per Sesi</label>
@@ -175,7 +206,7 @@ export default function LayananModal({ editData = null, onClose, onSaved }) {
           {isEdit && konfirmasiHapus && (
             <div className="delete-confirm-banner">
               <div className="delete-confirm-text">
-                <b>Yakin menghapus paket {editData.kategori_makeup} - {String(editData.jenis_makeup || '').trim() || editData.nama}?</b>
+                <b>Yakin menghapus paket {labelHalamanLayanan(editData)}?</b>
                 <span>Booking yang pernah memakai paket ini tidak berubah sama sekali (angka & isinya tetap).<br />
                 Paket yang sudah dihapus tidak bisa dikembalikan.</span>
               </div>
