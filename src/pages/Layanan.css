@@ -1,0 +1,52 @@
+/* Halaman Paket Layanan -- file CSS mandiri dengan prefix .lyn-* (konvensi
+   project: tiap halaman punya class sendiri), KECUALI class layout shell
+   (.app-shell, .main, .topbar, .topbar-actions, .greeting, .greeting-date,
+   .loading-state, .btn-booking-primary) dari Dashboard.css.
+   Kartu & baris daftar SENGAJA disamain sama daftar transaksi di halaman
+   Pengeluaran (.pgl-bulan / .pgl-row di Pengeluaran.css), tanpa kotak
+   tanggal. Tiap paket 1 baris "Kategori - Jenis", urut abjad. Warna nama
+   & harga punya halaman ini sendiri. Petunjuk disamain sama .pgl-hint. */
+
+.lyn-card { background: color-mix(in srgb, var(--box-dashboard) 90%, transparent); border-radius: 20px; padding: 22px; border: 1px solid var(--line-box); box-shadow: var(--shadow-card); }
+
+/* Teks polos di atas kolom PETUNJUK (tanpa latar). */
+.lyn-opsional { font-size: 13px; color: var(--ink-soft); margin-bottom: 8px; line-height: 1.5; }
+
+.lyn-hint { padding: 8px 16px; border-radius: 12px; border: 3px solid color-mix(in srgb, var(--pill-alt) 30%, transparent); font-size: 13px; color: var(--h9); background: var(--card-langganan); margin-bottom: 18px; line-height: 1.5; text-align: justify; }
+.lyn-hint a { font-weight: 800; }
+.lyn-hint b { color: var(--teks-khusus); opacity: 0.8; }
+
+.lyn-kosong { font-size: 13.5px; color: var(--ink-soft); line-height: 1.6; text-align: center; padding: 28px 22px; }
+
+/* ---------- Kartu & baris daftar paket -- nilai SAMA kayak .pgl-bulan &
+   .pgl-row (Pengeluaran.css), minus kotak tanggal. ---------- */
+.lyn-daftar { padding: 18px 22px; }
+.lyn-row {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 14px;
+  width: 100%; padding: 12px; text-align: left;
+  font-family: inherit; background: none; border: none; cursor: pointer;
+  border-bottom: 1px solid color-mix(in srgb, var(--line-box) 70%, transparent);
+  border-radius: 10px; transition: background 0.15s;
+}
+.lyn-row:last-child { border-bottom: none; }
+.lyn-row:hover { background: color-mix(in srgb, var(--ink-faint) 45%, transparent); }
+.lyn-row:focus-visible { outline: 2px solid var(--pill); outline-offset: -2px; }
+.lyn-row.nonaktif .lyn-nama,
+.lyn-row.nonaktif .lyn-harga { opacity: 0.55; }
+
+.lyn-nama { font-size: 14px; font-weight: 600; color: var(--ink-soft); overflow-wrap: break-word; word-break: break-word; min-width: 0; }
+
+/* Kolom kanan -- harga + label Nonaktif, ditumpuk kayak kolom pil di dashboard. */
+.lyn-kanan { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; }
+.lyn-harga { font-family: 'Poppins', sans-serif; font-size: 14px; font-weight: 700; color: var(--h5); white-space: nowrap; }
+.lyn-harga small { font-family: inherit; font-size: 11px; font-weight: 600; color: var(--ink-soft); opacity: 0.8; }
+/* Label Nonaktif -- ukuran sama kayak .dashboard-status-pill. */
+.lyn-badge { font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 6px; white-space: nowrap; background: var(--ink-faint); color: var(--ink-soft); }
+
+@media (max-width: 900px) {
+  .lyn-hint, .lyn-opsional { font-size: 11px; }
+}
+@media (max-width: 640px) {
+  .lyn-daftar { padding: 16px; }
+  .lyn-nama, .lyn-harga { font-size: 13px; }
+}

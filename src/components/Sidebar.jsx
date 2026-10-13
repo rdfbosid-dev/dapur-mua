@@ -19,6 +19,13 @@ const navUtamaMUA = [
   { to: '/pengeluaran', label: 'Pengeluaran', icon: 'wallet', fiturBaru: 'pengeluaran' },
 ]
 
+// Layanan Saya -- template layanan makeup (pengisi otomatis form booking).
+// SENGAJA di LUAR navUtamaMUA: bottom nav HP udah penuh (5 item), jadi
+// Layanan Saya dirender terpisah tepat SEBELUM section Rekapan -- di desktop
+// nongol di bawah Pengeluaran, di HP nongol di drawer (menu ☰) di atas
+// Rekapan (section Utama disembunyiin di drawer HP, lihat .nav-utama-group).
+const navLayanan = { to: '/layanan', label: 'Paket Layanan', icon: 'tag', fiturBaru: 'layanan' }
+
 const navRekapan = [
   { to: '/keuangan', label: 'Keuangan', icon: 'trend' },
   { to: '/laporan', label: 'Laporan', icon: 'file' },
@@ -74,6 +81,8 @@ function Icon({ name }) {
       return <svg {...common}><rect x="2" y="5" width="20" height="14" rx="2.5"/><path d="M2 10h20"/><path d="M6 15h4"/></svg>
     case 'wallet':
       return <svg {...common}><path d="M3 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v1"/><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M16 13.5h2"/></svg>
+    case 'tag':
+      return <svg {...common}><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>
     case 'logout':
       return <svg {...common}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
     default:
@@ -168,6 +177,14 @@ export default function Sidebar({ headerAction = null }) {
 
             {!isAdmin && (
             <>
+              <NavLink
+                to={navLayanan.to}
+                className={({ isActive }) => 'nav-item' + (isActive ? ' active' : '') + (adaTandaBaru(navLayanan) ? ' punya-tanda-baru' : '')}
+                >
+                <Icon name={navLayanan.icon} />
+                {navLayanan.label}
+                {adaTandaBaru(navLayanan) && <span className="tanda-fitur-baru">Fitur Baru</span>}
+              </NavLink>
               <div className="nav-section">Rekapan</div>
               {navRekapan.map((item) => (
               <NavLink

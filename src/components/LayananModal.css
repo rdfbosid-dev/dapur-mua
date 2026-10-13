@@ -1,0 +1,142 @@
+/* Form Tambah/Edit Layanan -- semua selector di-scope di bawah
+   .layanan-modal-overlay (konvensi project: tiap file modal punya scope
+   sendiri). Ukuran (lebar modal, judul, field 40px, font 12px, tombol
+   footer, bottom sheet di HP) SENGAJA disamain PERSIS sama
+   PengeluaranModal.css / BookingModal.css, biar kerasa satu keluarga. */
+
+.layanan-modal-overlay {
+  position: fixed; inset: 0; background: rgb(36, 55, 62, 0.45);
+  display: flex; align-items: center; justify-content: center; padding: 26px;
+  z-index: 95;
+  -webkit-text-size-adjust: 100%; text-size-adjust: 100%;
+}
+.layanan-modal-overlay .modal {
+  background: var(--table-body); border-radius: 24px; width: 100%; max-width: 600px;
+  max-height: 88vh; display: flex; flex-direction: column; overflow: hidden;
+  box-shadow: 0 24px 60px -12px var(--shadow-modal);
+}
+.layanan-modal-overlay .layanan-form { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.layanan-modal-overlay .modal-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 26px 26px 10px; flex-shrink: 0;
+}
+.layanan-modal-overlay .modal-head h2 { font-size: 18px; position: relative; padding-bottom: 5px; color: var(--ink-soft); }
+.layanan-modal-overlay .modal-head h2::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: 0;
+  height: 4px; border-radius: 2px; background: var(--line-animation);
+}
+.layanan-modal-overlay .modal-close {
+  width: 32px; height: 32px; border-radius: 10px; border: none; background: color-mix(in srgb, var(--h3) 20%, transparent);
+  color: var(--h3); font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s;
+}
+.layanan-modal-overlay .modal-close:hover { background: color-mix(in srgb, var(--h3) 50%, transparent); }
+.layanan-modal-overlay .modal-body {
+  padding: 10px 26px; overflow-y: auto; flex: 1; min-height: 0; -webkit-overflow-scrolling: touch;
+}
+.layanan-modal-overlay .modal-foot {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 16px 26px; flex-shrink: 0;
+}
+.layanan-modal-overlay .foot-right { display: flex; gap: 10px; margin-left: auto; }
+
+.layanan-modal-overlay .layanan-info { padding: 8px; background: color-mix(in srgb, var(--button-prm-hover) 30%, transparent); border-radius: 10px; font-size: 12px; line-height: 1.5; color: var(--h9); opacity: 0.85; margin: 4px 0 14px; }
+
+/* ---------- Field ---------- */
+.layanan-modal-overlay .field-grid-layanan { display: grid; gap: 8px; }
+.layanan-modal-overlay .field-grid-layanan.cols-2 { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.layanan-modal-overlay .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; margin-top: 5px; min-width: 0; }
+.layanan-modal-overlay .field label { font-size: 12px; font-weight: 600; color: var(--ink-soft); }
+.layanan-modal-overlay .field input {
+  border: 1.5px solid color-mix(in srgb, var(--button-border) 70%, transparent); border-radius: 11px; padding: 10px 10px;
+  font-size: 12px; font-family: inherit; color: var(--ink-soft); background: var(--field);
+  height: 40px; min-width: 0; width: 100%; box-sizing: border-box;
+}
+.layanan-modal-overlay .field input::placeholder { color: var(--placeholder); opacity: 1; }
+.layanan-modal-overlay .field input:focus {
+  outline: none; border-color: var(--h3); box-shadow: 0 0 0 3px color-mix(in srgb, var(--h3) 18%, transparent);
+}
+.layanan-modal-overlay .cselect-trigger { height: 40px; }
+
+/* Aktif / Nonaktif -- nilai SAMA kayak .toggle-row/.toggle-opt (Me/Tim) di BookingModal.css. */
+.layanan-modal-overlay .layanan-toggle-row { display: flex; gap: 6px; max-width: 280px; }
+.layanan-modal-overlay .layanan-toggle-opt {
+  flex: 1; text-align: center; padding: 7px; border-radius: 6px; font-size: 12px; font-weight: 600;
+  background: var(--ink-faint); color: var(--ink-soft); cursor: pointer;
+  transition: background 0.15s, color 0.15s; user-select: none;
+}
+.layanan-modal-overlay .layanan-toggle-opt:not(.sel):hover { background: color-mix(in srgb, var(--ink-faint) 50%, transparent); }
+.layanan-modal-overlay .layanan-toggle-opt.sel { background: var(--h3); color: #fff; }
+.layanan-modal-overlay .layanan-catatan { font-size: 11px; line-height: 1.45; color: var(--ink-soft); opacity: 0.85; }
+
+/* ---------- Tombol footer -- nilai SAMA PERSIS kayak PengeluaranModal.css ---------- */
+.layanan-modal-overlay .btn-primary-layanan {
+  padding: 10px 18px; border-radius: 11px; border: 1.5px solid var(--button-prm-hover); background: var(--button-prm-hover);
+  font-size: 13.5px; font-weight: 600; color: var(--button-tx-hover); cursor: pointer; font-family: inherit;
+  transition: background 0.15s, border-color 0.15s;
+}
+.layanan-modal-overlay .btn-primary-layanan:hover { background: var(--h3); }
+.layanan-modal-overlay .btn-ghost {
+  padding: 10px 18px; border-radius: 11px; border: 1.5px solid color-mix(in srgb, var(--button-border) 70%, transparent); background: var(--box-dashboard);
+  font-size: 13.5px; font-weight: 600; color: var(--ink-soft); cursor: pointer; font-family: inherit;
+  transition: background 0.15s, border-color 0.15s;
+}
+.layanan-modal-overlay .btn-ghost:hover { background: color-mix(in srgb, var(--button-prm-hover) 50%, transparent); border: 1.5px solid color-mix(in srgb, var(--button-prm-hover) 50%, transparent); }
+/* ---------- Hapus -- nilai SAMA PERSIS kayak konfirmasi Hapus Booking
+   di BookingDetailModal.css (.delete-confirm-*, .btn-danger*). ---------- */
+.layanan-modal-overlay .delete-confirm-banner { background: var(--notif); padding: 12px 26px; flex-shrink: 0; }
+.layanan-modal-overlay .delete-confirm-text { display: flex; flex-direction: column; gap: 3px; }
+.layanan-modal-overlay .delete-confirm-text b { color: var(--h8); font-size: 13.5px; }
+.layanan-modal-overlay .delete-confirm-text span { color: var(--h8); font-size: 12.5px; opacity: 0.85; }
+
+.layanan-modal-overlay .btn-danger-ghost {
+  padding: 8px 8px; border-radius: 11px; border: 1px solid var(--notif); background: var(--notif);
+  font-size: 12px; font-weight: 500; color: var(--h8); cursor: pointer; font-family: inherit;
+  transition: background 0.15s; line-height: 1.4;
+}
+.layanan-modal-overlay .btn-danger-ghost:hover { background: color-mix(in srgb, var(--notif) 85%, black); border: 1px solid color-mix(in srgb, var(--notif) 85%, black); }
+.layanan-modal-overlay .btn-danger.batal {
+  padding: 8px 10px; border-radius: 11px; border: 1.5px solid var(--button-tx); background: none;
+  font-size: 12px; font-weight: 600; color: var(--ink-soft); cursor: pointer; font-family: inherit;
+  transition: background 0.15s, border-color 0.15s;
+}
+.layanan-modal-overlay .btn-danger.batal:hover {
+  background: color-mix(in srgb, var(--button-prm-hover) 50%, transparent); border: 1.5px solid color-mix(in srgb, var(--button-prm-hover) 50%, transparent);
+}
+.layanan-modal-overlay .btn-danger {
+  padding: 8px 10px; border-radius: 11px; border: 1.5px solid var(--notif); background: var(--notif); color: #fff;
+  font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; line-height: 1.4;
+  transition: background 0.15s;
+}
+.layanan-modal-overlay .btn-danger:not(.batal):hover { background: color-mix(in srgb, var(--notif) 85%, black); border: 1.5px solid color-mix(in srgb, var(--notif) 85%, black); }
+.layanan-modal-overlay button:disabled { opacity: 0.6; cursor: default; }
+
+.layanan-modal-overlay .layanan-error { background: var(--pill); color: var(--h8); font-size: 12.5px; padding: 10px 14px; border-radius: 10px; margin-bottom: 10px; }
+
+@media (max-width: 640px) {
+  .layanan-modal-overlay { padding: 0; align-items: flex-end; }
+  .layanan-modal-overlay .modal { max-width: 100%; max-height: 92vh; border-radius: 22px 22px 0 0; }
+  .layanan-modal-overlay .modal-head { padding: 16px 18px; }
+  .layanan-modal-overlay .modal-body { padding: 16px 18px; }
+  .layanan-modal-overlay .modal-foot { padding: 12px 18px 18px; }
+  .layanan-modal-overlay .delete-confirm-banner { padding: 14px 18px; }
+  .layanan-modal-overlay .field-grid-layanan.cols-2 { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .layanan-modal-overlay .layanan-toggle-row { max-width: none; }
+}
+
+/* Kategori -- 3 tombol (dipilih pertama, buka field di bawahnya). */
+.layanan-modal-overlay .layanan-kategori-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.layanan-modal-overlay .layanan-kategori-opt {
+  position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  min-height: 30px; padding: 4px 6px; border-radius: 6px; cursor: pointer;
+  font-family: inherit; font-size: 12px; font-weight: 700; line-height: 1.25; text-align: center;
+  border: 1.5px solid color-mix(in srgb, var(--button-border) 70%, transparent);
+  background: var(--field); color: var(--ink-soft);
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.layanan-modal-overlay .layanan-kategori-opt:hover { border-color: var(--h3); }
+.layanan-modal-overlay .layanan-kategori-opt.sel { background: var(--h3); border-color: var(--h3); color: #fff; }
+.layanan-modal-overlay .layanan-badge-saran {
+  font-size: 9.5px; font-weight: 700; padding: 1px 7px; border-radius: 999px;
+  background: color-mix(in srgb, var(--h3) 22%, transparent); color: var(--h5);
+}
+

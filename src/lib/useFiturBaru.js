@@ -13,6 +13,7 @@ import { useAuth } from '../context/AuthContext'
 // Mau menghentikan tandanya lebih cepat? Hapus barisnya dari FITUR_BARU.
 export const FITUR_BARU = {
   pengeluaran: { durasiJam: 48 },
+  layanan: { durasiJam: 48 },
 }
 
 const MS_PER_JAM = 60 * 60 * 1000

@@ -16,6 +16,28 @@ const KATEGORI_AGENDA = ['Portofolio', 'Pelatihan & Kelas']
 // DURASI_DEFAULT_JAM di src/lib/durasiBooking.js.
 const DURASI_DEFAULT_JAM = 2
 
+// UUID akun admin -- SALINAN dari ADMIN_USER_ID di src/context/AuthContext.jsx
+// (& api/admin/users.js). Admin nggak pernah kekunci, di app maupun di sini.
+const ADMIN_USER_ID = '5a6ae3db-228c-464a-9b1e-f94e3071fdc9'
+
+// Zona waktu MUA (profiles.zona_waktu) -> nama zona yang dimengerti app
+// kalender HP. SALINAN dari ZONA_WAKTU di src/lib/zonaWaktu.js -- kalau ubah
+// salah satu, ubah dua-duanya. Jam booking di database itu jam setempat
+// MUA, jadi zonanya HARUS ikut zona MUA (dulu dipatok Asia/Jakarta, bikin
+// acara jam 14:00 WITA muncul jam 15:00 di kalender HP).
+const IANA_ZONA = { WIB: 'Asia/Jakarta', WITA: 'Asia/Makassar', WIT: 'Asia/Jayapura' }
+
+// Tanggal hari ini (YYYYMMDD) menurut zona MUA -- server Vercel jalan di
+// UTC, jadi tanggal UTC bisa masih "kemarin" pas dini hari di Indonesia.
+function hariIniDiZona(tzid) {
+  try {
+    return new Intl.DateTimeFormat('en-CA', { timeZone: tzid, year: 'numeric', month: '2-digit', day: '2-digit' })
+      .format(new Date()).replace(/-/g, '')
+  } catch {
+    return formatDateUTC(new Date()).slice(0, 8)
+  }
+}
+
 // Karakter khusus (koma, titik-koma, newline, backslash) WAJIB di-escape
 // di format iCalendar, kalau nggak bisa bikin file .ics-nya rusak/nggak
 // kebaca sama app kalender.
@@ -59,7 +81,7 @@ export default async function handler(req, res) {
 
   const { data: profile, error: profileError } = await supabaseAdmin
     .from('profiles')
-    .select('id, studio_name, trial_ends_at, subscription_status')
+    .select('id, studio_name, trial_ends_at, subscription_status, subscription_ends_at, zona_waktu')
     .eq('kode_kalender', kode)
     .maybeSingle()
 
@@ -69,14 +91,29 @@ export default async function handler(req, res) {
   }
 
   const studioName = profile.studio_name || 'Dapur MUA'
+  const tzid = IANA_ZONA[profile.zona_waktu] || IANA_ZONA.WIB
   const now = formatDateUTC(new Date())
 
   // Sama persis logic-nya kayak `isLocked` di AuthContext.jsx (React) --
   // TAPI endpoint ini jalan di server, di luar app React, jadi nggak bisa
-  // numpang ke situ, logic-nya perlu di-duplikasi manual di sini.
-  const isLocked = profile.subscription_status !== 'active'
-    && profile.trial_ends_at
-    && new Date(profile.trial_ends_at) < new Date()
+  // numpang ke situ, logic-nya perlu di-duplikasi manual di sini. Kalau
+  // aturan di AuthContext.jsx berubah, ubah juga di sini. Kekunci kalau:
+  // 1. TRIAL HABIS -- status BUKAN 'active' DAN trial_ends_at udah lewat.
+  // 2. LANGGANAN HABIS -- status 'active' TAPI subscription_ends_at udah
+  //    lewat (SEBELUMNYA kasus ini nggak dicek, jadi pelanggan yang
+  //    langganannya habis tetap dapat jadwal asli di kalender HP).
+  //    subscription_ends_at kosong (null) = aktif permanen.
+  // Admin nggak pernah kekunci (sama kayak di app).
+  // Data booking NGGAK dihapus -- cuma ditahan. Begitu langganan aktif lagi,
+  // sinkron berikutnya ngirim jadwal lengkap lagi (UID sama, link sama).
+  const sekarang = new Date()
+  const trialHabis = profile.subscription_status !== 'active'
+    && !!profile.trial_ends_at
+    && new Date(profile.trial_ends_at) < sekarang
+  const langgananHabis = profile.subscription_status === 'active'
+    && !!profile.subscription_ends_at
+    && new Date(profile.subscription_ends_at) < sekarang
+  const isLocked = profile.id !== ADMIN_USER_ID && (trialHabis || langgananHabis)
 
   if (isLocked) {
     // JANGAN ambil/bocorin data booking asli sama sekali kalau udah
@@ -86,7 +123,7 @@ export default async function handler(req, res) {
     // ke-subscribe sebelumnya bakal ke-replace sama ini pas app
     // kalendernya sinkron ulang (soalnya semua event lama otomatis
     // ilang begitu file .ics-nya nggak nyantumin UID itu lagi).
-    const todayStr = formatDateUTC(new Date()).slice(0, 8)
+    const todayStr = hariIniDiZona(tzid)
     const placeholderIcs = [
       'BEGIN:VCALENDAR',
       'VERSION:2.0',
@@ -226,8 +263,8 @@ export default async function handler(req, res) {
       'BEGIN:VEVENT',
       `UID:${b.id}@dapurmua.app`,
       `DTSTAMP:${now}`,
-      allDay ? `DTSTART;VALUE=DATE:${dtStart}` : `DTSTART;TZID=Asia/Jakarta:${dtStart}`,
-      allDay ? `DTEND;VALUE=DATE:${dtEnd}` : `DTEND;TZID=Asia/Jakarta:${dtEnd}`,
+      allDay ? `DTSTART;VALUE=DATE:${dtStart}` : `DTSTART;TZID=${tzid}:${dtStart}`,
+      allDay ? `DTEND;VALUE=DATE:${dtEnd}` : `DTEND;TZID=${tzid}:${dtEnd}`,
       `SUMMARY:${summary}`,
       location ? `LOCATION:${location}` : null,
       description ? `DESCRIPTION:${description}` : null,
@@ -266,6 +303,7 @@ export default async function handler(req, res) {
     'PRODID:-//Dapur MUA//Kalender Booking//ID',
     'CALSCALE:GREGORIAN',
     `X-WR-CALNAME:Jadwal Booking - ${escapeICS(studioName)}`,
+    `X-WR-TIMEZONE:${tzid}`,
     ...events,
     ...agendaEvents,
     'END:VCALENDAR',

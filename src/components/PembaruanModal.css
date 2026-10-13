@@ -1,0 +1,91 @@
+/* Modal info pembaruan ("Update 1.1") -- semua selector di-scope di bawah
+   .pmb-overlay (prefix .pmb-*). Ukuran, warna, & huruf SENGAJA disamain
+   sama OnboardingModal.css biar kerasa satu keluarga; bedanya isi modal
+   ini lebih panjang, jadi bisa di-scroll (tombol Oke tetap nempel di
+   bawah) & di HP jadi bottom sheet kayak modal booking. */
+
+.pmb-overlay {
+  position: fixed; inset: 0; background: rgb(36, 55, 62, 0.45);
+  display: flex; align-items: center; justify-content: center; padding: 24px;
+  /* z-index 95 -- sama kayak OnboardingModal (di atas .mobile-topbar). */
+  z-index: 95;
+  -webkit-text-size-adjust: 100%; text-size-adjust: 100%;
+}
+
+.pmb-modal {
+  background: var(--box-dashboard); border: 1.5px solid var(--line-box); border-radius: 26px; width: 100%; max-width: 600px;
+  max-height: 88vh; display: flex; flex-direction: column; overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+.pmb-scroll { padding: 30px 30px 6px; overflow-y: auto; flex: 1; min-height: 0; -webkit-overflow-scrolling: touch; }
+
+/* Hero -- nilai dari .onboard-hero */
+.pmb-hero { text-align: center; margin-bottom: 22px; }
+/* Logo Dapur MUA (gambar yang sama kayak di Sidebar). */
+.pmb-logo { display: block; width: 56px; height: 56px; border-radius: 14px; object-fit: contain; margin: 0 auto 10px; }
+.pmb-versi {
+  display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 0.03em;
+  padding: 3px 10px; border-radius: 999px; margin-bottom: 10px;
+  background: color-mix(in srgb, var(--h3) 18%, transparent); color: var(--h9);
+}
+.pmb-hero h2 { font-family: 'Poppins', sans-serif; font-size: 21px; font-weight: 700; color: var(--ink-soft); margin-bottom: 8px; }
+.pmb-hero p { font-size: 13.5px; color: var(--ink-soft); line-height: 1.5; padding: 0 8px; }
+
+/* Kartu fitur besar */
+.pmb-fitur { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+.pmb-kartu {
+  display: flex; gap: 14px; align-items: flex-start; text-align: left;
+  padding: 14px; border-radius: 16px; border: 1px solid var(--line-box);
+  background: color-mix(in srgb, var(--button-prm-hover) 22%, transparent);
+}
+.pmb-ikon {
+  width: 36px; height: 36px; border-radius: 11px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--grad); color: #fff;
+}
+.pmb-ikon svg { width: 19px; height: 19px; }
+.pmb-kartu-isi { min-width: 0; }
+/* Judul & deskripsi -- nilai dari .onboard-step-title / -desc */
+.pmb-kartu-judul { font-size: 13.5px; font-weight: 700; color: var(--h3); margin-bottom: 3px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.pmb-opsional { font-size: 10px; font-weight: 600; padding: 1px 7px; border-radius: 6px; background: var(--ink-faint); color: var(--ink-soft); }
+.pmb-kartu-desc { font-size: 12.5px; color: var(--ink-soft); line-height: 1.5; }
+
+.pmb-link {
+  background: none; border: none; padding: 0; margin-top: 6px; cursor: pointer; font-family: inherit;
+  font-size: 12.5px; font-weight: 700; color: var(--h3);
+}
+.pmb-link:hover { text-decoration: underline; text-underline-offset: 4px; }
+.pmb-link.inline { margin-top: 0; font-size: inherit; }
+
+/* Daftar "Lainnya" */
+.pmb-lainnya-judul { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-soft); opacity: 0.8; margin-bottom: 8px; }
+.pmb-lainnya { list-style: none; margin: 0 0 8px; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.pmb-lainnya li { position: relative; padding-left: 16px; font-size: 12.5px; color: var(--ink-soft); line-height: 1.5; }
+.pmb-lainnya li::before {
+  content: ''; position: absolute; left: 3px; top: 0.6em;
+  width: 6px; height: 6px; border-radius: 50%; background: var(--h3);
+}
+
+/* Tombol -- nempel di bawah (nggak ikut ke-scroll). Nilai dari .btn-primary
+   (Pengaturan.css), ditulis ulang di sini biar modal ini nggak bergantung
+   ke file CSS halaman lain. */
+.pmb-aksi { padding: 14px 30px 24px; flex-shrink: 0; }
+.pmb-overlay .btn-primary {
+  width: 100%; justify-content: center; display: flex; align-items: center;
+  background: var(--button-prm-hover); color: var(--button-tx-hover); border: none; border-radius: 11px;
+  padding: 12px; font-size: 13.5px; font-weight: 600; font-family: inherit; cursor: pointer;
+  transition: background 0.2s;
+}
+.pmb-overlay .btn-primary:hover { background: var(--h3); }
+
+/* Ikon item "Yang baru di Update x" di lonceng notifikasi Dashboard --
+   ditaruh di sini (bukan Dashboard.css) biar semua soal pembaruan ada di
+   satu file. Polanya sama kayak .notif-icon.laporan. */
+.notif-icon.pembaruan { background: color-mix(in srgb, var(--h3) 22%, transparent); color: var(--h3); }
+
+@media (max-width: 640px) {
+  .pmb-overlay { padding: 0; align-items: flex-end; }
+  .pmb-modal { max-width: 100%; max-height: 92vh; border-radius: 22px 22px 0 0; }
+  .pmb-scroll { padding: 24px 20px 4px; }
+  .pmb-aksi { padding: 12px 20px 20px; }
+}

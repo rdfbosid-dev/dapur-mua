@@ -3,6 +3,8 @@ import { createPortal } from 'react-dom'
 import { useAuth } from '../context/AuthContext'
 import './InvoiceModal.css'
 import IconClose from './IconClose'
+import { labelMakeup as labelMakeupDari } from '../lib/layanan'
+import { jamZona, kodeZona } from '../lib/zonaWaktu'
 
 function formatRupiah(n) {
   return 'Rp' + (Number(n) || 0).toLocaleString('id-ID')
@@ -51,6 +53,8 @@ function IconBank() {
 // (bukan di CSS) soalnya beda ikon vs teks itu beda STRUKTUR markup,
 // bukan cuma beda style.
 function InvoicePaper({ profile, booking, peserta, payments, bundlingItems = [], totalDibayar, sisa }) {
+  // Zona waktu MUA (WIB/WITA/WIT, dari Pengaturan) -- lihat lib/zonaWaktu.js.
+  const zona = kodeZona(profile)
   return (
     <div className="invoice-paper">
       <div className="inv-header">
@@ -85,7 +89,7 @@ function InvoicePaper({ profile, booking, peserta, payments, bundlingItems = [],
           <div className="inv-sub-event">{booking.event}</div>
           <div className="inv-sub-date">{formatTanggal(booking.tanggal_acara)}</div>
           {booking.jam_start_makeup && (
-            <div className="inv-sub-date">{booking.jam_start_makeup.slice(0, 5)} WIB{booking.jam_selesai ? ` - ${booking.jam_selesai.slice(0, 5)} WIB` : ''}</div>
+            <div className="inv-sub-date">{jamZona(booking.jam_start_makeup, zona)}{booking.jam_selesai ? ` - ${jamZona(booking.jam_selesai, zona)}` : ''}</div>
           )}
           {booking.lokasi && <div className="inv-sub-loc">{booking.lokasi}</div>}
         </div>
@@ -108,7 +112,8 @@ function InvoicePaper({ profile, booking, peserta, payments, bundlingItems = [],
             // Paket Bundling TETAP 1x apa adanya.
             const sesiMakeup = Math.max(1, Number(p.jumlah_sesi_makeup) || 1)
             const sesiTambahan = Math.max(1, Number(p.jumlah_sesi_tambahan) || 1)
-            const labelMakeup = ['Makeup', p.jenis_paket || p.kategori_makeup, p.dikerjakan_oleh_makeup === 'Tim' ? '(Tim)' : ''].filter(Boolean).join(' ') + (sesiMakeup > 1 ? ` (${sesiMakeup}x sesi)` : '')
+            // "Makeup Wedding Premium" -- Kategori + Jenis (lihat labelMakeup di lib/layanan.js).
+            const labelMakeup = [labelMakeupDari(p.kategori_makeup, p.jenis_paket), p.dikerjakan_oleh_makeup === 'Tim' ? '(Tim)' : ''].filter(Boolean).join(' ') + (sesiMakeup > 1 ? ` (${sesiMakeup}x sesi)` : '')
             // Kalau peserta ini pakai Paket Bundling, klien HARUSNYA cuma
             // liat 1 baris "Paket Bundling <vendor>..." yang udah nyatuin
             // Biaya Makeup + semua vendor level-atas jadi 1 harga paket --
@@ -461,10 +466,10 @@ export default function InvoiceModal({ booking, peserta, payments, bundlingItems
   const waUrl = `https://wa.me/${nomor}?text=${pesanEncoded}`
 
   // Link wa.me biasa itu "universal" -- OS yang mutusin app mana yang
-  // kebuka kalau WhatsApp reguler & Business dua-duanya keinstall.
+  // kebuka kalau WhatsApp regular & Business dua-duanya keinstall.
   // Di iPhone, iOS otomatis nawarin pilihan "Message" vs "Open in
   // WhatsApp Business" duluan, jadi link biasa aja udah cukup di sana.
-  // Di Android, TIDAK ada pilihan itu -- langsung ke WhatsApp reguler.
+  // Di Android, TIDAK ada pilihan itu -- langsung ke WhatsApp regular.
   // Satu-satunya cara maksa app spesifik di Android: Intent URI yang
   // nunjuk LANGSUNG ke package WhatsApp Business (com.whatsapp.w4b).
   // `S.browser_fallback_url` jaga-jaga andaikan WhatsApp Business

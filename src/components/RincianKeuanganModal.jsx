@@ -573,7 +573,7 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
             {activeCard === 'pengeluaran' && (
               rumusPengeluaran
                 ? <div className="rincian-rumus"><b>Pengeluaran</b> = {rumusPengeluaran}</div>
-                : <div className="rincian-rumus"><b>Pengeluaran</b> = Rp0 (semua dikerjain sendiri/Me, nggak ada Tim/vendor luar yang dibayar)</div>
+                : <div className="rincian-rumus"><b>Pengeluaran</b> = Rp0 (semua dikerjain sendiri (Me), nggak ada tim/vendor luar yang dibayar)</div>
             )}
 
             <div className="rincian-note-divider"></div>

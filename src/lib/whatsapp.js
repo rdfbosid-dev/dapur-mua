@@ -4,7 +4,7 @@ const ADMIN_WHATSAPP = '6285747911026'
 
 // Sama persis polanya kayak fitur "Kirim Invoice ke WhatsApp" -- link
 // wa.me itu "universal" (OS yang mutusin app mana yang kebuka kalau
-// WhatsApp reguler & Business dua-duanya keinstall, biasanya reguler
+// WhatsApp regular & Business dua-duanya keinstall, biasanya regular
 // yang menang). Di Android, satu-satunya cara maksa app spesifik dari
 // web itu Intent URI yang nunjuk LANGSUNG ke package WhatsApp Business
 // (com.whatsapp.w4b). Di iPhone/desktop nggak perlu -- iOS udah otomatis

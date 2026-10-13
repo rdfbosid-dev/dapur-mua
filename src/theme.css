@@ -81,6 +81,7 @@
   --card-langganan: #c9cff6e6;
   --logout: #f00433;
   --teks-khusus: #f00433;
+  --peringatan: #eeab2fe0;
 
   --shadow-modal: 0 24px 60px -12px rgb(29, 33, 58, 0.35);
   --shadow-card: 5px 5px 10px -5px rgb(29, 33, 58, 0.35);
@@ -173,6 +174,7 @@
   --card-langganan: #3f95ba5b;
   --logout: #3f95ba;
   --teks-khusus: #51dfef;
+  --peringatan: #51dfef;
 
   --shadow-modal: 0 6px 20px -5px rgb(142, 187, 205, 0.35);
   --shadow-card: 5px 6px 10px -5px rgba(142, 187, 205, 0.35);

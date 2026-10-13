@@ -7,11 +7,14 @@ import Sidebar from '../components/Sidebar'
 import BookingModal from '../components/BookingModal'
 import BookingDetailModal from '../components/BookingDetailModal'
 import OnboardingModal from '../components/OnboardingModal'
+import PembaruanModal from '../components/PembaruanModal'
 import DonutChart from '../components/DonutChart'
 import TrendChart from '../components/TrendChart'
 import { useInViewAnimate } from '../hooks/useInViewAnimate'
 import { bookingSelesai } from '../lib/durasiBooking'
 import { kelasStatusPembayaran, STATUS_BELUM_ADA_TAGIHAN } from '../lib/statusPembayaran'
+import { jamZona, kodeZona } from '../lib/zonaWaktu'
+import { VERSI_PEMBARUAN, bacaPembaruan, tandaiPembaruan, pembaruanDiLonceng } from '../lib/pembaruan'
 import './Dashboard.css'
 
 function formatRupiah(n) {
@@ -53,6 +56,8 @@ function formatTanggal(dateStr) {
 
 export default function Dashboard() {
   const { user, profile } = useAuth()
+  // Zona waktu MUA (WIB/WITA/WIT, dari Pengaturan) -- lihat lib/zonaWaktu.js.
+  const zona = kodeZona(profile)
   const { theme } = useTheme()
   const isDark = theme === 'dark'
   const [bookings, setBookings] = useState([])
@@ -60,6 +65,9 @@ export default function Dashboard() {
   const [error, setError] = useState('')
   const [showModal, setShowModal] = useState(false)
   const [showOnboarding, setShowOnboarding] = useState(false)
+  // Info pembaruan ("Update 1.1") -- lihat lib/pembaruan.js.
+  const [showPembaruan, setShowPembaruan] = useState(false)
+  const [pembaruanDilihat, setPembaruanDilihat] = useState(null)
   const [selectedBooking, setSelectedBooking] = useState(null)
   const [notifOpen, setNotifOpen] = useState(false)
   const [notifReadKey, setNotifReadKey] = useState('')
@@ -81,11 +89,19 @@ export default function Dashboard() {
       setBookings(data || [])
       // Munculin sambutan cuma buat akun yang beneran baru (belum ada
       // booking sama sekali) DAN belum pernah nutup sambutan ini sebelumnya.
+      let sambutan = false
       if (user && (data || []).length === 0) {
         const key = `dapurmua-onboarded-${user.id}`
         if (!localStorage.getItem(key)) {
           setShowOnboarding(true)
+          sambutan = true
         }
+      }
+      // Info pembaruan cuma buat user LAMA yang belum pernah lihat. Akun
+      // baru (lagi dapat sambutan di atas) nggak dikasih -- dua modal nggak
+      // pernah numpuk, & pas sambutannya ditutup, pembaruan ditandai beres.
+      if (user && !sambutan && !bacaPembaruan(user.id)) {
+        setShowPembaruan(true)
       }
     }
     setLoading(false)
@@ -94,6 +110,17 @@ export default function Dashboard() {
   function dismissOnboarding() {
     setShowOnboarding(false)
     if (user) localStorage.setItem(`dapurmua-onboarded-${user.id}`, '1')
+    // Akun baru: semuanya memang baru, info pembaruan nggak perlu muncul.
+    if (user) tandaiPembaruan(user.id, 'baru')
+  }
+
+  // Tutup info pembaruan. Waktu tutupnya dicatat SEKALI (pertama kali), jadi
+  // buka-tutup lagi lewat lonceng nggak memperpanjang masa tampil di lonceng.
+  function tutupPembaruan() {
+    setShowPembaruan(false)
+    if (!user) return
+    tandaiPembaruan(user.id, Date.now())
+    setPembaruanDilihat(bacaPembaruan(user.id))
   }
 
   // Fetch sekali pas komponen pertama kali dipasang, pola standar
@@ -112,6 +139,7 @@ export default function Dashboard() {
     const stored = localStorage.getItem(`dapurmua-notif-read-${user.id}`)
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (stored) setNotifReadKey(stored)
+    setPembaruanDilihat(bacaPembaruan(user.id))
   }, [user])
 
   function handleBookingSaved(kodeBooking) {
@@ -209,7 +237,7 @@ export default function Dashboard() {
       title: `Invoice untuk ${b.nama_klien}`,
       desc: [
         formatTanggal(b.tanggal_acara),
-        b.jam_start_makeup ? `${b.jam_start_makeup.slice(0, 5)} WIB` : null,
+        b.jam_start_makeup ? jamZona(b.jam_start_makeup, zona) : null,
       ].filter(Boolean).join(' · '),
       lokasi: b.lokasi || null,
       booking: b,
@@ -220,7 +248,7 @@ export default function Dashboard() {
       title: `${b.nama_klien} — ${b.event || 'Booking'}`,
       desc: [
         formatTanggal(b.tanggal_acara),
-        b.jam_start_makeup ? `${b.jam_start_makeup.slice(0, 5)} WIB` : null,
+        b.jam_start_makeup ? jamZona(b.jam_start_makeup, zona) : null,
       ].filter(Boolean).join(' · '),
       lokasi: b.lokasi || null,
       booking: b,
@@ -238,9 +266,19 @@ export default function Dashboard() {
       title: `Laporan bulan ${namaLaporanBulan} ${laporanTahun} udah lengkap`,
       desc: 'Cek rekap Keuangan & Laporan sekarang.',
     }] : []),
+    // Item "Yang baru" -- cuma buat user lama yang udah nutup modalnya,
+    // selama beberapa hari (lib/pembaruan.js). Klik = buka modalnya lagi.
+    ...(pembaruanDiLonceng(pembaruanDilihat) ? [{
+      type: 'pembaruan',
+      id: `pembaruan-${VERSI_PEMBARUAN}`,
+      title: `Yang baru di Update ${VERSI_PEMBARUAN}`,
+      desc: 'Pengeluaran, Paket Layanan, zona waktu, dan lainnya.',
+    }] : []),
   ]
-  const notifKey = notifications.map((n) => n.id).join(',')
-  const hasUnreadNotif = notifications.length > 0 && notifReadKey !== notifKey
+  // Item pembaruan SENGAJA nggak ikut nyalain titik merah -- user udah
+  // lihat modalnya, item ini cuma buat dibuka lagi kalau perlu.
+  const notifKey = notifications.filter((n) => n.type !== 'pembaruan').map((n) => n.id).join(',')
+  const hasUnreadNotif = notifKey !== '' && notifReadKey !== notifKey
 
   // Titik merah di lonceng HANYA hilang lewat tombol "Tandai sudah dibaca" di
   // panel (membuka panel / mengetuk satu notifikasi nggak menghilangkannya).
@@ -402,7 +440,7 @@ export default function Dashboard() {
               {/* Selalu tampil selama ada notifikasi: kalau semuanya sudah dibaca,
                   tombolnya redup & nonaktif (bukan hilang), biar user tahu
                   fiturnya ada dan statusnya jelas. */}
-              {notifications.length > 0 && (
+              {notifKey !== '' && (
                 <button type="button" className="notif-tandai-baca" onClick={tandaiSudahDibaca} disabled={!hasUnreadNotif}>
                   {hasUnreadNotif ? 'Tandai sudah dibaca' : 'Sudah dibaca'}
                 </button>
@@ -424,6 +462,7 @@ export default function Dashboard() {
                   onClick={() => {
                     setNotifOpen(false)
                     if (n.type === 'booking' || n.type === 'invoice') setSelectedBooking(n.booking)
+                    else if (n.type === 'pembaruan') setShowPembaruan(true)
                     else navigate('/keuangan', { state: { highlightBulan: n.bulan, highlightTahun: n.tahun } })
                   }}
                 >
@@ -432,6 +471,8 @@ export default function Dashboard() {
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 3v3M16 3v3"/></svg>
                     ) : n.type === 'invoice' ? (
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M7 3h8l4 4v14H7z"/><path d="M15 3v4h4M9 12h6M9 16h6"/></svg>
+                    ) : n.type === 'pembaruan' ? (
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 17l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z"/></svg>
                     ) : (
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 3v18h18"/><path d="M7 14l4-5 3 3 5-7"/></svg>
                     )}
@@ -540,7 +581,7 @@ export default function Dashboard() {
                           <div className="b-name">{b.nama_klien}</div>
                           <div className="b-meta">
                             {b.event || 'Booking'} · {formatTanggal(b.tanggal_acara)}
-                            {b.jam_start_makeup ? ` · ${b.jam_start_makeup.slice(0, 5)} WIB` : ''}
+                            {b.jam_start_makeup ? ` · ${jamZona(b.jam_start_makeup, zona)}` : ''}
                           </div>
                         </div>
                         <div className="dash-booking-row-right">
@@ -768,6 +809,8 @@ export default function Dashboard() {
           {toast}
         </div>
       )}
+
+      {showPembaruan && !showOnboarding && <PembaruanModal onClose={tutupPembaruan} />}
 
       {showOnboarding && (
         <OnboardingModal

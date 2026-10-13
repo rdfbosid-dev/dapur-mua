@@ -1,0 +1,58 @@
+/* Dropdown Layanan di kartu Klien, field Event versi layanan & keterangan
+   harga (BookingModal & BookingDetailModal). Nama layanan bisa panjang
+   (maks 80 huruf) -- CustomSelect bawaannya nowrap, jadi di sini teks
+   tombolnya dipotong "..." & opsi di menunya boleh turun baris, biar nggak
+   meluber keluar kartu di layar HP. Cuma berlaku di dalam .pilih-layanan,
+   dropdown lain nggak kesentuh. */
+.pilih-layanan .cselect-trigger { height: 40px; }
+.pilih-layanan .cselect-trigger > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.pilih-layanan .cselect-option { white-space: normal; line-height: 1.35; }
+
+/* Ringkasan Kategori & Jenis Makeup dari layanan (field aslinya disembunyiin). */
+.pilih-layanan-ringkas {
+  display: flex; flex-wrap: wrap; gap: 4px 14px;
+  font-size: 12px; line-height: 1.45; color: var(--ink-soft);
+  padding: 7px 10px; border-radius: 9px;
+  background: color-mix(in srgb, var(--ink-faint) 55%, transparent);
+}
+.pilih-layanan-ringkas b { font-weight: 700; }
+
+/* Catatan kecil (event menyesuaikan layanan, harga layanan, dst). */
+.pilih-layanan-catatan { font-size: 11px; line-height: 1.45; color: var(--ink-soft); opacity: 0.85; }
+.pilih-layanan-catatan b { font-weight: 700; }
+
+/* Judul kelompok di menu Layanan (per Kategori). Kelompok yang cocok sama
+   Event booking ditaruh paling atas & diwarnai. */
+.pilih-layanan .pilih-layanan-kelompok { display: flex; flex-direction: column; gap: 4px; }
+.pilih-layanan .pilih-layanan-judul {
+  font-size: 10.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+  color: var(--ink-soft); opacity: 0.75; padding: 8px 10px 2px;
+}
+.pilih-layanan .pilih-layanan-judul.cocok { color: var(--h5); opacity: 1; }
+/* Jenis Makeup = anak dari judul Kategori di atasnya -> menjorok ke dalam.
+   Pakai margin (bukan padding) biar kotak hover/terpilihnya ikut menjorok. */
+.pilih-layanan .cselect-option.pilih-layanan-anak { margin-left: 14px; }
+
+/* Peringatan "cek lagi" (bukan error) -- kuning lembut, SENGAJA beda dari
+   merah (.modal-error) yang dipakai buat error yang ngeblok simpan.
+   Dipakai di kartu klien & sebagai banner konfirmasi waktu Simpan.
+   Tanpa garis kiri; ikon segitiga peringatan di depan teks. Ikonnya lewat
+   ::before (mask SVG yang diwarnai background-color), jadi JSX nggak perlu
+   diubah. Posisi absolute + padding-left, biar teks yang turun baris tetap
+   rata sejajar di sebelah kanan ikon. */
+.pilih-layanan-peringatan {
+  --ikon-peringatan: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z'/%3E%3Cpath d='M12 9v4'/%3E%3Cpath d='M12 17h.01'/%3E%3C/svg%3E");
+  position: relative;
+  font-size: 11px; line-height: 1.45; color: var(--ink-soft);
+  padding: 7px 10px 7px 31px; border-radius: 9px; margin-top: 2px;
+  background: color-mix(in srgb, var(--peringatan) 25%, transparent);
+}
+.pilih-layanan-peringatan::before {
+  content: ''; position: absolute; left: 10px; top: 8.5px;
+  width: 14px; height: 14px; background-color: #e0a12a;
+  -webkit-mask: var(--ikon-peringatan) center / contain no-repeat;
+  mask: var(--ikon-peringatan) center / contain no-repeat;
+}
+.pilih-layanan-peringatan b { font-weight: 700; }
+.pilih-layanan-peringatan.banner { font-size: 12.5px; padding: 10px 14px 10px 38px; border-radius: 10px; margin: 0 0 10px; }
+.pilih-layanan-peringatan.banner::before { left: 13px; top: 11.5px; width: 16px; height: 16px; }

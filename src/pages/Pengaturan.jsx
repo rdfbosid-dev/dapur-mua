@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import Sidebar from '../components/Sidebar'
 import './Pengaturan.css'
 import { cekPassword, pesanErrorPassword, PANJANG_MIN_PASSWORD, PETUNJUK_PASSWORD } from '../lib/aturanPassword'
+import { ZONA_WAKTU, kodeZona, tebakZonaPerangkat } from '../lib/zonaWaktu'
 
 function initialsOf(name) {
   return (name || '?').split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase()
@@ -18,6 +19,7 @@ function isiDariProfil(profile) {
     instagram: profile.instagram || '',
     whatsapp: profile.whatsapp || '',
     rekening: profile.rekening && profile.rekening.length > 0 ? profile.rekening : [{ bank: '', nomor: '' }],
+    zonaWaktu: kodeZona(profile),
   }
 }
 
@@ -45,6 +47,11 @@ export default function Pengaturan() {
   // kosong di form biar user langsung liat input-nya, walau profile-nya
   // belum ada rekening sama sekali.
   const [rekening, setRekening] = useState([{ bank: '', nomor: '' }])
+  // Zona waktu (WIB/WITA/WIT) -- label jam di invoice/Dashboard/Kalender &
+  // zona di kalender HP. Lihat lib/zonaWaktu.js.
+  const [zonaWaktu, setZonaWaktu] = useState('WIB')
+  // Zona perangkat ini (null kalau di luar Indonesia) -- cuma buat saran.
+  const [zonaPerangkat] = useState(tebakZonaPerangkat)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState(null) // { type: 'success' | 'error', text }
@@ -87,6 +94,8 @@ export default function Pengaturan() {
     setInstagram(isi.instagram)
     setWhatsapp(isi.whatsapp)
     setRekening(isi.rekening)
+    // Draf lama (sebelum ada field ini) nggak punya zonaWaktu -> pakai profil.
+    setZonaWaktu(isi.zonaWaktu || kodeZona(profile))
     setFormSiap(true)
     setLoading(false)
   }, [profile, formSiap, kunciDraf])
@@ -95,12 +104,12 @@ export default function Pengaturan() {
   // Simpan/hapus draf tiap isian berubah (baru jalan setelah form terisi).
   useEffect(() => {
     if (!formSiap || !kunciDraf || !profile) return
-    const isi = { studioName, kodePrefix, instagram, whatsapp, rekening }
+    const isi = { studioName, kodePrefix, instagram, whatsapp, rekening, zonaWaktu }
     try {
       if (JSON.stringify(isi) === JSON.stringify(isiDariProfil(profile))) localStorage.removeItem(kunciDraf)
       else localStorage.setItem(kunciDraf, JSON.stringify({ waktu: Date.now(), isi }))
     } catch { /* penyimpanan diblokir/penuh: form tetap jalan, cuma tanpa draf */ }
-  }, [formSiap, kunciDraf, profile, studioName, kodePrefix, instagram, whatsapp, rekening])
+  }, [formSiap, kunciDraf, profile, studioName, kodePrefix, instagram, whatsapp, rekening, zonaWaktu])
 
   useEffect(() => {
     // Jaring pengaman -- kalau karena sebab tak terduga `profile` nggak
@@ -154,6 +163,7 @@ export default function Pengaturan() {
         instagram: instagram.trim(),
         whatsapp: whatsapp.trim(),
         rekening: cleanRekening,
+        zona_waktu: zonaWaktu,
       })
 
     setSaving(false)
@@ -350,6 +360,37 @@ export default function Pengaturan() {
                     <label>Nomor WhatsApp</label>
                     <input type="text" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="085xxxxxxx" />
                   </div>
+                </div>
+
+                {/* Zona Waktu -- jam booking disimpan apa adanya (jam setempat),
+                    ini cuma nentuin label "WIB/WITA/WIT" & zona di kalender HP.
+                    Kalau zona perangkat beda dari pilihan, dikasih saran
+                    (nggak diubah otomatis). */}
+                <div className="field">
+                  <label id="label-zona-waktu">Zona Waktu</label>
+                  <div className="zona-row" role="radiogroup" aria-labelledby="label-zona-waktu">
+                    {ZONA_WAKTU.map((z) => (
+                      <button
+                        type="button"
+                        key={z.kode}
+                        role="radio"
+                        aria-checked={zonaWaktu === z.kode}
+                        className={`zona-opt${zonaWaktu === z.kode ? ' sel' : ''}`}
+                        onClick={() => setZonaWaktu(z.kode)}
+                      >
+                        {z.kode}<small>{z.utc}</small>
+                      </button>
+                    ))}
+                  </div>
+                  <span className="field-hint">
+                    {ZONA_WAKTU.find((z) => z.kode === zonaWaktu)?.wilayah}. Dipakai untuk jam di invoice, Dashboard, Kalender, dan kalender HP.
+                  </span>
+                  {zonaPerangkat && zonaPerangkat !== zonaWaktu && (
+                    <div className="zona-saran">
+                      <span>Perangkatmu terdeteksi di zona <b>{zonaPerangkat}</b>.</span>
+                      <button type="button" className="btn-ghost-small" onClick={() => setZonaWaktu(zonaPerangkat)}>Pakai {zonaPerangkat}</button>
+                    </div>
+                  )}
                 </div>
 
                 {/* Rekening -- BISA lebih dari 1 (beda dari field lain di

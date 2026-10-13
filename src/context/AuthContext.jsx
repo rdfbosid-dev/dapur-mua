@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
+import { tebakZonaPerangkat, ZONA_DEFAULT } from '../lib/zonaWaktu'
 
 const AuthContext = createContext(null)
 
@@ -12,6 +13,11 @@ const AuthContext = createContext(null)
 // tampilan menu, api/admin/users.js yang beneran nge-gate akses data).
 const ADMIN_USER_ID = '5a6ae3db-228c-464a-9b1e-f94e3071fdc9'
 
+// Kolom profil yang dimuat -- dipakai 2x di bawah (muat & bikin baru).
+// zona_waktu (WIB/WITA/WIT) WAJIB sudah ada di database sebelum versi ini
+// di-deploy (lihat migrasi-zona-waktu.sql), kalau belum profil gagal dimuat.
+const KOLOM_PROFIL = 'studio_name, kode_prefix, instagram, whatsapp, logo_url, kode_kalender, trial_ends_at, subscription_status, subscription_ends_at, kalender_synced_at, rekening, zona_waktu'
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -21,7 +27,7 @@ export function AuthProvider({ children }) {
     if (!userId) return
     const { data, error } = await supabase
       .from('profiles')
-      .select('studio_name, kode_prefix, instagram, whatsapp, logo_url, kode_kalender, trial_ends_at, subscription_status, subscription_ends_at, kalender_synced_at, rekening')
+      .select(KOLOM_PROFIL)
       .eq('id', userId)
       .maybeSingle() // beda dari .single() -- nggak error kalau 0 baris, cuma balikin null
 
@@ -48,11 +54,13 @@ export function AuthProvider({ children }) {
       studio_name: '', kode_prefix: '', instagram: '', whatsapp: '', logo_url: null, kode_kalender: null,
       trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), subscription_status: 'trial', kalender_synced_at: null,
       rekening: [],
+      // Akun baru tanpa baris profil -> tebak dari zona perangkat, selain itu WIB.
+      zona_waktu: tebakZonaPerangkat() || ZONA_DEFAULT,
     }
     const { data: created } = await supabase
       .from('profiles')
       .upsert({ id: userId, ...fallback })
-      .select('studio_name, kode_prefix, instagram, whatsapp, logo_url, kode_kalender, trial_ends_at, subscription_status, subscription_ends_at, kalender_synced_at, rekening')
+      .select(KOLOM_PROFIL)
       .single()
 
     setProfile(created || fallback) // tetap kasih nilai walau upsert-nya somehow gagal juga

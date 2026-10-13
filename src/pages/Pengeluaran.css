@@ -41,6 +41,9 @@
 .pgl-total { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 26px; color: var(--pill); margin-top: 4px; }
 /* Keterangan halaman -- penjelasan buat user tentang halaman ini, DI
    ATAS baris filter & selebar halaman penuh (nggak dibatasin max-width). */
+/* Teks polos di atas kolom PETUNJUK (tanpa latar) -- sama kayak .lyn-opsional
+   di Layanan.css. */
+.pgl-opsional { font-size: 13px; color: var(--ink-soft); margin-bottom: 8px; line-height: 1.5; }
 .pgl-hint { padding: 8px 16px; border-radius: 12px; border: 3px solid color-mix(in srgb, var(--pill-alt) 30%, transparent); font-size: 13px; color: var(--h9); background: var(--card-langganan); margin-bottom: 18px; line-height: 1.5; text-align: justify; }
 .pgl-hint a { font-weight: 800; }
 .pgl-hint b { color: var(--teks-khusus); opacity: 0.8; }
@@ -96,7 +99,7 @@
   .pgl-search { max-width: none; flex: 1 1 100%; }
   .pgl-filter-select { flex: 1 1 calc(50% - 6px); width: auto; }
   .pgl-kategori-list { grid-template-columns: minmax(0, 1fr); }
-  .pgl-hint { font-size: 11px; }
+  .pgl-hint, .pgl-opsional { font-size: 11px; }
 }
 @media (max-width: 640px) {
   .pgl-bulan { padding: 16px; }

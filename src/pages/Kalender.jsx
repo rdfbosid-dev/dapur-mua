@@ -9,6 +9,7 @@ import PengeluaranDetailModal from '../components/PengeluaranDetailModal'
 import { KATEGORI_AGENDA } from '../lib/agendaPengeluaran'
 import { bookingSelesai } from '../lib/durasiBooking'
 import { kelasStatusPembayaran } from '../lib/statusPembayaran'
+import { jamZona, kodeZona } from '../lib/zonaWaktu'
 import './Kalender.css'
 
 const BULAN_PENUH = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
@@ -55,6 +56,8 @@ function buildGrid(year, month) {
 
 export default function Kalender() {
   const { user, profile, refreshProfile } = useAuth()
+  // Zona waktu MUA (WIB/WITA/WIT, dari Pengaturan) -- lihat lib/zonaWaktu.js.
+  const zona = kodeZona(profile)
   const today = new Date()
   const [viewYear, setViewYear] = useState(today.getFullYear())
   const [viewMonth, setViewMonth] = useState(today.getMonth())
@@ -367,7 +370,7 @@ export default function Kalender() {
                   <div className="b-info">
                     <div className="b-name">{b.nama_klien}</div>
                     <div className="b-meta">
-                      {b.event || 'Booking'}{b.jam_start_makeup ? ` · ${b.jam_start_makeup.slice(0, 5)} WIB` : ''}
+                      {b.event || 'Booking'}{b.jam_start_makeup ? ` · ${jamZona(b.jam_start_makeup, zona)}` : ''}
                     </div>
                   </div>
                   <span className={`status-pill ${kelasStatusPembayaran(b.status_pembayaran)}`}>
