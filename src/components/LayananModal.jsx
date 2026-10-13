@@ -9,6 +9,15 @@ import './LayananModal.css'
 
 const PANJANG_MAKS_NAMA = 80
 
+// Placeholder Jenis Makeup -- ikut Kategori yang dipilih. Belum pilih
+// Kategori (atau kategori lain) -> PLACEHOLDER_JENIS_UMUM.
+const PLACEHOLDER_JENIS_UMUM = 'contoh: Premium, Ultimate, Standard, VIP, atau lainnya'
+const PLACEHOLDER_JENIS = {
+  Wedding: 'contoh: Premium, Ultimate, Silver, Gold',
+  'Special Occasion': 'contoh: VIP, VVIP',
+  Regular: 'contoh: Standard, VIP',
+}
+
 function capitalizeWords(str) {
   return str.replace(/\b\w/g, (c) => c.toUpperCase())
 }
@@ -122,7 +131,7 @@ export default function LayananModal({ editData = null, onClose, onSaved }) {
               <label>Jenis Makeup</label>
               <input
                 type="text"
-                placeholder="contoh: Premium, Ultimate, Standard, VIP, atau lainnya"
+                placeholder={PLACEHOLDER_JENIS[kategori] || PLACEHOLDER_JENIS_UMUM}
                 maxLength={PANJANG_MAKS_NAMA}
                 value={jenis}
                 onChange={(e) => setJenis(e.target.value)}
