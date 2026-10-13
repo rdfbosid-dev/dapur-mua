@@ -73,6 +73,7 @@ export default function PembaruanModal({ onClose }) {
             </li>
             <li>Jam acara di kalender HP kini tepat sesuai zona waktumu.</li>
             <li>Nama layanan di invoice kini lengkap, misalnya “Makeup Wedding Premium”.</li>
+            <li>Penambahan fitur diskon di form booking.</li>
             <li>Perbaikan tampilan di beberapa bagian.</li>
           </ul>
         </div>
