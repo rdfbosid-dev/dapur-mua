@@ -36,10 +36,6 @@ import { cariAngkaTakWajar, itemKewajaranRow } from '../lib/validasiBooking'
 import PeringatanKewajaran from './PeringatanKewajaran'
 import { bookingSelesai } from '../lib/durasiBooking'
 import { kelasStatusPembayaran, adaNilaiTagihan } from '../lib/statusPembayaran'
-import { muatLayanan, layananDipakai, namaLayanan, eventDariForm, peringatanKategoriEvent, kategoriKlien, labelMakeup } from '../lib/layanan'
-import PilihLayanan, { PetunjukEventLayanan, CatatanKategoriKartu, CatatanHargaLayanan, pesanKonfirmasiKategori } from './PilihLayanan'
-import DiskonBooking from './DiskonBooking'
-import { tagihanSebelumDiskonRow, pesanDiskonTidakValid, nilaiSimpanDiskon, labelDiskon } from '../lib/tagihan'
 
 function formatRupiah(n) {
   const num = Number(n) || 0
@@ -121,15 +117,6 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
     if (user) loadBookingDates()
   }, [user])
 
-  // Layanan Saya buat dropdown Layanan di kartu Klien (mode edit) -- pola
-  // sama kayak di BookingModal.jsx.
-  const [daftarLayanan, setDaftarLayanan] = useState([])
-  useEffect(() => {
-    let batal = false
-    if (user) muatLayanan(user.id).then((daftar) => { if (!batal) setDaftarLayanan(daftar) })
-    return () => { batal = true }
-  }, [user])
-
   // form state buat mode edit
   const [tanggalBooking, setTanggalBooking] = useState('')
   const [namaKlien, setNamaKlien] = useState('')
@@ -142,10 +129,6 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
   const [event, setEvent] = useState('')
   const [eventCustom, setEventCustom] = useState('')
   const [biayaTransport, setBiayaTransport] = useState('')
-  // Diskon per booking -- OPSIONAL. Lihat lib/tagihan.js.
-  const [adaDiskon, setAdaDiskon] = useState(false)
-  const [diskon, setDiskon] = useState('')
-  const [keteranganDiskon, setKeteranganDiskon] = useState('')
   const [catatan, setCatatan] = useState('')
   const [editPeserta, setEditPeserta] = useState([])
   const [removedPesertaIds, setRemovedPesertaIds] = useState([])
@@ -230,9 +213,6 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
       setEventCustom(liveBooking.event || '')
     }
     setBiayaTransport(liveBooking.biaya_transport ?? '')
-    setAdaDiskon(Number(liveBooking.diskon) > 0)
-    setDiskon(Number(liveBooking.diskon) > 0 ? String(Number(liveBooking.diskon)) : '')
-    setKeteranganDiskon(Number(liveBooking.diskon) > 0 ? (liveBooking.keterangan_diskon || '') : '')
     setCatatan(liveBooking.catatan || '')
     // Vendor yang UDAH ADA (dari bundlingItems, di-filter per peserta_id
     // masing-masing klien) dimuat jadi array "vendors" nested di tiap
@@ -401,46 +381,9 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
       }) }
     }))
   }
-  // Layanan = daftar harga, NGGAK terikat ke Event (lihat lib/layanan.js).
-  // Event dipilih bebas; cuma ada peringatan halus kalau semua layanan yang
-  // dipakai kategorinya beda dari kategori yang biasa dipakai acaranya.
-  const eventSekarang = eventDariForm(event, eventCustom)
-  // Kategori efektif tiap klien (layanan -> kategori layanan; manual ->
-  // isian Kategori). Dipakai buat peringatan & konfirmasi Event vs kategori.
-  const kategoriPerKlien = editPeserta.map((p) => kategoriKlien(daftarLayanan, p.layanan_id, p.kategori_makeup))
-  const peringatanEvent = peringatanKategoriEvent(kategoriPerKlien, eventSekarang)
-  // Total tagihan SEBELUM diskon dari isian form edit (rumus sama dengan
-  // VIEW booking_summary) -- buat ringkasan & pengecekan diskon.
-  const tagihanSebelumDiskon = tagihanSebelumDiskonRow(biayaTransport, editPeserta)
-  function ubahAdaDiskon(ya) {
-    setAdaDiskon(ya)
-    if (!ya) { setDiskon(''); setKeteranganDiskon('') }
-  }
-
-  // Pilih Layanan di kartu Klien i -> Kategori & Jenis Makeup ikut layanan
-  // (fieldnya disembunyiin & disimpan dari layanan), Biaya Makeup keisi harga
-  // layanan (tetap bisa diedit). Event NGGAK disentuh. Pilih "Isi manual"
-  // (id null) -> lepas tautan layanannya; isian field yang ada SENGAJA
-  // dibiarin (Kategori & Jenis muncul lagi), biar nggak ada ketikan hilang.
-  function pilihLayananEdit(i, id) {
-    const l = layananDipakai(daftarLayanan, id)
-    setEditPeserta((list) => list.map((p, idx) => {
-      if (idx !== i) return p
-      if (!l) return { ...p, layanan_id: null }
-      return {
-        ...p,
-        layanan_id: l.id,
-        kategori_makeup: l.kategori_makeup,
-        jenis_paket: namaLayanan(l),
-        biaya_makeup: Math.round(Number(l.biaya_makeup) || 0),
-      }
-    }))
-  }
-
   function addEditPeserta() {
     setEditPeserta((list) => [...list, {
-      nama_anggota: '', peran: '', jumlah_sesi_makeup: 1, jumlah_sesi_tambahan: 1, kategori_makeup: '', jenis_paket: '', dikerjakan_oleh_makeup: 'Me',
-      layanan_id: null,
+      nama_anggota: '', peran: '', jumlah_sesi_makeup: 1, jumlah_sesi_tambahan: 1, kategori_makeup: 'Regular', jenis_paket: '', dikerjakan_oleh_makeup: 'Me',
       pakai_paket_bundling: false,
       biaya_makeup: 0, komisi_makeup_tim: 0, nama_tim_makeup: '', transport_tim_makeup: 0, retouch: false, biaya_retouch: 0, layanan_tambahan: 'Tidak Ada',
       dikerjakan_oleh_tambahan: 'Me', biaya_tambahan: 0, komisi_tambahan: 0, nama_tim_tambahan: '', transport_tim_tambahan: 0,
@@ -504,9 +447,6 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
   const bodyRef = useRef(null)
   // Sudah diingatkan soal tagihan Rp0 di modal ini? (lihat handleSaveEdit)
   const [konfirmasiRp0, setKonfirmasiRp0] = useState(false)
-  // Konfirmasi Event vs kategori -- sama kayak di BookingModal.jsx.
-  const [konfirmasiKategori, setKonfirmasiKategori] = useState('')
-  const [peringatanSimpan, setPeringatanSimpan] = useState('')
 
   // Tolak simpan karena isian nggak valid. Banner error ada di BAGIAN
   // ATAS area isian, sementara tombol Simpan ada di bawah -- kalau user
@@ -518,15 +458,14 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
   // BookingModal.jsx.)
   // `pesertaKosong` (nomor urut kartu) -> gulir ke kolom Nama Klien di kartu
   // itu & langsung fokus ke kolomnya, biar user tahu persis mana yang kurang.
-  function tolakSimpan(pesan, { keKartu = false, pesertaKosong = null, selector = null } = {}) {
+  function tolakSimpan(pesan, { keKartu = false, pesertaKosong = null } = {}) {
     setError(pesan)
     requestAnimationFrame(() => {
       const body = bodyRef.current
       if (!body) return
-      const target = selector ? body.querySelector(selector)
-        : pesertaKosong !== null
-          ? body.querySelector(`[data-nama-peserta="${pesertaKosong}"]`)
-          : keKartu ? body.querySelector('.peringatan-kewajaran') : null
+      const target = pesertaKosong !== null
+        ? body.querySelector(`[data-nama-peserta="${pesertaKosong}"]`)
+        : keKartu ? body.querySelector('.peringatan-kewajaran') : null
       if (target) {
         target.scrollIntoView({ behavior: 'smooth', block: 'center' })
         if (pesertaKosong !== null) target.focus({ preventScroll: true })
@@ -536,7 +475,6 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
 
   async function handleSaveEdit() {
     setError('')
-    setPeringatanSimpan('')
 
     // WAJIB diisi -- SAMA dengan form Booking Baru: Nama Klien, Nomor
     // WhatsApp, Tanggal Acara, dan Nama Klien di SETIAP kartu klien. Kolom
@@ -547,14 +485,9 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
     if (!nomorWhatsApp.trim()) { tolakSimpan('Nomor WhatsApp wajib diisi.'); return }
     if (!nomorWhatsAppValid(nomorWhatsApp)) { tolakSimpan('Nomor WhatsApp belum benar (minimal 8 angka).'); return }
     if (!tanggalAcara) { tolakSimpan('Tanggal acara wajib diisi.'); return }
-    if (!eventSekarang) { tolakSimpan(event === EVENT_CUSTOM_SENTINEL ? 'Tulis nama event-nya dulu.' : 'Event wajib dipilih.'); return }
     if (editPeserta.length === 0) { tolakSimpan('Tambahkan minimal 1 peserta.'); return }
     const iNamaKosong = editPeserta.findIndex((p) => !String(p.nama_anggota || '').trim())
     if (iNamaKosong !== -1) { tolakSimpan(`Nama klien di Klien ${iNamaKosong + 1} wajib diisi.`, { pesertaKosong: iNamaKosong }); return }
-    // Kategori WAJIB dipilih di tiap kartu (kecuali yang pakai layanan) --
-    // sama kayak form Booking Baru.
-    const iKategoriKosong = kategoriPerKlien.findIndex((k) => !k)
-    if (iKategoriKosong !== -1) { tolakSimpan(`Kategori di Klien ${iKategoriKosong + 1} wajib dipilih.`, { selector: `[data-kategori-peserta="${iKategoriKosong}"]` }); return }
 
     // Angka yang nggak masuk akal (komisi/untung > biayanya) DITOLAK.
     // Detailnya udah kelihatan di kotak peringatan tiap kartu klien
@@ -565,20 +498,6 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
     if (kartuBermasalah.length > 0) {
       const daftarKlien = kartuBermasalah.map((k) => `Klien ${k.i + 1}`).join(', ')
       tolakSimpan(`Perubahan belum bisa disimpan: ada angka yang tidak masuk akal (komisi/untung lebih besar dari biayanya) di ${daftarKlien}. Cek kotak peringatan merah di kartu klien tersebut.`, { keKartu: true })
-      return
-    }
-
-    // Diskon nggak boleh lebih besar dari total tagihan sebelum diskon.
-    if (adaDiskon) {
-      const pesanDiskon = pesanDiskonTidakValid(diskon, tagihanSebelumDiskon)
-      if (pesanDiskon) { tolakSimpan(`Perubahan belum bisa disimpan: ${pesanDiskon}`, { selector: '[data-diskon-nominal]' }); return }
-    }
-
-    // Konfirmasi Event vs kategori -- sama kayak di BookingModal.jsx.
-    if (peringatanEvent && konfirmasiKategori !== peringatanEvent.kunci) {
-      setKonfirmasiKategori(peringatanEvent.kunci)
-      setPeringatanSimpan(pesanKonfirmasiKategori(peringatanEvent, 'Simpan Perubahan'))
-      requestAnimationFrame(() => { if (bodyRef.current) bodyRef.current.scrollTo({ top: 0, behavior: 'smooth' }) })
       return
     }
 
@@ -615,9 +534,8 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
         jam_start_makeup: jamStartMakeup || null,
         jam_selesai: jamSelesai || null,
         lokasi: lokasi.trim(),
-        event: eventSekarang,
+        event: event === EVENT_CUSTOM_SENTINEL ? (eventCustom.trim() || 'Lainnya') : event,
         biaya_transport: Number(biayaTransport) || 0,
-        ...nilaiSimpanDiskon(adaDiskon, diskon, keteranganDiskon),
         catatan: catatan.trim(),
       })
       .eq('id', booking.id)
@@ -653,12 +571,8 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
         nama_anggota: p.nama_anggota?.trim() || '',
         peran: p.peran?.trim() || '',
         jumlah_sesi_makeup: Math.max(1, Number(p.jumlah_sesi_makeup) || 1),
-        // Klien yang pakai layanan -> Kategori & Jenis Makeup diambil LANGSUNG
-        // dari layanan (bukan dari field form), jadi pasti sinkron.
-        jenis_paket: layananDipakai(daftarLayanan, p.layanan_id) ? namaLayanan(layananDipakai(daftarLayanan, p.layanan_id)) : (p.jenis_paket || '').trim(),
-        kategori_makeup: layananDipakai(daftarLayanan, p.layanan_id) ? layananDipakai(daftarLayanan, p.layanan_id).kategori_makeup : p.kategori_makeup,
-        // Catatan asal-usul doang (nggak dihitung) -- lihat lib/layanan.js.
-        layanan_id: p.layanan_id || null,
+        jenis_paket: (p.jenis_paket || '').trim(),
+        kategori_makeup: p.kategori_makeup,
         pakai_paket_bundling: !!p.pakai_paket_bundling,
         dikerjakan_oleh_makeup: p.dikerjakan_oleh_makeup,
         biaya_makeup: Number(p.biaya_makeup) || 0,
@@ -864,9 +778,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
 
         <div className="modal-body" ref={bodyRef}>
           {error && <div className="modal-error">{error}</div>}
-          {/* Banner konfirmasi kuning -- otomatis hilang begitu Event/kategori dibetulkan. */}
-          {peringatanSimpan && peringatanEvent && peringatanEvent.kunci === konfirmasiKategori && <div className="pilih-layanan-peringatan banner" role="alert">{peringatanSimpan}</div>}
-          {loading && <div className="empty-state">Memuat detail...</div>}
+          {loading && <div className="empty-state">Memuat detail ....</div>}
 
           {!loading && !editMode && (
             <>
@@ -897,15 +809,6 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                 <div><span className="detail-label-summary">Sudah Dibayar</span><div className="pay-value" style={{ color: 'var(--bar-transport)' }}>{formatRupiah(liveBooking.belanja_klien - sisa)}</div></div>
                 <div><span className="detail-label-summary">Sisa Tagihan</span><div className="pay-value" style={{ color: sisa > 0 ? 'var(--notif)' : 'var(--ink-soft)' }}>{formatRupiah(sisa)}</div></div>
               </div>
-
-              {/* Diskon CUMA nongol kalau booking ini memang dikasih diskon. */}
-              {Number(liveBooking.diskon) > 0 && (
-                <div className="diskon-detail">
-                  <span>{labelDiskon(liveBooking.keterangan_diskon)}</span>
-                  <b>−{formatRupiah(liveBooking.diskon)}</b>
-                  <span className="diskon-detail-asal">Total Tagihan di atas sudah dipotong diskon (sebelum diskon {formatRupiah(liveBooking.belanja_sebelum_diskon)}).</span>
-                </div>
-              )}
 
               <div className="detail-label-history">Riwayat Pembayaran</div>
               {payments.length > 0 && (
@@ -949,7 +852,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                               <div className="pay-confirm-popup-actions">
                                 <button type="button" className="pay-confirm-cancel" onClick={() => setConfirmDeletePaymentId(null)}>Batal</button>
                                 <button type="button" className="pay-confirm-yes" onClick={() => handleDeletePayment(p.id)} disabled={saving}>
-                                  {saving ? '...' : 'Ya, hapus'}
+                                  {saving ? '....' : 'Ya, hapus'}
                                 </button>
                               </div>
                             </div>
@@ -983,7 +886,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                   </div>
                   <div style={{ display: 'flex', gap: 5, marginTop: 4 }}>
                     <button type="button" className="btn-payment" onClick={() => setShowAddPayment(false)}>Batal</button>
-                    <button type="submit" className="btn-payment" disabled={saving}>{saving ? 'Menyimpan...' : 'Tambah Pembayaran'}</button>
+                    <button type="submit" className="btn-payment" disabled={saving}>{saving ? 'Menyimpan ....' : 'Tambah Pembayaran'}</button>
                   </div>
                 </form>
               )}
@@ -995,7 +898,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                   <div className="b-info">
                     <div className="b-name">{p.nama_anggota} {p.peran ? `— (${p.peran})` : ''}</div>
                     <div className="b-meta">
-                      {`${labelMakeup(p.kategori_makeup, p.jenis_paket)} (${p.dikerjakan_oleh_makeup}${p.dikerjakan_oleh_makeup === 'Tim' && p.nama_tim_makeup ? ' - ' + p.nama_tim_makeup : ''})${p.jumlah_sesi_makeup > 1 ? ` (${p.jumlah_sesi_makeup}x sesi)` : ''} — ${formatRupiah(Number(p.biaya_makeup) * (p.jumlah_sesi_makeup || 1))}`}
+                      {`${p.jenis_paket || p.kategori_makeup} (${p.dikerjakan_oleh_makeup}${p.dikerjakan_oleh_makeup === 'Tim' && p.nama_tim_makeup ? ' - ' + p.nama_tim_makeup : ''})${p.jumlah_sesi_makeup > 1 ? ` (${p.jumlah_sesi_makeup}x sesi)` : ''} — ${formatRupiah(Number(p.biaya_makeup) * (p.jumlah_sesi_makeup || 1))}`}
                       {p.dikerjakan_oleh_makeup === 'Tim' && Number(p.transport_tim_makeup) > 0 ? ` | Fee Transport Tim ${formatRupiah(p.transport_tim_makeup)}` : ''}
                       {p.pakai_paket_bundling
                         ? bundlingItems.filter((b) => b.peserta_id === p.id && !b.parent_id).map((v) => {
@@ -1061,7 +964,6 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                     options={EVENT_OPTIONS}
                     value={event}
                     onChange={setEvent}
-                    placeholder="Pilih Event"
                     variant="modal"
                   />
                   {event === EVENT_CUSTOM_SENTINEL && (
@@ -1073,7 +975,6 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                       style={{ marginTop: 8 }}
                     />
                   )}
-                  <PetunjukEventLayanan daftar={daftarLayanan} />
                 </div>
               </div>
 
@@ -1102,16 +1003,6 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                   <textarea value={catatan} onChange={(e) => setCatatan(e.target.value)} />
                 </div>
               </div>
-
-              <DiskonBooking
-                ada={adaDiskon}
-                onUbahAda={ubahAdaDiskon}
-                diskon={diskon}
-                onUbahDiskon={setDiskon}
-                keterangan={keteranganDiskon}
-                onUbahKeterangan={setKeteranganDiskon}
-                tagihanSebelumDiskon={tagihanSebelumDiskon}
-              />
 
             <div className="section-label">Klien</div>
               {editPeserta.map((p, i) => (
@@ -1160,9 +1051,6 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                           makeup. Angka Biaya Makeup TETAP harga
                           PER-SESI -- perkaliannya otomatis kejadian di
                           Invoice/Rincian Keuangan.*/}
-                      {/* Layanan (Layanan Saya) -- sama kayak di form
-                          Booking Baru (lihat BookingModal.jsx). */}
-                      <PilihLayanan daftar={daftarLayanan} idTerpilih={p.layanan_id} eventAktif={eventSekarang} peringatan={peringatanEvent} tersimpan={{ kategori: p.kategori_makeup, jenis: p.jenis_paket }} onPilih={(v) => pilihLayananEdit(i, v)} />
                       <div className="field-grid-peserta cols-2">
                         <div className="field">
                           <label>Jumlah Sesi Makeup</label>
@@ -1180,17 +1068,13 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                         </div>
                       </div>
 
-                      {/* Kategori & Jenis Makeup disembunyiin selama klien ini
-                          pakai layanan -- sama kayak form Booking Baru. */}
-                      {!layananDipakai(daftarLayanan, p.layanan_id) && (
                       <div className="field-grid-peserta cols-2">
-                        <div className="field" data-kategori-peserta={i}>
+                        <div className="field">
                           <label>Kategori</label>
                           <CustomSelect
                             options={KATEGORI_MAKEUP_OPTIONS}
-                            value={p.kategori_makeup || ''}
+                            value={p.kategori_makeup || 'Regular'}
                             onChange={(v) => updateEditPeserta(i, 'kategori_makeup', v)}
-                            placeholder="Pilih Kategori"
                             variant="modal"
                           />
                         </div>
@@ -1199,9 +1083,6 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                           <input type="text" placeholder="Standar/VIP/Sesuai kebutuhan masing-masing" value={p.jenis_paket || ''} onChange={(e) => updateEditPeserta(i, 'jenis_paket', e.target.value)} />
                         </div>
                       </div>
-                      )}
-                      {/* Catatan kuning "cek lagi" -- sama kayak form Booking Baru. */}
-                      {!layananDipakai(daftarLayanan, p.layanan_id) && <CatatanKategoriKartu peringatan={peringatanEvent} kategori={kategoriPerKlien[i]} />}
                       <div className="field-grid-peserta cols-2">
                         <div className="field">
                           <label>Dikerjakan oleh</label>
@@ -1215,7 +1096,6 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                         <div className="field">
                           <label>Biaya Makeup</label>
                           <input type="text" inputMode="numeric" placeholder="Rp0" value={p.biaya_makeup ? `Rp${formatAngkaInput(p.biaya_makeup)}` : ''} onChange={(e) => updateEditPeserta(i, 'biaya_makeup', parseAngkaInput(e.target.value))} />
-                          <CatatanHargaLayanan layanan={layananDipakai(daftarLayanan, p.layanan_id)} biaya={p.biaya_makeup} />
                         </div>
                         {p.dikerjakan_oleh_makeup === 'Tim' && (
                         <div className="field">
@@ -1272,7 +1152,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                           (bukan salah satu pilihan Kategori lagi),
                           soalnya 2 hal ini beda dimensi: Kategori jawab
                           "acara apa", Paket Bundling jawab "ada vendor
-                          luar tambahan apa nggak". Klien Wedding/Reguler/
+                          luar tambahan apa nggak". Klien Wedding/Regular/
                           dst BISA juga sekalian pakai Paket Bundling --
                           makanya harus bisa nyala bareng, bukan saling
                           gantiin. Biaya Makeup/Komisi/dkk di atas TETEP
@@ -1622,7 +1502,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
           {editMode ? (
             <>
               <button className="btn-batal" onClick={() => setEditMode(false)}>Batal</button>
-              <button className="btn-primary-detail" onClick={handleSaveEdit} disabled={saving}>{saving ? 'Menyimpan...' : 'Simpan Perubahan'}</button>
+              <button className="btn-primary-detail" onClick={handleSaveEdit} disabled={saving}>{saving ? 'Menyimpan ....' : 'Simpan Perubahan'}</button>
             </>
           ) : confirmDeleteBooking ? (
             <>

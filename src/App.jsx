@@ -32,7 +32,7 @@ function ProtectedRoute({ children }) {
         minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontFamily: "'Plus Jakarta Sans', sans-serif", color: '#8B8299'
       }}>
-        Memuat...
+        Memuat ....
       </div>
     )
   }
@@ -62,7 +62,7 @@ function TrialGateRoute({ children }) {
         minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontFamily: "'Plus Jakarta Sans', sans-serif", color: '#8B8299'
       }}>
-        Memuat...
+        Memuat ....
       </div>
     )
   }
@@ -83,7 +83,7 @@ function GuestRoute({ children }) {
         minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontFamily: "'Plus Jakarta Sans', sans-serif", color: '#8B8299'
       }}>
-        Memuat...
+        Memuat ....
       </div>
     )
   }
@@ -107,7 +107,7 @@ function AdminRoute({ children }) {
         minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontFamily: "'Plus Jakarta Sans', sans-serif", color: '#8B8299'
       }}>
-        Memuat...
+        Memuat ....
       </div>
     )
   }

@@ -502,7 +502,7 @@ export default function Keuangan() {
         </button>
 
         {error && <div className="empty-state" style={{ color: 'var(--coral-tx)' }}>Gagal memuat data: {error}</div>}
-        {loading && <div className="loading-state">Memuat data...</div>}
+        {loading && <div className="loading-state">Memuat data color-mix(in srgb, var(--ink-faint) 45%, transparent); ...</div>}
 
         {!loading && !error && (
           <>

@@ -266,7 +266,7 @@ export default function NotaPengeluaranModal({ data, items, onClose }) {
             <button className="btn-ghost" onClick={onClose}>Tutup</button>
             <div className="inv-export" ref={exportMenuRef}>
               <button className="btn-ghost" onClick={() => setExportOpen((v) => !v)} type="button" disabled={exporting}>
-                {exporting ? 'Memproses...' : 'Cetak / Unduh'} <span className="inv-export-caret">▾</span>
+                {exporting ? 'Memproses ....' : 'Cetak / Unduh'} <span className="inv-export-caret">▾</span>
               </button>
               {exportOpen && (
                 <div className="inv-export-menu">

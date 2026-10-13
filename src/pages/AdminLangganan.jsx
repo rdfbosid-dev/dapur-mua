@@ -160,7 +160,7 @@ export default function AdminLangganan() {
         {error && <div className="empty-state-bookinglist" style={{ color: 'var(--ink-soft)' }}>Gagal memuat data: {error}</div>}
 
         {loading ? (
-          <div className="loading-state">Memuat...</div>
+          <div className="loading-state">Memuat ....</div>
         ) : (
           <div className="adminlangganan-layout">
             <div className="card-adminlangganan">

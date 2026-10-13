@@ -125,7 +125,7 @@ export default function BookingList() {
 
         {(loading || error || (!loading && !error && filtered.length === 0)) && (
           <div>
-            {loading && <div className="loading-state">Memuat data...</div>}
+            {loading && <div className="loading-state">Memuat data ....</div>}
             {error && <div className="empty-state-bookinglist" style={{ color: 'var(--ink-soft)' }}>Gagal memuat data: {error}</div>}
             {!loading && !error && filtered.length === 0 && (
               <div className="empty-state-bookinglist">

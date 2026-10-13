@@ -111,7 +111,7 @@ export default function PengeluaranDetailModal({ data, onClose, onEdit, onDelete
 
           <div className="section-label">Rincian Item</div>
           {loading ? (
-            <div className="empty-state">Memuat item...</div>
+            <div className="empty-state">Memuat Item ....</div>
           ) : (
             <div className="item-list">
               {kelompokkanItem(items).map((g, gi) => (
@@ -163,7 +163,7 @@ export default function PengeluaranDetailModal({ data, onClose, onEdit, onDelete
             <>
               <button className="btn-danger batal" onClick={() => setConfirmHapus(false)} type="button" disabled={menghapus}>Batal</button>
               <button className="btn-danger" onClick={handleHapus} type="button" disabled={menghapus}>
-                {menghapus ? 'Menghapus...' : 'Ya, hapus permanen'}
+                {menghapus ? 'Menghapus ...' : 'Ya, hapus permanen'}
               </button>
             </>
           ) : (

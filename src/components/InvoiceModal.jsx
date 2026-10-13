@@ -516,7 +516,7 @@ export default function InvoiceModal({ booking, peserta, payments, bundlingItems
             <button className="btn-ghost" onClick={handleWhatsApp} type="button">Kirim ke WhatsApp</button>
             <div className="inv-export" ref={exportMenuRef}>
               <button className="btn-ghost" onClick={() => setExportOpen((v) => !v)} type="button" disabled={exporting}>
-                {exporting ? 'Memproses...' : 'Cetak / Unduh'} <span className="inv-export-caret">▾</span>
+                {exporting ? 'Memproses ....' : 'Cetak / Unduh'} <span className="inv-export-caret">▾</span>
               </button>
               {exportOpen && (
                 <div className="inv-export-menu">

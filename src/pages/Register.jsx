@@ -162,7 +162,7 @@ export default function Register() {
             <div className="auth-hint" id="register-password-petunjuk">{PETUNJUK_PASSWORD}</div>
           </div>
           <button className="auth-btn" type="submit" disabled={loading}>
-            {loading ? 'Memproses...' : 'Daftar'}
+            {loading ? 'Memproses ....' : 'Daftar'}
           </button>
         </form>
 

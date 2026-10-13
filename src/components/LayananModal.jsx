@@ -218,7 +218,7 @@ export default function LayananModal({ editData = null, onClose, onSaved }) {
               <div className="foot-right">
                 <button type="button" className="btn-danger batal" onClick={() => setKonfirmasiHapus(false)} disabled={saving}>Batal</button>
                 <button type="button" className="btn-danger" onClick={handleHapus} disabled={saving}>
-                  {saving ? 'Menghapus...' : 'Ya, hapus permanen'}
+                  {saving ? 'Menghapus ....' : 'Ya, hapus permanen'}
                 </button>
               </div>
             ) : (
@@ -229,7 +229,7 @@ export default function LayananModal({ editData = null, onClose, onSaved }) {
                 <div className="foot-right">
                   <button type="button" className="btn-ghost" onClick={onClose}>Batal</button>
                   <button type="submit" className="btn-primary-layanan" disabled={saving}>
-                    {saving ? 'Menyimpan...' : 'Simpan Layanan'}
+                    {saving ? 'Menyimpan ....' : 'Simpan Layanan'}
                   </button>
                 </div>
               </>

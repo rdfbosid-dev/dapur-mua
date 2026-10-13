@@ -136,7 +136,7 @@ export default function ResetPassword() {
             </div>
           </div>
           <button className="auth-btn" type="submit" disabled={loading}>
-            {loading ? 'Menyimpan...' : 'Simpan Kata Sandi Baru'}
+            {loading ? 'Menyimpan ....' : 'Simpan Kata Sandi Baru'}
           </button>
         </form>
 

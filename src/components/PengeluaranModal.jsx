@@ -18,6 +18,14 @@ function formatRupiah(n) {
   return 'Rp' + (Number(n) || 0).toLocaleString('id-ID')
 }
 
+// Placeholder field Nama Item (kategori ketik bebas) yang khusus per
+// kategori. Urutannya: `contohNamaItem` di lib/pengeluaran.js (kalau ada)
+// -> daftar ini -> bawaan "contoh: Foundation" (Belanja Alat & Kosmetik).
+const PLACEHOLDER_NAMA_ITEM = {
+  Operasional: 'contoh: Gaji Staf',
+  [KATEGORI_LAINNYA]: 'Isi sesuai kebutuhan',
+}
+
 // `detail` = isi field tambahan item (Nama/Akun Medsos, Keterangan, dst --
 // cuma ada di kategori yang Nama Item-nya dropdown, lihat `opsiItem` di
 // lib/pengeluaran.js). Disimpan ke kolom `keterangan` pengeluaran_items.
@@ -285,7 +293,7 @@ export default function PengeluaranModal({ onClose, onSaved, editData = null }) 
                 {kategori === KATEGORI_LAINNYA && (
                   <input
                     type="text"
-                    placeholder="Tulis nama kategori..."
+                    placeholder="Tulis nama kategori"
                     value={kategoriCustom}
                     onChange={(e) => setKategoriCustom(e.target.value)}
                     style={{ marginTop: 8 }}
@@ -355,7 +363,7 @@ export default function PengeluaranModal({ onClose, onSaved, editData = null }) 
             )}
 
             {loadingItems ? (
-              <div className="item-loading">Memuat item...</div>
+              <div className="item-loading">Memuat Item ....</div>
             ) : (
               items.map((it, idx) => (
                 // 2 lapis kayak kartu Klien di form Booking: lapis luar
@@ -420,7 +428,7 @@ export default function PengeluaranModal({ onClose, onSaved, editData = null }) 
                   <div className={infoKategori?.namaItemSetengah ? 'field-grid-item-nama' : undefined}>
                   <div className="field">
                     <label>Nama Item</label>
-                    <input type="text" placeholder={infoKategori?.contohNamaItem || 'contoh: Foundation'} value={it.nama} onChange={(e) => updateItem(idx, 'nama', e.target.value)} />
+                    <input type="text" placeholder={infoKategori?.contohNamaItem || PLACEHOLDER_NAMA_ITEM[kategori] || 'contoh: Foundation'} value={it.nama} onChange={(e) => updateItem(idx, 'nama', e.target.value)} />
                   </div>
                   {/* `detailBebas` (misal Nama Brand) -- SELALU muncul di
                       samping Nama Item, mau namanya dari saran item atau
@@ -501,7 +509,7 @@ export default function PengeluaranModal({ onClose, onSaved, editData = null }) 
             <div className="foot-right">
               <button type="button" className="btn-ghost" onClick={onClose}>Batal</button>
               <button type="submit" className="btn-primary-pengeluaran" disabled={saving || loadingItems}>
-                {saving ? 'Menyimpan...' : 'Simpan Pengeluaran'}
+                {saving ? 'Menyimpan ....' : 'Simpan Pengeluaran'}
               </button>
             </div>
           </div>

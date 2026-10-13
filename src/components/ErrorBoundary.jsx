@@ -83,7 +83,7 @@ export default class ErrorBoundary extends Component {
               Ke Dashboard
             </button>
             <button type="button" style={gaya.tombolSekunder} disabled={sibuk} onClick={() => this.jalankanReset(false)}>
-              {sibuk ? 'Mereset...' : 'Reset aplikasi'}
+              {sibuk ? 'Mereset ....' : 'Reset aplikasi'}
             </button>
           </div>
           <details style={gaya.detail}>

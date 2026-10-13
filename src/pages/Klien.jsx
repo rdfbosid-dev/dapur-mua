@@ -348,7 +348,7 @@ export default function Klien() {
         </div>
 
         {error && <div className="empty-state-klien" style={{ color: 'var(--ink-soft)' }}>Gagal memuat data: {error}</div>}
-        {loading && <div className="loading-state">Memuat data...</div>}
+        {loading && <div className="loading-state">Memuat data ....</div>}
 
         {!loading && !error && (
           filtered.length === 0 ? (

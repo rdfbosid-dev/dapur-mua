@@ -82,7 +82,7 @@ export default function AdminDashboard() {
         {error && <div className="empty-state-bookinglist" style={{ color: 'var(--ink-soft)' }}>Gagal memuat data: {error}</div>}
 
         {loading ? (
-          <div className="loading-state">Memuat...</div>
+          <div className="loading-state">Memuat ....</div>
         ) : (
           <div className="admin-card-grid">
             {cards.map((c) => (

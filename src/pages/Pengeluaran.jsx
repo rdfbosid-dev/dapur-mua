@@ -197,7 +197,7 @@ export default function Pengeluaran() {
           <div className="pgl-filter-select"><CustomSelect options={['Semua Bulan', ...BULAN_PENUH]} value={filterBulan} onChange={setFilterBulan} /></div>
         </div>
 
-        {loading && <div className="loading-state">Memuat data...</div>}
+        {loading && <div className="loading-state">Memuat data ....</div>}
         {!loading && error && <div className="pgl-card pgl-kosong">Gagal memuat pengeluaran: {error}</div>}
 
         {!loading && !error && (

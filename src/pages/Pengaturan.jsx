@@ -296,7 +296,7 @@ export default function Pengaturan() {
         </div>
 
         {loading ? (
-          <div className="loading-state">Memuat data...</div>
+          <div className="loading-state">Memuat data ....</div>
         ) : (
           <div className="pengaturan-layout">
             <div className="card-pengaturan">
@@ -319,11 +319,11 @@ export default function Pengaturan() {
                     <div>
                       <div className="logo-actions-row">
                         <button type="button" className="btn-ghost-small" onClick={() => fileInputRef.current?.click()} disabled={uploadingLogo || deletingLogo}>
-                          {uploadingLogo ? 'Mengunggah...' : 'Ganti Logo'}
+                          {uploadingLogo ? 'Mengunggah ....' : 'Ganti Logo'}
                         </button>
                         {profile?.logo_url && (
                           <button type="button" className="btn-ghost-small btn-ghost-danger" onClick={handleDeleteLogo} disabled={uploadingLogo || deletingLogo}>
-                            {deletingLogo ? 'Menghapus...' : 'Hapus Logo'}
+                            {deletingLogo ? 'Menghapus ....' : 'Hapus Logo'}
                           </button>
                         )}
                       </div>
@@ -415,7 +415,7 @@ export default function Pengaturan() {
                 </div>
 
                 <button className="btn-primary" type="submit" disabled={saving}>
-                  {saving ? 'Menyimpan...' : 'Simpan Perubahan'}
+                  {saving ? 'Menyimpan ....' : 'Simpan Perubahan'}
                 </button>
 
                 {message && (
@@ -457,7 +457,7 @@ export default function Pengaturan() {
                   <span className="field-hint" id="ubah-password-petunjuk">{PETUNJUK_PASSWORD}</span>
                 </div>
                 <button className="btn-primary" type="submit" disabled={savingPassword}>
-                  {savingPassword ? 'Menyimpan...' : 'Ubah Kata Sandi'}
+                  {savingPassword ? 'Menyimpan ....' : 'Ubah Kata Sandi'}
                 </button>
               </form>
             </div>
@@ -485,7 +485,7 @@ export default function Pengaturan() {
                   </div>
                 </div>
               ) : (
-                <div className="field-hint">Menyiapkan link kalender kamu...</div>
+                <div className="field-hint">Menyiapkan link kalender kamu</div>
               )}
             </div>
 
