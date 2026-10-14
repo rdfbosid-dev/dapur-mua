@@ -12,6 +12,10 @@ import { cariAngkaTakWajar, itemKewajaranForm } from '../lib/validasiBooking'
 import PeringatanKewajaran from './PeringatanKewajaran'
 import './BookingModal.css'
 import { adaNilaiTagihan } from '../lib/statusPembayaran'
+import { muatLayanan, biayaKeForm, layananDipakai, namaLayanan, eventDariForm, peringatanKategoriEvent, kategoriKlien } from '../lib/layanan'
+import PilihLayanan, { PetunjukEventLayanan, CatatanKategoriKartu, CatatanHargaLayanan, pesanKonfirmasiKategori } from './PilihLayanan'
+import DiskonBooking from './DiskonBooking'
+import { tagihanSebelumDiskonForm, pesanDiskonTidakValid, nilaiSimpanDiskon } from '../lib/tagihan'
 
 // Nomor WhatsApp dianggap terisi kalau berisi minimal 8 ANGKA (spasi, "+",
 // "-" diabaikan) -- isian asal kayak "-" atau "0" nggak lolos, tapi format
@@ -96,7 +100,11 @@ function blankPeserta(nama = '') {
     // Invoice/Rincian Keuangan, BUKAN di sini.
     jumlahSesiMakeup: 1,
     jumlahSesiTambahan: 1,
-    kategoriMakeup: 'Regular', jenisPaket: '', dikerjakanOlehMakeup: 'Me',
+    kategoriMakeup: '', jenisPaket: '', dikerjakanOlehMakeup: 'Me',
+    // Layanan Saya -- id layanan yang dipilih buat ngisi otomatis Kategori/
+    // Jenis Makeup/Biaya Makeup (null = isi manual). Cuma CATATAN asal-usul,
+    // nggak ikut dihitung apa pun (lihat lib/layanan.js).
+    layananId: null,
     pakaiPaketBundling: false,
     biayaMakeup: '', komisiMakeup: '', namaTimMakeup: '',
     // Fee Transport Tim -- ongkos transport yang ditagih ke klien &
@@ -133,11 +141,17 @@ export default function BookingModal({ onClose, onSaved }) {
   const [jamStartMakeup, setJamStartMakeup] = useState('')
   const [jamSelesai, setJamSelesai] = useState('')
   const [lokasi, setLokasi] = useState('')
-  const [event, setEvent] = useState(EVENT_OPTIONS[0])
+  // Event SENGAJA mulai kosong ("Pilih Event") & wajib dipilih -- Event juga
+  // jadi penyaring pilihan Layanan di kartu klien (lihat lib/layanan.js).
+  const [event, setEvent] = useState('')
   const [eventCustom, setEventCustom] = useState('')
   const [biayaTransport, setBiayaTransport] = useState('')
   const [dp, setDp] = useState('')
   const [dpMetode, setDpMetode] = useState('Transfer Bank')
+  // Diskon per booking -- OPSIONAL (default "Tidak"). Lihat lib/tagihan.js.
+  const [adaDiskon, setAdaDiskon] = useState(false)
+  const [diskon, setDiskon] = useState('')
+  const [keteranganDiskon, setKeteranganDiskon] = useState('')
   const [catatan, setCatatan] = useState('')
   const [pesertaList, setPesertaList] = useState([blankPeserta()])
 
@@ -192,6 +206,16 @@ export default function BookingModal({ onClose, onSaved }) {
       if (data) setExistingClients(data)
     }
     if (user) loadExistingClients()
+  }, [user])
+
+  // Layanan Saya (template layanan makeup milik user ini) buat dropdown
+  // Layanan di tiap kartu Klien. State diisi di dalam .then() (bukan
+  // langsung di badan effect) -- aman buat aturan lint set-state-in-effect.
+  const [daftarLayanan, setDaftarLayanan] = useState([])
+  useEffect(() => {
+    let batal = false
+    if (user) muatLayanan(user.id).then((daftar) => { if (!batal) setDaftarLayanan(daftar) })
+    return () => { batal = true }
   }, [user])
 
   const namaKlienTrim = namaKlien.trim().toLowerCase()
@@ -252,6 +276,42 @@ export default function BookingModal({ onClose, onSaved }) {
       return updated
     }))
   }
+  // Layanan = daftar harga, NGGAK terikat ke Event (lihat lib/layanan.js).
+  // Event dipilih bebas; cuma ada peringatan halus kalau semua layanan yang
+  // dipakai kategorinya beda dari kategori yang biasa dipakai acaranya.
+  const eventSekarang = eventDariForm(event, eventCustom)
+  // Kategori efektif tiap klien (layanan -> kategori layanan; manual ->
+  // isian Kategori). Dipakai buat peringatan & konfirmasi Event vs kategori.
+  const kategoriPerKlien = pesertaList.map((p) => kategoriKlien(daftarLayanan, p.layananId, p.kategoriMakeup))
+  const peringatanEvent = peringatanKategoriEvent(kategoriPerKlien, eventSekarang)
+  // Total tagihan SEBELUM diskon (rumus sama dengan VIEW booking_summary) --
+  // buat ringkasan & pengecekan diskon. Angka resminya tetap dari database.
+  const tagihanSebelumDiskon = tagihanSebelumDiskonForm(biayaTransport, pesertaList)
+  function ubahAdaDiskon(ya) {
+    setAdaDiskon(ya)
+    if (!ya) { setDiskon(''); setKeteranganDiskon('') }
+  }
+
+  // Pilih Layanan di kartu Klien i -> Kategori & Jenis Makeup ikut layanan
+  // (fieldnya disembunyiin & disimpan dari layanan), Biaya Makeup keisi harga
+  // layanan (tetap bisa diedit). Event NGGAK disentuh. Pilih "Isi manual"
+  // (id null) -> lepas tautan layanannya; isian field yang ada SENGAJA
+  // dibiarin (Kategori & Jenis muncul lagi), biar nggak ada ketikan hilang.
+  function pilihLayanan(i, id) {
+    const l = layananDipakai(daftarLayanan, id)
+    setPesertaList((list) => list.map((p, idx) => {
+      if (idx !== i) return p
+      if (!l) return { ...p, layananId: null }
+      return {
+        ...p,
+        layananId: l.id,
+        kategoriMakeup: l.kategori_makeup,
+        jenisPaket: namaLayanan(l),
+        biayaMakeup: biayaKeForm(l.biaya_makeup),
+      }
+    }))
+  }
+
   function addPeserta() {
     setPesertaList((list) => [...list, blankPeserta()])
   }
@@ -382,6 +442,11 @@ export default function BookingModal({ onClose, onSaved }) {
   const bodyRef = useRef(null)
   // Sudah diingatkan soal tagihan Rp0 di form ini? (lihat handleSubmit)
   const [konfirmasiRp0, setKonfirmasiRp0] = useState(false)
+  // Konfirmasi Event vs kategori: `kunci` kombinasi yang udah dikonfirmasi
+  // (kalau Event/kategori diubah jadi kombinasi lain, ditanya lagi), dan
+  // teks banner kuning di atas form (BUKAN error merah).
+  const [konfirmasiKategori, setKonfirmasiKategori] = useState('')
+  const [peringatanSimpan, setPeringatanSimpan] = useState('')
 
   // Tolak simpan karena isian nggak valid. Banner error ada di BAGIAN
   // ATAS area isian, sementara tombol Simpan ada di bawah -- kalau user
@@ -392,14 +457,15 @@ export default function BookingModal({ onClose, onSaved }) {
   // jalan SETELAH banner error-nya ke-render.
   // `pesertaKosong` (nomor urut kartu) -> gulir ke kolom Nama Klien di kartu
   // itu & langsung fokus ke kolomnya, biar user tahu persis mana yang kurang.
-  function tolakSimpan(pesan, { keKartu = false, pesertaKosong = null } = {}) {
+  function tolakSimpan(pesan, { keKartu = false, pesertaKosong = null, selector = null } = {}) {
     setError(pesan)
     requestAnimationFrame(() => {
       const body = bodyRef.current
       if (!body) return
-      const target = pesertaKosong !== null
-        ? body.querySelector(`[data-nama-peserta="${pesertaKosong}"]`)
-        : keKartu ? body.querySelector('.peringatan-kewajaran') : null
+      const target = selector ? body.querySelector(selector)
+        : pesertaKosong !== null
+          ? body.querySelector(`[data-nama-peserta="${pesertaKosong}"]`)
+          : keKartu ? body.querySelector('.peringatan-kewajaran') : null
       if (target) {
         target.scrollIntoView({ behavior: 'smooth', block: 'center' })
         if (pesertaKosong !== null) target.focus({ preventScroll: true })
@@ -410,6 +476,7 @@ export default function BookingModal({ onClose, onSaved }) {
   async function handleSubmit(e) {
     e.preventDefault()
     setError('')
+    setPeringatanSimpan('')
 
     // WAJIB diisi: Nama Klien, Nomor WhatsApp, Tanggal Acara, dan Nama Klien
     // di SETIAP kartu klien (urutannya ngikutin urutan di form). Kolom
@@ -418,9 +485,15 @@ export default function BookingModal({ onClose, onSaved }) {
     if (!nomorWhatsApp.trim()) { tolakSimpan('Nomor WhatsApp wajib diisi.'); return }
     if (!nomorWhatsAppValid(nomorWhatsApp)) { tolakSimpan('Nomor WhatsApp belum benar (minimal 8 angka).'); return }
     if (!tanggalAcara) { tolakSimpan('Tanggal acara wajib diisi.'); return }
+    if (!event) { tolakSimpan('Event wajib dipilih.'); return }
+    if (!eventSekarang) { tolakSimpan('Tulis nama event-nya dulu.'); return }
     if (pesertaList.length === 0) { tolakSimpan('Tambahkan minimal 1 peserta.'); return }
     const iNamaKosong = pesertaList.findIndex((p) => !String(p.nama || '').trim())
     if (iNamaKosong !== -1) { tolakSimpan(`Nama klien di Klien ${iNamaKosong + 1} wajib diisi.`, { pesertaKosong: iNamaKosong }); return }
+    // Kategori WAJIB dipilih di tiap kartu (kecuali yang pakai layanan --
+    // kategorinya ikut layanan). Dulu diam-diam terisi "Regular" sendiri.
+    const iKategoriKosong = kategoriPerKlien.findIndex((k) => !k)
+    if (iKategoriKosong !== -1) { tolakSimpan(`Kategori di Klien ${iKategoriKosong + 1} wajib dipilih.`, { selector: `[data-kategori-peserta="${iKategoriKosong}"]` }); return }
 
     // Angka yang nggak masuk akal (komisi/untung > biayanya) DITOLAK.
     // Detailnya udah kelihatan di kotak peringatan tiap kartu klien
@@ -431,6 +504,23 @@ export default function BookingModal({ onClose, onSaved }) {
     if (kartuBermasalah.length > 0) {
       const daftarKlien = kartuBermasalah.map((k) => `Klien ${k.i + 1}`).join(', ')
       tolakSimpan(`Booking belum bisa disimpan: ada angka yang tidak masuk akal (komisi/untung lebih besar dari biayanya) di ${daftarKlien}. Cek kotak peringatan merah di kartu klien tersebut.`, { keKartu: true })
+      return
+    }
+
+    // Diskon nggak boleh lebih besar dari total tagihan sebelum diskon.
+    if (adaDiskon) {
+      const pesanDiskon = pesanDiskonTidakValid(diskon, tagihanSebelumDiskon)
+      if (pesanDiskon) { tolakSimpan(`Booking belum bisa disimpan: ${pesanDiskon}`, { selector: '[data-diskon-nominal]' }); return }
+    }
+
+    // Konfirmasi Event vs kategori -- BUKAN larangan (polanya sama kayak
+    // pengingat Rp0 di bawah): Simpan pertama munculin banner kuning di atas
+    // form; Simpan kedua tetap menyimpan. Ditanya lagi kalau kombinasinya
+    // berubah. Lihat peringatanKategoriEvent di lib/layanan.js.
+    if (peringatanEvent && konfirmasiKategori !== peringatanEvent.kunci) {
+      setKonfirmasiKategori(peringatanEvent.kunci)
+      setPeringatanSimpan(pesanKonfirmasiKategori(peringatanEvent, 'Simpan Booking'))
+      requestAnimationFrame(() => { if (bodyRef.current) bodyRef.current.scrollTo({ top: 0, behavior: 'smooth' }) })
       return
     }
 
@@ -468,8 +558,9 @@ export default function BookingModal({ onClose, onSaved }) {
         jam_start_makeup: jamStartMakeup || null,
         jam_selesai: jamSelesai || null,
         lokasi: lokasi.trim(),
-        event: event === EVENT_CUSTOM_SENTINEL ? (eventCustom.trim() || 'Lainnya') : event,
+        event: eventSekarang,
         biaya_transport: Number(biayaTransport) || 0,
+        ...nilaiSimpanDiskon(adaDiskon, diskon, keteranganDiskon),
         catatan: catatan.trim(),
       })
       .select()
@@ -497,8 +588,12 @@ export default function BookingModal({ onClose, onSaved }) {
       peran: p.peran.trim(),
       jumlah_sesi_makeup: Math.max(1, Number(p.jumlahSesiMakeup) || 1),
       jumlah_sesi_tambahan: p.layananTambahan !== 'Tidak Ada' ? Math.max(1, Number(p.jumlahSesiTambahan) || 1) : 1,
-      jenis_paket: p.jenisPaket.trim(),
-      kategori_makeup: p.kategoriMakeup,
+      // Klien yang pakai layanan -> Kategori & Jenis Makeup diambil LANGSUNG
+      // dari layanan (bukan dari field form), jadi pasti sinkron.
+      jenis_paket: layananDipakai(daftarLayanan, p.layananId) ? namaLayanan(layananDipakai(daftarLayanan, p.layananId)) : p.jenisPaket.trim(),
+      kategori_makeup: layananDipakai(daftarLayanan, p.layananId) ? layananDipakai(daftarLayanan, p.layananId).kategori_makeup : p.kategoriMakeup,
+      // Catatan asal-usul doang (nggak dihitung) -- lihat lib/layanan.js.
+      layanan_id: p.layananId || null,
       pakai_paket_bundling: p.pakaiPaketBundling,
       dikerjakan_oleh_makeup: p.dikerjakanOlehMakeup,
       biaya_makeup: Number(p.biayaMakeup) || 0,
@@ -631,6 +726,8 @@ export default function BookingModal({ onClose, onSaved }) {
         <form onSubmit={handleSubmit} style={{ display: 'contents' }}>
           <div className="modal-body" ref={bodyRef}>
             {error && <div className="modal-error">{error}</div>}
+            {/* Banner konfirmasi kuning -- otomatis hilang begitu Event/kategori dibetulkan. */}
+            {peringatanSimpan && peringatanEvent && peringatanEvent.kunci === konfirmasiKategori && <div className="pilih-layanan-peringatan banner" role="alert">{peringatanSimpan}</div>}
 
             <div className="field-grid-booking cols-tanggal-nama-wa">
               <div className="field">
@@ -689,6 +786,7 @@ export default function BookingModal({ onClose, onSaved }) {
                   options={EVENT_OPTIONS}
                   value={event}
                   onChange={setEvent}
+                  placeholder="Pilih Event"
                   variant="modal"
                 />
                 {event === EVENT_CUSTOM_SENTINEL && (
@@ -700,6 +798,7 @@ export default function BookingModal({ onClose, onSaved }) {
                     style={{ marginTop: 8 }}
                   />
                 )}
+                <PetunjukEventLayanan daftar={daftarLayanan} />
               </div>
             </div>
 
@@ -742,6 +841,16 @@ export default function BookingModal({ onClose, onSaved }) {
               )}
               </div>
             </div>
+
+            <DiskonBooking
+              ada={adaDiskon}
+              onUbahAda={ubahAdaDiskon}
+              diskon={diskon}
+              onUbahDiskon={setDiskon}
+              keterangan={keteranganDiskon}
+              onUbahKeterangan={setKeteranganDiskon}
+              tagihanSebelumDiskon={tagihanSebelumDiskon}
+            />
 
             <div className="field-grid-booking cols-catatan">
               <div className="field">
@@ -793,6 +902,13 @@ export default function BookingModal({ onClose, onSaved }) {
                         </div>
                       </div>
 
+                      {/* Layanan (Layanan Saya) -- pengisi otomatis
+                          Kategori, Jenis Makeup & Biaya Makeup di bawah
+                          (Klien 1 sekalian ngisi Event). Cuma tampil kalau
+                          user punya layanan aktif, jadi buat yang nggak
+                          pakai fitur ini form-nya sama persis kayak dulu. */}
+                      <PilihLayanan daftar={daftarLayanan} idTerpilih={p.layananId} eventAktif={eventSekarang} peringatan={peringatanEvent} onPilih={(v) => pilihLayanan(i, v)} />
+
                       {/* Jumlah Sesi Makeup -- buat kasus klien yang
                           SAMA di-makeup lebih dari 1x di booking yang
                           sama (misal sesi pagi & sore), tanpa perlu
@@ -824,13 +940,18 @@ export default function BookingModal({ onClose, onSaved }) {
                         </div>
                       </div>
 
+                      {/* Kategori & Jenis Makeup disembunyiin selama klien ini
+                          pakai layanan (isinya ditampilin sebagai teks di
+                          bawah dropdown Layanan & disimpan dari layanan). */}
+                      {!layananDipakai(daftarLayanan, p.layananId) && (
                       <div className="field-grid-peserta cols-2">
-                        <div className="field">
+                        <div className="field" data-kategori-peserta={i}>
                           <label>Kategori</label>
                           <CustomSelect
                             options={KATEGORI_MAKEUP_OPTIONS}
                             value={p.kategoriMakeup}
                             onChange={(v) => updatePeserta(i, 'kategoriMakeup', v)}
+                            placeholder="Pilih Kategori"
                             variant="modal"
                           />
                         </div>
@@ -839,6 +960,10 @@ export default function BookingModal({ onClose, onSaved }) {
                           <input type="text" placeholder="Standar/VIP/Sesuai kebutuhan masing-masing" value={p.jenisPaket} onChange={(e) => updatePeserta(i, 'jenisPaket', e.target.value)} />
                         </div>
                       </div>
+                      )}
+                      {/* Catatan kuning "cek lagi" kalau kategori booking ini nggak
+                          ada yang cocok sama acaranya (lihat lib/layanan.js). */}
+                      {!layananDipakai(daftarLayanan, p.layananId) && <CatatanKategoriKartu peringatan={peringatanEvent} kategori={kategoriPerKlien[i]} />}
 
                       <div className="field-grid-peserta cols-2">
                         <div className="field">
@@ -853,6 +978,7 @@ export default function BookingModal({ onClose, onSaved }) {
                         <div className="field">
                           <label>Biaya Makeup</label>
                           <input type="text" inputMode="numeric" placeholder="Rp0" value={p.biayaMakeup ? `Rp${formatAngkaInput(p.biayaMakeup)}` : ''} onChange={(e) => updatePeserta(i, 'biayaMakeup', parseAngkaInput(e.target.value))} />
+                          <CatatanHargaLayanan layanan={layananDipakai(daftarLayanan, p.layananId)} biaya={p.biayaMakeup} />
                         </div>
                         {p.dikerjakanOlehMakeup === 'Tim' && (
                         <div className="field">
@@ -914,7 +1040,7 @@ export default function BookingModal({ onClose, onSaved }) {
                           lagi), soalnya 2 hal ini beda dimensi: Kategori
                           jawab "acara apa", Paket Bundling jawab "ada
                           vendor luar tambahan apa nggak". Klien Wedding/
-                          Regular/dst BISA juga sekalian pakai Paket
+                          Reguler/dst BISA juga sekalian pakai Paket
                           Bundling -- makanya harus bisa nyala bareng,
                           bukan saling gantiin. Biaya Makeup/Komisi/dkk
                           di atas TETEP jalan apa adanya, BEDA hal
