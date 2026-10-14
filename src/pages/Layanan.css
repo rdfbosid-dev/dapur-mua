@@ -51,3 +51,19 @@
   .lyn-daftar { padding: 16px; }
   .lyn-nama, .lyn-harga { font-size: 13px; }
 }
+
+/* Tab Makeup / Rambut -- ukuran & warna SAMA kayak tombol Aktif/Nonaktif
+   di form paket (.layanan-toggle-opt, LayananModal.css). */
+.lyn-tabs { display: flex; gap: 6px; max-width: 280px; margin-bottom: 16px; }
+.lyn-tab {
+  flex: 1; text-align: center; padding: 8px; border-radius: 8px; border: none; cursor: pointer;
+  font-family: inherit; font-size: 13px; font-weight: 600;
+  background: var(--ink-faint); color: var(--ink-soft);
+  transition: background 0.15s, color 0.15s;
+}
+.lyn-tab:not(.sel):hover { background: color-mix(in srgb, var(--ink-faint) 50%, transparent); }
+.lyn-tab.sel { background: var(--h3); color: #fff; }
+@media (max-width: 640px) {
+  .lyn-tabs { max-width: none; }
+  .lyn-tab { font-size: 12px; }
+}

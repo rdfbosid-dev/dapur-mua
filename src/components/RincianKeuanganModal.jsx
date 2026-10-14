@@ -3,6 +3,7 @@ import RemittanceAdviceModal from './RemittanceAdviceModal'
 import './RincianKeuanganModal.css'
 import IconClose from './IconClose'
 import { labelDiskon } from '../lib/tagihan'
+import { labelLayananRambut } from '../lib/layananRambut'
 
 function formatRupiah(n) {
   const num = Number(n) || 0
@@ -69,7 +70,8 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
     const sesi = Math.max(1, Number(p.jumlah_sesi_tambahan) || 1)
     return {
       nama: p.nama_anggota,
-      jenis: p.layanan_tambahan,
+      // "Hairdo Sanggul Modern" (Detail Layanan Rambut ikut, kalau diisi).
+      jenis: labelLayananRambut(p.layanan_tambahan, p.detail_tambahan),
       tim,
       namaTim: p.nama_tim_tambahan,
       sesi,
@@ -95,7 +97,7 @@ export default function RincianKeuanganModal({ booking, peserta, bundlingItems =
     }
     const feeTambahan = Number(p.transport_tim_tambahan) || 0
     if (punyaTambahan(p) && p.dikerjakan_oleh_tambahan === 'Tim' && feeTambahan > 0) {
-      transportTimRows.push({ nama: p.nama_anggota, jenis: p.layanan_tambahan, namaTim: p.nama_tim_tambahan, fee: feeTambahan })
+      transportTimRows.push({ nama: p.nama_anggota, jenis: labelLayananRambut(p.layanan_tambahan, p.detail_tambahan), namaTim: p.nama_tim_tambahan, fee: feeTambahan })
     }
   })
 

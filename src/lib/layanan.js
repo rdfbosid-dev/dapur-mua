@@ -109,7 +109,7 @@ export function labelLengkapLayanan(l) {
 export function labelHalamanLayanan(l) {
   const jenis = namaLayanan(l)
   const ket = keteranganLayanan(l)
-  return `${l.kategori_makeup}${jenis ? ` - ${jenis}` : ''}${ket ? ` (${ket})` : ''}`
+  return `${l.kategori_makeup}${jenis ? ` | ${jenis}` : ''}${ket ? ` (${ket})` : ''}`
 }
 
 // Urutan di halaman Paket Layanan: Kategori A-Z, lalu sama kayak di dropdown

@@ -129,14 +129,20 @@
   position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
   min-height: 30px; padding: 4px 6px; border-radius: 6px; cursor: pointer;
   font-family: inherit; font-size: 12px; font-weight: 700; line-height: 1.25; text-align: center;
-  border: 1.5px solid color-mix(in srgb, var(--button-border) 70%, transparent);
-  background: var(--field); color: var(--ink-soft);
+  border: none;
+  background: var(--ink-faint); color: var(--ink-soft);
   transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
-.layanan-modal-overlay .layanan-kategori-opt:hover { border-color: var(--h3); }
-.layanan-modal-overlay .layanan-kategori-opt.sel { background: var(--h3); border-color: var(--h3); color: #fff; }
+.layanan-modal-overlay .layanan-kategori-opt:hover { border-color: none; background: var(--h3); color: var(--h7); }
+.layanan-modal-overlay .layanan-kategori-opt.sel { background: var(--h3); color: #fff; }
 .layanan-modal-overlay .layanan-badge-saran {
   font-size: 9.5px; font-weight: 700; padding: 1px 7px; border-radius: 999px;
   background: color-mix(in srgb, var(--h3) 22%, transparent); color: var(--h5);
 }
 
+
+/* Jenis Layanan Rambut (form Paket Rambut) -- 2 tombol, bukan 3. */
+.layanan-modal-overlay .layanan-kategori-row.jenis-rambut { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 280px; }
+@media (max-width: 640px) {
+  .layanan-modal-overlay .layanan-kategori-row.jenis-rambut { max-width: none; }
+}

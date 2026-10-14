@@ -1,0 +1,5 @@
+/* Baris Paket Hairdo/Hijabdo+ + Detail Layanan Rambut (PilihPaketRambut.jsx).
+   Tampilan dropdown numpang CustomSelect.css + PilihLayanan.css (.pilih-layanan).
+   Label Detail bisa turun 2 baris di HP -- kolomnya dirata bawah biar
+   dropdown & field Detail tetap sejajar. */
+.pilih-rambut { align-items: end; }

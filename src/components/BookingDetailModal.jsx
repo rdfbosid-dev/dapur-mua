@@ -40,6 +40,8 @@ import { muatLayanan, layananDipakai, namaLayanan, eventDariForm, peringatanKate
 import PilihLayanan, { PetunjukEventLayanan, CatatanKategoriKartu, CatatanHargaLayanan, pesanKonfirmasiKategori } from './PilihLayanan'
 import DiskonBooking from './DiskonBooking'
 import { tagihanSebelumDiskonRow, pesanDiskonTidakValid, nilaiSimpanDiskon, labelDiskon } from '../lib/tagihan'
+import { muatLayananRambut, paketRambutDipakai, namaPaketRambut, gantiJenisRambut, nilaiSimpanRambut, labelLayananRambut } from '../lib/layananRambut'
+import PilihPaketRambut, { CatatanHargaRambut } from './PilihPaketRambut'
 
 function formatRupiah(n) {
   const num = Number(n) || 0
@@ -127,6 +129,13 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
   useEffect(() => {
     let batal = false
     if (user) muatLayanan(user.id).then((daftar) => { if (!batal) setDaftarLayanan(daftar) })
+    return () => { batal = true }
+  }, [user])
+  // Paket Layanan Rambut (Hairdo/Hijabdo+) -- pola sama kayak di atas.
+  const [daftarRambut, setDaftarRambut] = useState([])
+  useEffect(() => {
+    let batal = false
+    if (user) muatLayananRambut(user.id).then((daftar) => { if (!batal) setDaftarRambut(daftar) })
     return () => { batal = true }
   }, [user])
 
@@ -335,6 +344,14 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
       // ke Total Tagihan padahal barisnya nggak nongol di Invoice sama
       // sekali. Sekarang begitu balik ke "Tidak Ada", Dikerjakan Oleh,
       // Biaya, Komisi, DAN Nama Tim-nya langsung ke-reset semua.
+      // Ganti Tidak/Hairdo/Hijabdo+ -> Detail & paket rambut disesuaikan
+      // (lihat gantiJenisRambut di lib/layananRambut.js).
+      if (field === 'layanan_tambahan') {
+        const r = gantiJenisRambut(daftarRambut, value, { detail: p.detail_tambahan || '', idPaket: p.layanan_tambahan_id, biaya: p.biaya_tambahan })
+        updated.detail_tambahan = r.detail
+        updated.layanan_tambahan_id = r.idPaket
+        if (r.biayaKosong) updated.biaya_tambahan = 0
+      }
       if (field === 'layanan_tambahan' && value === 'Tidak Ada') {
         updated.dikerjakan_oleh_tambahan = 'Me'
         updated.biaya_tambahan = 0
@@ -437,6 +454,17 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
     }))
   }
 
+  // Pilih Paket Hairdo/Hijabdo+ (mode edit) -- sama kayak pilihPaketRambut
+  // di BookingModal.jsx. "Pilih Manual" (id null) -> isian dibiarkan.
+  function pilihPaketRambutEdit(i, id) {
+    const l = paketRambutDipakai(daftarRambut, id)
+    setEditPeserta((list) => list.map((p, idx) => {
+      if (idx !== i) return p
+      if (!l) return { ...p, layanan_tambahan_id: null }
+      return { ...p, layanan_tambahan_id: l.id, detail_tambahan: namaPaketRambut(l), biaya_tambahan: Math.round(Number(l.biaya) || 0) }
+    }))
+  }
+
   function addEditPeserta() {
     setEditPeserta((list) => [...list, {
       nama_anggota: '', peran: '', jumlah_sesi_makeup: 1, jumlah_sesi_tambahan: 1, kategori_makeup: '', jenis_paket: '', dikerjakan_oleh_makeup: 'Me',
@@ -444,6 +472,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
       pakai_paket_bundling: false,
       biaya_makeup: 0, komisi_makeup_tim: 0, nama_tim_makeup: '', transport_tim_makeup: 0, retouch: false, biaya_retouch: 0, layanan_tambahan: 'Tidak Ada',
       dikerjakan_oleh_tambahan: 'Me', biaya_tambahan: 0, komisi_tambahan: 0, nama_tim_tambahan: '', transport_tim_tambahan: 0,
+      detail_tambahan: '', layanan_tambahan_id: null,
       layanan_lainnya: '', biaya_lainnya: 0, keuntungan_lainnya: 0, jumlah_lainnya: 1,
       layanan_lainnya_2: '', biaya_lainnya_2: 0, keuntungan_lainnya_2: 0, jumlah_lainnya_2: 1,
       layanan_lainnya_3: '', biaya_lainnya_3: 0, keuntungan_lainnya_3: 0, jumlah_lainnya_3: 1,
@@ -689,6 +718,8 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
         // Jumlah Sesi Layanan Tambahan -- TERPISAH dari Jumlah Sesi
         // Makeup di atas, sama alasannya kayak biaya_tambahan.
         jumlah_sesi_tambahan: p.layanan_tambahan !== 'Tidak Ada' ? Math.max(1, Number(p.jumlah_sesi_tambahan) || 1) : 1,
+        // Detail Layanan Rambut + catatan asal paket (lib/layananRambut.js).
+        ...nilaiSimpanRambut(p.layanan_tambahan, p.detail_tambahan, p.layanan_tambahan_id),
       }
       for (let n = 1; n <= 5; n++) {
         const suffix = n === 1 ? '' : `_${n}`
@@ -1003,7 +1034,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                             return ` | ${v.nama} ${formatRupiah(v.biaya)}` + addOns.map((a) => ` | ↳ ${a.nama} ${formatRupiah(a.biaya)}`).join('')
                           }).join('')
                         : ''}
-                      {p.layanan_tambahan !== 'Tidak Ada' ? ` | ${p.layanan_tambahan} (${p.dikerjakan_oleh_tambahan}${p.dikerjakan_oleh_tambahan === 'Tim' && p.nama_tim_tambahan ? ' - ' + p.nama_tim_tambahan : ''})${p.jumlah_sesi_tambahan > 1 ? ` (${p.jumlah_sesi_tambahan}x sesi)` : ''} ${formatRupiah(Number(p.biaya_tambahan) * (p.jumlah_sesi_tambahan || 1))}` : ''}
+                      {p.layanan_tambahan !== 'Tidak Ada' ? ` | ${labelLayananRambut(p.layanan_tambahan, p.detail_tambahan)} (${p.dikerjakan_oleh_tambahan}${p.dikerjakan_oleh_tambahan === 'Tim' && p.nama_tim_tambahan ? ' - ' + p.nama_tim_tambahan : ''})${p.jumlah_sesi_tambahan > 1 ? ` (${p.jumlah_sesi_tambahan}x sesi)` : ''} ${formatRupiah(Number(p.biaya_tambahan) * (p.jumlah_sesi_tambahan || 1))}` : ''}
                       {p.layanan_tambahan !== 'Tidak Ada' && p.dikerjakan_oleh_tambahan === 'Tim' && Number(p.transport_tim_tambahan) > 0 ? ` | Fee Transport Tim ${formatRupiah(p.transport_tim_tambahan)}` : ''}
                       {p.retouch ? ` | Retouch ${formatRupiah(p.biaya_retouch)}` : ''}
                       {[1, 2, 3, 4, 5].map((n) => {
@@ -1369,11 +1400,25 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                         )}
                       </div>
 
+                      {/* Paket Hairdo/Hijabdo+ & Detail Layanan Rambut -- sama
+                          kayak form Booking Baru (PilihPaketRambut.jsx). */}
+                      {p.layanan_tambahan !== 'Tidak Ada' && (
+                        <PilihPaketRambut
+                          daftar={daftarRambut}
+                          jenis={p.layanan_tambahan}
+                          idTerpilih={p.layanan_tambahan_id}
+                          detail={p.detail_tambahan || ''}
+                          onPilih={(v) => pilihPaketRambutEdit(i, v)}
+                          onDetail={(v) => updateEditPeserta(i, 'detail_tambahan', v)}
+                        />
+                      )}
+
                       {p.layanan_tambahan !== 'Tidak Ada' && (
                       <div className="field-grid-peserta cols-2">
                         <div className="field">
                           <label>Biaya Layanan Tambahan</label>
                           <input type="text" inputMode="numeric" placeholder="Rp0" value={p.biaya_tambahan ? `Rp${formatAngkaInput(p.biaya_tambahan)}` : ''} onChange={(e) => updateEditPeserta(i, 'biaya_tambahan', parseAngkaInput(e.target.value))} />
+                          <CatatanHargaRambut paket={paketRambutDipakai(daftarRambut, p.layanan_tambahan_id)} biaya={p.biaya_tambahan} />
                         </div>
                         {p.dikerjakan_oleh_tambahan === 'Tim' && (
                         <div className="field">

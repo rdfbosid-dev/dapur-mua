@@ -16,6 +16,8 @@ import { muatLayanan, biayaKeForm, layananDipakai, namaLayanan, eventDariForm, p
 import PilihLayanan, { PetunjukEventLayanan, CatatanKategoriKartu, CatatanHargaLayanan, pesanKonfirmasiKategori } from './PilihLayanan'
 import DiskonBooking from './DiskonBooking'
 import { tagihanSebelumDiskonForm, pesanDiskonTidakValid, nilaiSimpanDiskon } from '../lib/tagihan'
+import { muatLayananRambut, paketRambutDipakai, namaPaketRambut, biayaRambutKeForm, gantiJenisRambut, nilaiSimpanRambut } from '../lib/layananRambut'
+import PilihPaketRambut, { CatatanHargaRambut } from './PilihPaketRambut'
 
 // Nomor WhatsApp dianggap terisi kalau berisi minimal 8 ANGKA (spasi, "+",
 // "-" diabaikan) -- isian asal kayak "-" atau "0" nggak lolos, tapi format
@@ -117,6 +119,9 @@ function blankPeserta(nama = '') {
     retouch: false, biayaRetouch: '',
     layananTambahan: 'Tidak Ada', dikerjakanOlehTambahan: 'Me',
     biayaTambahan: '', komisiTambahan: '', namaTimTambahan: '', transportTimTambahan: '',
+    // Detail Layanan Rambut (opsional, misal "Sanggul Modern") & id paket
+    // rambut yang dipilih (null = isi manual) -- lihat lib/layananRambut.js.
+    detailTambahan: '', layananTambahanId: null,
     // Add On Item (Beli) -- SEKARANG dikasih toggle Tidak/Ya juga,
     // sama pola persis kayak Add On Item (Sewa) di bawah, defaultnya
     // nggak aktif.
@@ -217,6 +222,13 @@ export default function BookingModal({ onClose, onSaved }) {
     if (user) muatLayanan(user.id).then((daftar) => { if (!batal) setDaftarLayanan(daftar) })
     return () => { batal = true }
   }, [user])
+  // Paket Layanan Rambut (Hairdo/Hijabdo+) -- pola sama kayak di atas.
+  const [daftarRambut, setDaftarRambut] = useState([])
+  useEffect(() => {
+    let batal = false
+    if (user) muatLayananRambut(user.id).then((daftar) => { if (!batal) setDaftarRambut(daftar) })
+    return () => { batal = true }
+  }, [user])
 
   const namaKlienTrim = namaKlien.trim().toLowerCase()
   const clientSuggestions = namaKlienTrim
@@ -256,6 +268,14 @@ export default function BookingModal({ onClose, onSaved }) {
       // BALIK ke "Tidak Ada", field Biaya Tambahan sebelumnya cuma
       // ke-sembunyiin di form, nggak ke-reset -- jadi bisa nyangkut
       // diem-diem ke Total Tagihan tanpa kelihatan barisnya di Invoice.
+      // Ganti Tidak/Hairdo/Hijabdo+ -> Detail & paket rambut disesuaikan
+      // (lihat gantiJenisRambut di lib/layananRambut.js).
+      if (field === 'layananTambahan') {
+        const r = gantiJenisRambut(daftarRambut, value, { detail: p.detailTambahan, idPaket: p.layananTambahanId, biaya: p.biayaTambahan })
+        updated.detailTambahan = r.detail
+        updated.layananTambahanId = r.idPaket
+        if (r.biayaKosong) updated.biayaTambahan = ''
+      }
       if (field === 'layananTambahan' && value === 'Tidak Ada') {
         updated.dikerjakanOlehTambahan = 'Me'
         updated.biayaTambahan = ''
@@ -309,6 +329,19 @@ export default function BookingModal({ onClose, onSaved }) {
         jenisPaket: namaLayanan(l),
         biayaMakeup: biayaKeForm(l.biaya_makeup),
       }
+    }))
+  }
+
+  // Pilih Paket Hairdo/Hijabdo+ di kartu Klien i -> Detail Layanan Rambut
+  // keisi nama paket & Biaya Layanan Tambahan keisi harga paket (dua-duanya
+  // tetap bisa diedit). Dikerjakan oleh/Komisi/Nama Tim TETAP manual.
+  // "Pilih Manual" (id null) -> lepas tautan paket, isian dibiarkan.
+  function pilihPaketRambut(i, id) {
+    const l = paketRambutDipakai(daftarRambut, id)
+    setPesertaList((list) => list.map((p, idx) => {
+      if (idx !== i) return p
+      if (!l) return { ...p, layananTambahanId: null }
+      return { ...p, layananTambahanId: l.id, detailTambahan: namaPaketRambut(l), biayaTambahan: biayaRambutKeForm(l.biaya) }
     }))
   }
 
@@ -618,6 +651,8 @@ export default function BookingModal({ onClose, onSaved }) {
       komisi_tambahan: (p.layananTambahan !== 'Tidak Ada' && p.dikerjakanOlehTambahan === 'Tim') ? (Number(p.komisiTambahan) || 0) : 0,
       nama_tim_tambahan: (p.layananTambahan !== 'Tidak Ada' && p.dikerjakanOlehTambahan === 'Tim') ? (p.namaTimTambahan.trim() || null) : null,
       transport_tim_tambahan: (p.layananTambahan !== 'Tidak Ada' && p.dikerjakanOlehTambahan === 'Tim') ? (Number(p.transportTimTambahan) || 0) : 0,
+      // Detail Layanan Rambut + catatan asal paket (lib/layananRambut.js).
+      ...nilaiSimpanRambut(p.layananTambahan, p.detailTambahan, p.layananTambahanId),
       ...addOnsToRow(p.addOnLainnya),
       ...sewaToRow(p.sewaLainnya),
     }))
@@ -1145,11 +1180,26 @@ export default function BookingModal({ onClose, onSaved }) {
                         )}
                       </div>
 
+                      {/* Paket Hairdo/Hijabdo+ (kalau punya paket rambut) &
+                          Detail Layanan Rambut (opsional, misal "Sanggul
+                          Modern") -- lihat PilihPaketRambut.jsx. */}
+                      {p.layananTambahan !== 'Tidak Ada' && (
+                        <PilihPaketRambut
+                          daftar={daftarRambut}
+                          jenis={p.layananTambahan}
+                          idTerpilih={p.layananTambahanId}
+                          detail={p.detailTambahan}
+                          onPilih={(v) => pilihPaketRambut(i, v)}
+                          onDetail={(v) => updatePeserta(i, 'detailTambahan', v)}
+                        />
+                      )}
+
                       {p.layananTambahan !== 'Tidak Ada' && (
                       <div className="field-grid-peserta cols-2">
                         <div className="field">
                           <label>Biaya Layanan Tambahan</label>
                           <input type="text" inputMode="numeric" placeholder="Rp0" value={p.biayaTambahan ? `Rp${formatAngkaInput(p.biayaTambahan)}` : ''} onChange={(e) => updatePeserta(i, 'biayaTambahan', parseAngkaInput(e.target.value))} />
+                          <CatatanHargaRambut paket={paketRambutDipakai(daftarRambut, p.layananTambahanId)} biaya={p.biayaTambahan} />
                         </div>
                         {p.dikerjakanOlehTambahan === 'Tim' && (
                         <div className="field">

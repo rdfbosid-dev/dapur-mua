@@ -6,6 +6,7 @@ import IconClose from './IconClose'
 import { labelMakeup as labelMakeupDari } from '../lib/layanan'
 import { jamZona, kodeZona } from '../lib/zonaWaktu'
 import { labelDiskon } from '../lib/tagihan'
+import { labelLayananRambut } from '../lib/layananRambut'
 
 function formatRupiah(n) {
   return 'Rp' + (Number(n) || 0).toLocaleString('id-ID')
@@ -167,7 +168,7 @@ function InvoicePaper({ profile, booking, peserta, payments, bundlingItems = [],
               rows.push(
                 <tr key={p.id + '-tmb'}>
                   <td></td>
-                  <td>{p.layanan_tambahan}{p.dikerjakan_oleh_tambahan === 'Tim' ? ' (Tim)' : ''}{sesiTambahan > 1 ? ` (${sesiTambahan}x sesi)` : ''}</td>
+                  <td>{labelLayananRambut(p.layanan_tambahan, p.detail_tambahan)}{p.dikerjakan_oleh_tambahan === 'Tim' ? ' (Tim)' : ''}{sesiTambahan > 1 ? ` (${sesiTambahan}x sesi)` : ''}</td>
                   <td className="right">{formatRupiah(Number(p.biaya_tambahan) * sesiTambahan)}</td>
                 </tr>
               )
