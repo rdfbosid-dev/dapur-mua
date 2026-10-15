@@ -397,6 +397,9 @@ export default function Dashboard() {
     WhatsApp: '#25D366',
     Facebook: '#1877F2',
     TikTok: '#000000',
+    // Logo Threads hitam juga (sama kayak TikTok) -> SENGAJA abu-abu biar
+    // kebedain di donut & legend.
+    Threads: '#8E8E93',
     Referral: '#E7B655',
   }
   function sumberColor(label, i) {

@@ -132,6 +132,7 @@
 @media (min-width: 641px) {
   .pb-aksi { flex-wrap: nowrap; }
   .pb-btn { white-space: nowrap; }
+  .pb-info { font-size: 12px; }
 }
 
 @media (max-width: 640px) {
@@ -142,4 +143,5 @@
   .pb-aksi .pb-btn { flex: 1 1 auto; justify-content: center; }
   /* Tolak | Terima sebaris, Chat WhatsApp turun ke baris sendiri selebar kartu. */
   .pb-aksi .pb-btn.wa { flex-basis: 100%; }
+  .pb-info { font-size: 12px; }
 }

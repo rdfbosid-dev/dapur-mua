@@ -24,6 +24,17 @@ import './BookingOnline.css'
 const BULAN = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
 const HARI = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab']
 const BELUM_PILIH_PAKET = 'Belum tahu, tanya dulu'
+// "Tahu MUA dari mana?" -- label yang dilihat calon klien -> nilai yang
+// disimpan (SAMA dengan pilihan Sumber Kanal Booking di form booking;
+// Teman/Keluarga = Referral). Daftar nilainya juga dicek di server
+// (booking_publik_kirim) & constraint tabel permintaan_booking.
+const PILIHAN_SUMBER = [
+  { label: 'Instagram', nilai: 'Instagram' },
+  { label: 'TikTok', nilai: 'TikTok' },
+  { label: 'Facebook', nilai: 'Facebook' },
+  { label: 'Threads', nilai: 'Threads' },
+  { label: 'Teman/Keluarga', nilai: 'Referral' },
+]
 
 function inisial(nama) {
   return (nama || '?').split(' ').map((w) => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase()
@@ -254,6 +265,16 @@ function FooterDapurMua() {
   )
 }
 
+// Tombol Beranda (ikon rumah) -- pojok KIRI atas, sejajar tombol tema di
+// kanan. Muncul di form booking & halaman sukses: balik ke landing page MUA.
+function TombolBeranda({ namaMua, onKlik }) {
+  return (
+    <button type="button" className="bo-beranda" onClick={onKlik} aria-label={`Kembali ke halaman ${namaMua}`} title="Beranda">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5" /><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5" /></svg>
+    </button>
+  )
+}
+
 // Tombol tema terang/gelap (pakai ThemeContext yang sama dengan aplikasi).
 function TombolTema() {
   const { theme, toggleTheme } = useTheme()
@@ -288,6 +309,7 @@ export default function BookingOnline() {
 
   const [nama, setNama] = useState('')
   const [wa, setWa] = useState('')
+  const [sumber, setSumber] = useState('') // label PILIHAN_SUMBER yang dipilih
   const [tanggal, setTanggal] = useState('')
   const [jam, setJam] = useState('')
   const [event, setEvent] = useState('')
@@ -366,6 +388,8 @@ export default function BookingOnline() {
     if (nama.trim().length < 2) return tolak('Nama wajib diisi.')
     // Batas 15 angka SAMA dengan pengecekan di server (booking_publik_kirim).
     if (pesanNomorWaTidakValid(wa, { maksAngka: 15 })) return tolak(pesanNomorWaTidakValid(wa, { maksAngka: 15 }))
+    const nilaiSumber = PILIHAN_SUMBER.find((s) => s.label === sumber)?.nilai
+    if (!nilaiSumber) return tolak(`Pilih dari mana kamu tahu ${profil.nama}.`)
     if (!tanggal) return tolak('Pilih tanggal acara di kalender dulu.')
     if (!eventFinal) return tolak(event === EVENT_CUSTOM_SENTINEL ? 'Tulis nama acaranya dulu.' : 'Pilih acaranya dulu.')
     if (lokasi.trim().length < 3) return tolak('Lokasi wajib diisi.')
@@ -380,6 +404,7 @@ export default function BookingOnline() {
       event: eventFinal,
       lokasi: capitalizeWords(lokasi.trim()),
       catatan: catatan.trim(),
+      sumber: nilaiSumber,
       peserta: orang.map((o) => ({ nama: capitalizeWords(o.nama.trim()), peran: o.peran.trim(), layanan_id: o.paketId, rambut: o.rambut })),
       situs,
     }
@@ -395,6 +420,12 @@ export default function BookingOnline() {
   function kirimLagi() {
     setTanggal(''); setJam(''); setEvent(''); setEventLain(''); setLokasi(''); setCatatan('')
     setOrang([orangKosong()]); setTerkirim(null); setStatus('siap')
+  }
+  // Dari halaman sukses: isian dikosongkan (sama kayak Kirim permintaan lain)
+  // lalu balik ke landing page.
+  function berandaSetelahKirim() {
+    kirimLagi()
+    keLanding()
   }
 
   if (status === 'memuat') return <div className="bo-page"><TombolTema /><div className="bo-info">Memuat ....</div></div>
@@ -428,6 +459,7 @@ export default function BookingOnline() {
     const pesan = pesanWaPermintaan({ namaMua: profil.nama, isian: terkirim, zona: profil.zona_waktu })
     return (
       <div className="bo-page">
+        <TombolBeranda namaMua={profil.nama} onKlik={berandaSetelahKirim} />
         <TombolTema />
         <div className="bo-wrap">
           {kepala}
@@ -503,9 +535,9 @@ export default function BookingOnline() {
   // ---------- FORM BOOKING (/b/slug#booking) ----------
   return (
     <div className="bo-page">
+      <TombolBeranda namaMua={profil.nama} onKlik={keLanding} />
       <TombolTema />
       <div className="bo-wrap">
-        <button type="button" className="bo-kembali" onClick={keLanding}>← Kembali ke halaman {profil.nama}</button>
         {kepala}
         <div className="bo-sub">Form Permintaan Booking</div>
         {profil.pesan && <div className="bo-pesan">{profil.pesan}</div>}
@@ -522,6 +554,12 @@ export default function BookingOnline() {
                 <span>Nomor WhatsApp</span>
                 <input type="tel" inputMode="tel" value={wa} onChange={(e) => setWa(rapikanKetikanWa(e.target.value))} placeholder="0812xxxxxxx" maxLength={25} autoComplete="tel" />
               </label>
+            </div>
+            {/* Tahu MUA dari mana -> jadi Sumber Kanal Booking waktu MUA
+                menerima permintaan (Teman/Keluarga = Referral). */}
+            <div className="bo-field bo-field-sumber">
+              <span>Tahu {profil.nama} dari mana?</span>
+              <CustomSelect options={PILIHAN_SUMBER.map((s) => s.label)} value={sumber} onChange={setSumber} placeholder="Pilih" variant="modal" />
             </div>
           </section>
 

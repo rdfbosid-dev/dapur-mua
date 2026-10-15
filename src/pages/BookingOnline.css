@@ -23,6 +23,18 @@
 }
 .bo-tema:hover { background: var(--button-theme); color: var(--h2); border: 1px solid var(--button-theme); }
 .bo-tema svg { width: 18px; height: 18px; }
+/* Tombol Beranda (ikon rumah) -- pojok KIRI atas, ukuran & posisi SAMA
+   dengan tombol tema di kanan (jadi selalu sejajar, termasuk di HP). Muncul
+   di form booking & halaman sukses. Warna numpang gaya tombol Kembali lama. */
+.bo-beranda {
+  position: absolute; top: 14px; left: 14px; z-index: 5;
+  width: 38px; height: 38px; border-radius: 12px; padding: 0; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; border: none;
+  background: color-mix(in srgb, var(--button-prm-hover) 80%, transparent); color: var(--h7);
+  box-shadow: var(--shadow-card); transition: background 0.15s;
+}
+.bo-beranda:hover { background: var(--h3); }
+.bo-beranda svg { width: 18px; height: 18px; }
 .bo-wrap { max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
 .bo-info { text-align: center; padding: 80px 0; font-size: 14px; }
 
@@ -67,6 +79,12 @@
 .bo-field input::placeholder, .bo-field textarea::placeholder { color: var(--placeholder); opacity: 1; }
 .bo-field input:focus, .bo-field textarea:focus { outline: none; border-color: var(--h3); box-shadow: 0 0 0 3px color-mix(in srgb, var(--h3) 18%, transparent); }
 .bo-field .cselect-trigger { font-size: 14px; padding: 10px 10px 10px 12px; }
+/* "Tahu MUA dari mana?" -- di bawah Nama & Nomor WhatsApp; di layar lebar
+   selebar 1 kolom (sejajar Nomor WhatsApp di atasnya, rata kanan). */
+.bo-field-sumber { margin-bottom: 0; }
+@media (min-width: 481px) {
+  .bo-field-sumber { width: calc(50% - 6px); margin-left: auto; }
+}
 .bo-hint { font-size: 11.5px; color: var(--ink-soft); opacity: 0.8; line-height: 1.45; }
 .bo-link-kecil {
   align-self: flex-start; background: none; border: none; padding: 0; cursor: pointer; font-family: inherit;
@@ -264,12 +282,6 @@
 .bo-pl-list li span { min-width: 0; overflow-wrap: anywhere; }
 .bo-pl-list b { font-family: 'Poppins', sans-serif; color: var(--h5); white-space: nowrap; }
 .bo-pl-catatan { display: block; margin-top: 10px; }
-/* Link "Kembali" di atas form booking. */
-.bo-kembali {
-  display: inline-block; align-self: flex-start; border: none; padding: 5px 10px; cursor: pointer; border-radius: 8px;
-  font-family: inherit; font-size: 13px; font-weight: 500; background: color-mix(in srgb, var(--button-prm-hover) 80%, transparent); color: var(--h7);
-}
-.bo-kembali:hover { background: var(--h3); }
 
 .bo-footer {
   display: flex; flex-direction: column; align-items: center; gap: 6px;
@@ -281,6 +293,7 @@
 @media (max-width: 480px) {
   .bo-page { padding-top: 20px; }
   .bo-tema { top: 10px; right: 10px; width: 34px; height: 34px; }
+  .bo-beranda { top: 10px; left: 10px; width: 34px; height: 34px; }
   .bo-toggle { max-width: none; }
   .bo-grid-2 { grid-template-columns: minmax(0, 1fr); }
   .bo-card { padding: 16px 14px; }

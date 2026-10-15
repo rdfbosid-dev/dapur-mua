@@ -46,6 +46,11 @@ function waktuMasuk(iso, zona) {
 function Label({ children }) {
   return <span>{children}<i className="pb-titik-dua">:</i></span>
 }
+// Sumber tersimpan -> teks di kartu. Referral = pilihan "Teman/Keluarga"
+// calon klien di link booking.
+function labelSumber(s) {
+  return s === 'Referral' ? 'Teman/Keluarga (Referral)' : s
+}
 function labelPaket(o) {
   if (!o.kategori) return 'Belum pilih paket'
   const inti = o.jenis ? `${o.kategori} · ${o.jenis}` : o.kategori
@@ -61,6 +66,7 @@ function keAwalBooking(p) {
     lokasi: p.lokasi,
     event: p.event,
     catatan: p.catatan,
+    sumber: p.sumber || '',
     peserta: (p.peserta || []).map((o) => ({
       nama: o.nama,
       peran: o.peran,
@@ -230,6 +236,8 @@ export default function PermintaanBooking() {
                     <div><Label>Acara</Label><b>{p.event}</b></div>
                     <div><Label>Lokasi</Label><b>{p.lokasi}</b></div>
                     <div><Label>WhatsApp</Label><b>{p.nomor_whatsapp}</b></div>
+                    {/* Permintaan lama (sebelum ada pertanyaan ini) nggak punya sumber. */}
+                    {p.sumber && <div><Label>Tahu dari</Label><b>{labelSumber(p.sumber)}</b></div>}
                   </div>
                   <div className="pb-orang">
                     {(p.peserta || []).map((o, i) => (

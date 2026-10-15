@@ -133,7 +133,7 @@ function blankPeserta(nama = '') {
 
 // Isi awal form dari PERMINTAAN BOOKING online (halaman Permintaan Booking):
 // `awal` = { namaKlien, nomorWhatsApp, tanggalAcara, jamStartMakeup, lokasi,
-// event, catatan, peserta: [{ nama, peran, layananId, kategoriMakeup,
+// event, catatan, sumber, peserta: [{ nama, peran, layananId, kategoriMakeup,
 // jenisPaket, biayaMakeup, rambut }] }. Tanpa `awal` -> form kosong seperti
 // biasa. `rambut` = pilihan Add On Layanan Rambut calon klien (Tidak Ada/
 // Hairdo/Hijabdo+) -- paket, biaya & Me/Tim-nya tetap dilengkapi MUA.
@@ -155,7 +155,8 @@ export default function BookingModal({ onClose, onSaved, awal = null }) {
   const [tanggalBooking, setTanggalBooking] = useState(todayStr())
   const [namaKlien, setNamaKlien] = useState(awal?.namaKlien || '')
   const [nomorWhatsApp, setNomorWhatsApp] = useState(awal?.nomorWhatsApp || '')
-  const [sumber, setSumber] = useState('Instagram')
+  // Dari permintaan booking online: ikut jawaban "Tahu MUA dari mana?".
+  const [sumber, setSumber] = useState(awal?.sumber || 'Instagram')
   const [tanggalAcara, setTanggalAcara] = useState(awal?.tanggalAcara || '')
   const [jamStartMakeup, setJamStartMakeup] = useState(awal?.jamStartMakeup ? String(awal.jamStartMakeup).slice(0, 5) : '')
   const [jamSelesai, setJamSelesai] = useState('')
@@ -859,7 +860,7 @@ export default function BookingModal({ onClose, onSaved, awal = null }) {
               <div className="field">
                 <label>Sumber Kanal Booking</label>
                 <CustomSelect
-                  options={['Instagram', 'WhatsApp', 'TikTok', 'Facebook', 'Referral']}
+                  options={['Instagram', 'WhatsApp', 'TikTok', 'Threads', 'Facebook', 'Referral']}
                   value={sumber}
                   onChange={setSumber}
                   variant="modal"

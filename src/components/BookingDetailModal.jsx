@@ -1111,7 +1111,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                 <div className="field">
                   <label>Sumber Kanal Booking</label>
                   <CustomSelect
-                    options={['Instagram', 'WhatsApp', 'TikTok', 'Facebook', 'Referral']}
+                    options={['Instagram', 'WhatsApp', 'TikTok', 'Threads', 'Facebook', 'Referral']}
                     value={sumber}
                     onChange={setSumber}
                     variant="modal"
