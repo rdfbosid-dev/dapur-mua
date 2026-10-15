@@ -4,6 +4,8 @@ import { useRegisterSW } from 'virtual:pwa-register/react'
 import { Analytics } from '@vercel/analytics/react'
 import './index.css'
 import './theme.css'
+// Semua CSS aplikasi dengan urutan tetap -- HARUS sebelum App (lihat gaya.js).
+import './gaya.js'
 import App from './App.jsx'
 import ErrorBoundary from './components/ErrorBoundary'
 

@@ -1,29 +1,48 @@
+import { Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { ThemeProvider } from './context/ThemeContext'
-import Login from './pages/Login'
-import Register from './pages/Register'
-import Landing from './pages/Landing'
-import LupaPassword from './pages/LupaPassword'
-import ResetPassword from './pages/ResetPassword'
-import Dashboard from './pages/Dashboard'
-import BookingList from './pages/BookingList'
-import Kalender from './pages/Kalender'
-import Klien from './pages/Klien'
-import Pengeluaran from './pages/Pengeluaran'
-import Layanan from './pages/Layanan'
-import Keuangan from './pages/Keuangan'
-import Laporan from './pages/Laporan'
-import Pengaturan from './pages/Pengaturan'
-import Langganan from './pages/Langganan'
-import TrialHabis from './pages/TrialHabis'
-import Panduan from './pages/Panduan'
-import AdminDashboard from './pages/AdminDashboard'
-import AdminUsers from './pages/AdminUsers'
-import AdminLangganan from './pages/AdminLangganan'
 import PasangAplikasi from './components/PasangAplikasi'
-import BookingOnline from './pages/BookingOnline'
-import PermintaanBooking from './pages/PermintaanBooking'
+import { muatHalaman } from './lib/muatHalaman'
+
+// Tiap halaman dimuat TERPISAH, baru diunduh waktu dibuka (lihat
+// lib/muatHalaman.js) -- pembukaan pertama aplikasi & link booking online
+// jauh lebih ringan.
+const Login = muatHalaman(() => import('./pages/Login'))
+const Register = muatHalaman(() => import('./pages/Register'))
+const Landing = muatHalaman(() => import('./pages/Landing'))
+const LupaPassword = muatHalaman(() => import('./pages/LupaPassword'))
+const ResetPassword = muatHalaman(() => import('./pages/ResetPassword'))
+const Dashboard = muatHalaman(() => import('./pages/Dashboard'))
+const BookingList = muatHalaman(() => import('./pages/BookingList'))
+const Kalender = muatHalaman(() => import('./pages/Kalender'))
+const Klien = muatHalaman(() => import('./pages/Klien'))
+const Pengeluaran = muatHalaman(() => import('./pages/Pengeluaran'))
+const Layanan = muatHalaman(() => import('./pages/Layanan'))
+const Keuangan = muatHalaman(() => import('./pages/Keuangan'))
+const Laporan = muatHalaman(() => import('./pages/Laporan'))
+const Pengaturan = muatHalaman(() => import('./pages/Pengaturan'))
+const Langganan = muatHalaman(() => import('./pages/Langganan'))
+const TrialHabis = muatHalaman(() => import('./pages/TrialHabis'))
+const Panduan = muatHalaman(() => import('./pages/Panduan'))
+const AdminDashboard = muatHalaman(() => import('./pages/AdminDashboard'))
+const AdminUsers = muatHalaman(() => import('./pages/AdminUsers'))
+const AdminLangganan = muatHalaman(() => import('./pages/AdminLangganan'))
+const BookingOnline = muatHalaman(() => import('./pages/BookingOnline'))
+const PermintaanBooking = muatHalaman(() => import('./pages/PermintaanBooking'))
+
+// Tampilan sementara selama file halaman diunduh -- SAMA dengan tampilan
+// "Memuat ...." di penjaga rute di bawah.
+function MemuatHalaman() {
+  return (
+    <div style={{
+      minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
+      fontFamily: "'Plus Jakarta Sans', sans-serif", color: '#8B8299'
+    }}>
+      Memuat ....
+    </div>
+  )
+}
 
 function ProtectedRoute({ children }) {
   const { user, loading, isLocked, isAdmin } = useAuth()
@@ -125,6 +144,7 @@ export default function App() {
     <ThemeProvider>
       <BrowserRouter>
         <AuthProvider>
+          <Suspense fallback={<MemuatHalaman />}>
           <Routes>
             <Route path="/" element={<GuestRoute><Landing /></GuestRoute>} />
             <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
@@ -271,6 +291,7 @@ export default function App() {
             />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+          </Suspense>
           {/* Banner ajakan pasang aplikasi -- di dalam AuthProvider karena
               cuma muncul buat user yang sudah login. */}
           <PasangAplikasi />

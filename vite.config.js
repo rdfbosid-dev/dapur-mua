@@ -13,6 +13,17 @@ export default defineConfig({
       plugins: [cadanganColorMix()],
     },
   },
+  build: {
+    // CSS SENGAJA tetap 1 file & dimuat di awal (walau JavaScript-nya dipecah
+    // per halaman -- lihat src/lib/muatHalaman.js). Banyak class CSS dipakai
+    // lintas halaman, jadi kalau CSS ikut dipecah, tampilan sebuah halaman bisa
+    // berubah tergantung halaman mana yang sudah dibuka sebelumnya. Dengan ini
+    // urutan & isi CSS sama persis seperti sebelum dipecah.
+    cssCodeSplit: false,
+    // exceljs (~930 KB) memang besar, tapi cuma diunduh waktu tombol Export
+    // Excel ditekan -- peringatan ukurannya nggak relevan.
+    chunkSizeWarningLimit: 1000,
+  },
   plugins: [
     react(),
     VitePWA({

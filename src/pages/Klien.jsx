@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
-import ExcelJS from 'exceljs'
 import Sidebar from '../components/Sidebar'
 import BookingDetailModal from '../components/BookingDetailModal'
 import CustomSelect from '../components/CustomSelect'
@@ -164,6 +163,9 @@ export default function Klien() {
   // dua level data ini nggak bisa dipaksa jadi 1 baris tanpa ada yang
   // kepotong.
   async function handleExportExcel() {
+    // ExcelJS (~900 KB) baru diunduh waktu tombol Export ditekan -- bukan
+    // ikut dimuat setiap kali aplikasi dibuka.
+    const { default: ExcelJS } = await import('exceljs')
     const wb = new ExcelJS.Workbook()
 
     const wsRingkasan = wb.addWorksheet('Ringkasan Klien')

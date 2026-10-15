@@ -765,7 +765,7 @@ export default function Pengaturan() {
                       <button type="button" role="radio" aria-checked={lbCleanHijabdo} className={`zona-opt${lbCleanHijabdo ? ' sel' : ''}`} onClick={() => setLbCleanHijabdo(true)}>Ya</button>
                       <button type="button" role="radio" aria-checked={!lbCleanHijabdo} className={`zona-opt${!lbCleanHijabdo ? ' sel' : ''}`} onClick={() => setLbCleanHijabdo(false)}>Tidak</button>
                     </div>
-                    <span className="field-hint">Kalau Ya, calon klien melihat keterangan di pilihan Add On Layanan Rambut bahwa Clean Hijabdo sudah termasuk dalam layanan makeup, dan Hijabdo+ adalah layanan kreasi hijab khusus.</span>
+                    <span className="field-hint">Kalau Ya, calon klien melihat keterangan di pilihan Add On Layanan Rambut bahwa Clean Hijabdo sudah termasuk dalam layanan makeup, dan Hijabdo+ adalah layanan hijab khusus.</span>
                   </div>
                   <div className="field">
                     <label>Pesan untuk Calon Klien <span className="lb-opsional">(opsional)</span></label>

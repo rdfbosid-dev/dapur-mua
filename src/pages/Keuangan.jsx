@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import ExcelJS from 'exceljs'
 import { supabase } from '../lib/supabase'
 import Sidebar from '../components/Sidebar'
 import CustomSelect from '../components/CustomSelect'
@@ -389,6 +388,9 @@ export default function Keuangan() {
   // SENGAJA async -- ExcelJS nge-generate file-nya lewat Promise
   // (writeBuffer), beda sama SheetJS yang sinkron.
   async function handleExportExcel() {
+    // ExcelJS (~900 KB) baru diunduh waktu tombol Export ditekan -- bukan
+    // ikut dimuat setiap kali aplikasi dibuka.
+    const { default: ExcelJS } = await import('exceljs')
     const wb = new ExcelJS.Workbook()
     const ws = wb.addWorksheet(`Keuangan ${filterTahun}`)
 
