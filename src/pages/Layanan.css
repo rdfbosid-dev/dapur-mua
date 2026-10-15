@@ -16,7 +16,8 @@
 .lyn-hint a { font-weight: 800; }
 .lyn-hint b { color: var(--teks-khusus); opacity: 0.8; }
 
-.lyn-kosong { font-size: 13.5px; color: var(--ink-soft); line-height: 1.6; text-align: center; padding: 28px 22px; }
+.lyn-kosong { text-align: left; padding: 32px 16px; background: color-mix(in srgb, var(--box-dashboard) 90%, transparent); border-radius: 20px; color: var(--ink-soft); font-size: 13px; font-weight: 500;
+  box-shadow: var(--shadow-card); border: none; }
 
 /* ---------- Kartu & baris daftar paket -- nilai SAMA kayak .pgl-bulan &
    .pgl-row (Pengeluaran.css), minus kotak tanggal. ---------- */

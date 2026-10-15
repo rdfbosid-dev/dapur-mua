@@ -14,6 +14,15 @@ function todayStr() {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
+// Huruf pertama tiap kata jadi kapital -- SAMA PERSIS dengan capitalizeWords
+// di form booking (BookingModal.jsx): cuma nyentuh huruf PERTAMA, sisanya
+// dibiarkan (singkatan kayak "MAC" / "UMS" nggak berubah). Dipakai di Judul,
+// Tempat/Toko, Nama Item, & Nama Brand -- jalan waktu kolom ditinggal (onBlur)
+// & sekali lagi waktu disimpan.
+function capitalizeWords(str) {
+  return (str || '').replace(/(^|[\s,])([a-z])/g, (_, sep, ch) => sep + ch.toUpperCase())
+}
+
 function formatRupiah(n) {
   return 'Rp' + (Number(n) || 0).toLocaleString('id-ID')
 }
@@ -207,12 +216,12 @@ export default function PengeluaranModal({ onClose, onSaved, editData = null }) 
 
     const header = {
       kategori: kategoriFinal,
-      judul: judul.trim() || null,
+      judul: capitalizeWords(judul.trim()) || null,
       tanggal,
       // Kategori `tanpaTempat` (misal Iklan & Promosi) -> field-nya nggak
       // tampil, jadi nggak disimpan (biar sisa ketikan kategori lain nggak
       // ikut kesimpen diam-diam).
-      tempat: (!infoKategori?.tanpaTempat && tempat.trim()) || null,
+      tempat: (!infoKategori?.tanpaTempat && capitalizeWords(tempat.trim())) || null,
       // Cuma disimpan kalau kategorinya emang punya field Penyelenggara.
       penyelenggara: (infoKategori?.penyelenggara && penyelenggara.trim()) || null,
       keterangan: keterangan.trim() || null,
@@ -241,10 +250,12 @@ export default function PengeluaranModal({ onClose, onSaved, editData = null }) 
       pengeluaran_id: pengeluaranId,
       user_id: user.id,
       urutan: i,
-      nama_item: it.nama === ITEM_LAINNYA.label ? it.namaCustom.trim() : it.nama.trim(),
+      nama_item: capitalizeWords(it.nama === ITEM_LAINNYA.label ? it.namaCustom.trim() : it.nama.trim()),
       // Field tambahan cuma disimpan kalau opsi item-nya emang punya field
       // tambahan -- selain itu NULL (biar nggak nyimpen sisa ketikan).
-      keterangan: ((cariOpsiItem(infoKategori, it.nama)?.labelDetail || cariOpsiItem(infoKategori, it.nama)?.gantiJumlah || (!pakaiOpsiItem && infoKategori?.detailBebas)) && it.detail.trim()) ? it.detail.trim() : null,
+      // Nama Brand (detailBebas, kategori ketik bebas) ikut dikapitalin;
+      // field tambahan lain (Akun Medsos, Durasi, dst) dibiarkan apa adanya.
+      keterangan: ((cariOpsiItem(infoKategori, it.nama)?.labelDetail || cariOpsiItem(infoKategori, it.nama)?.gantiJumlah || (!pakaiOpsiItem && infoKategori?.detailBebas)) && it.detail.trim()) ? (!pakaiOpsiItem && infoKategori?.detailBebas ? capitalizeWords(it.detail.trim()) : it.detail.trim()) : null,
       keterangan_tambahan: (cariOpsiItem(infoKategori, it.nama)?.labelDetail2 && it.detail2.trim()) ? it.detail2.trim() : null,
       jumlah: (cariOpsiItem(infoKategori, it.nama)?.tanpaJumlah || cariOpsiItem(infoKategori, it.nama)?.gantiJumlah) ? 1 : Math.max(1, Number(it.jumlah) || 1),
       harga_satuan: Number(it.harga) || 0,
@@ -317,7 +328,7 @@ export default function PengeluaranModal({ onClose, onSaved, editData = null }) 
             <div className="field-grid-pengeluaran cols-2">
               <div className="field">
                 <label>{infoKategori?.labelJudul || 'Judul'} (opsional)</label>
-                <input type="text" placeholder={infoKategori?.contohJudul || 'contoh: Belanja kebutuhan usaha'} value={judul} onChange={(e) => setJudul(e.target.value)} />
+                <input type="text" placeholder={infoKategori?.contohJudul || 'contoh: Belanja kebutuhan usaha'} value={judul} onChange={(e) => setJudul(e.target.value)} onBlur={(e) => setJudul(capitalizeWords(e.target.value))} autoCapitalize="words" />
               </div>
               {infoKategori?.penyelenggara ? (
               <div className="field">
@@ -327,7 +338,7 @@ export default function PengeluaranModal({ onClose, onSaved, editData = null }) 
               ) : kategori && !infoKategori?.tanpaTempat && (
               <div className="field">
                 <label>{infoKategori?.labelTempat || LABEL_TEMPAT_DEFAULT} (opsional)</label>
-                <input type="text" placeholder={infoKategori?.contohTempat || 'contoh: Nama toko/tempat'} value={tempat} onChange={(e) => setTempat(e.target.value)} />
+                <input type="text" placeholder={infoKategori?.contohTempat || 'contoh: Nama toko/tempat'} value={tempat} onChange={(e) => setTempat(e.target.value)} onBlur={(e) => setTempat(capitalizeWords(e.target.value))} autoCapitalize="words" />
               </div>
               )}
             </div>
@@ -335,7 +346,7 @@ export default function PengeluaranModal({ onClose, onSaved, editData = null }) 
             <div className="field-grid-pengeluaran cols-2">
               <div className="field">
                 <label>{infoKategori.labelTempat || LABEL_TEMPAT_DEFAULT} (opsional)</label>
-                <input type="text" placeholder={infoKategori.contohTempat || 'contoh: Nama toko/tempat'} value={tempat} onChange={(e) => setTempat(e.target.value)} />
+                <input type="text" placeholder={infoKategori.contohTempat || 'contoh: Nama toko/tempat'} value={tempat} onChange={(e) => setTempat(e.target.value)} onBlur={(e) => setTempat(capitalizeWords(e.target.value))} autoCapitalize="words" />
               </div>
             </div>
             )}
@@ -401,6 +412,8 @@ export default function PengeluaranModal({ onClose, onSaved, editData = null }) 
                             placeholder="Tulis nama item ..."
                             value={it.namaCustom}
                             onChange={(e) => updateItem(idx, 'namaCustom', e.target.value)}
+                            onBlur={(e) => updateItem(idx, 'namaCustom', capitalizeWords(e.target.value))}
+                            autoCapitalize="words"
                             style={{ marginTop: 8 }}
                           />
                         )}
@@ -428,7 +441,7 @@ export default function PengeluaranModal({ onClose, onSaved, editData = null }) 
                   <div className={infoKategori?.namaItemSetengah ? 'field-grid-item-nama' : undefined}>
                   <div className="field">
                     <label>Nama Item</label>
-                    <input type="text" placeholder={infoKategori?.contohNamaItem || PLACEHOLDER_NAMA_ITEM[kategori] || 'contoh: Foundation'} value={it.nama} onChange={(e) => updateItem(idx, 'nama', e.target.value)} />
+                    <input type="text" placeholder={infoKategori?.contohNamaItem || PLACEHOLDER_NAMA_ITEM[kategori] || 'contoh: Foundation'} value={it.nama} onChange={(e) => updateItem(idx, 'nama', e.target.value)} onBlur={(e) => updateItem(idx, 'nama', capitalizeWords(e.target.value))} autoCapitalize="words" />
                   </div>
                   {/* `detailBebas` (misal Nama Brand) -- SELALU muncul di
                       samping Nama Item, mau namanya dari saran item atau
@@ -436,7 +449,7 @@ export default function PengeluaranModal({ onClose, onSaved, editData = null }) 
                   {infoKategori?.detailBebas && (
                   <div className="field">
                     <label>{infoKategori.detailBebas.label}</label>
-                    <input type="text" placeholder={infoKategori.detailBebas.contoh || ''} value={it.detail} onChange={(e) => updateItem(idx, 'detail', e.target.value)} />
+                    <input type="text" placeholder={infoKategori.detailBebas.contoh || ''} value={it.detail} onChange={(e) => updateItem(idx, 'detail', e.target.value)} onBlur={(e) => updateItem(idx, 'detail', capitalizeWords(e.target.value))} autoCapitalize="words" />
                   </div>
                   )}
                   </div>

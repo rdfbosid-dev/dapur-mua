@@ -113,7 +113,7 @@
   .booking-modal-overlay .field-label-2line { min-height: 30px; }
   .booking-modal-overlay .field-label-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 6px; }
   .booking-modal-overlay .quickfill-btn {
-    font-size: 10px; font-weight: 500; color: var(--h1); background: var(--ink-faint);
+    font-size: 10px; font-weight: 500; color: var(--h7); background: color-mix(in srgb, var(--button-prm-hover) 70%, transparent);
     border: none; border-radius: 5px; padding: 4px 6px; cursor: pointer; transition: background 0.15s;
     /* align-self:flex-start -- .field itu flex-column, default-nya SEMUA
        anak (label/input/tombol) stretch ngikutin lebar penuh container.
@@ -121,7 +121,7 @@
        override biar cuma selebar teksnya sendiri, nempel rata kiri. */
     align-self: flex-start; margin-top: 2px;
   }
-  .booking-modal-overlay .quickfill-btn:hover { background: color-mix(in srgb, var(--ink-faint) 50%, transparent); }
+  .booking-modal-overlay .quickfill-btn:hover { background: var(--button-prm-hover); }
   .booking-modal-overlay .field input,
   .booking-modal-overlay .field select,
   .booking-modal-overlay .field textarea {

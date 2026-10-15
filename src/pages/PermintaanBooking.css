@@ -1,0 +1,145 @@
+/* Halaman Permintaan Booking (dari link booking online). Class "pb-". */
+.pb-info {
+  font-size: 14px; color: var(--ink-soft); line-height: 1.5; margin-bottom: 14px;
+  background: none; overflow-wrap: anywhere;
+}
+.pb-info a { color: var(--h5); font-weight: 700; }
+
+/* Saklar geser (segmented switch) Baru | Diterima | Ditolak. Satu "rel"
+   (.pb-tabs) berisi 3 tab sama lebar; "thumb" (.pb-tabs-thumb) adalah latar
+   pilihan aktif yang BERGESER ke tab yang dipilih. Posisi thumb diatur dari
+   JSX lewat --pb-tab-i (0 = Baru, 1 = Diterima, 2 = Ditolak).
+   Warna: rel = --button-prm-hover, thumb = --h3, teks = --h7 (sama dengan
+   warna tab sebelumnya). */
+.pb-tabs {
+  position: relative; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  width: 100%; max-width: 380px; padding: 4px; margin-bottom: 14px; border-radius: 999px;
+  background: var(--button-prm-hover);
+}
+.pb-tabs-thumb {
+  position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc((100% - 8px) / 3);
+  border-radius: 999px; background: var(--h3); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+  transform: translateX(calc(var(--pb-tab-i, 0) * 100%));
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.pb-tab {
+  position: relative; z-index: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  border: none; cursor: pointer; font-family: inherit; background: none; white-space: nowrap;
+  padding: 8px 10px; border-radius: 999px; font-size: 13px; font-weight: 700;
+  color: var(--h7); opacity: 0.7; transition: opacity 0.15s;
+}
+.pb-tab:hover, .pb-tab.aktif { opacity: 1; }
+.pb-tab:focus-visible { outline: 2px solid var(--h5); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .pb-tabs-thumb { transition: none; } }
+.pb-tab-jumlah { font-size: 11px; min-width: 18px; padding: 1px 6px; border-radius: 999px; background: var(--h7); color: var(--h3); }
+
+.pb-galat { background: var(--pill); color: var(--h8); font-size: 13px; padding: 10px 14px; border-radius: 10px; margin-bottom: 16px; }
+.pb-kosong { text-align: left; color: var(--ink-soft); font-size: 13px; font-weight: 500; margin-top: 20px; }
+
+/* Lebar minimum kartu 420px (sebelumnya 380px) -- biar 3 tombol aksi
+   (Tolak | Terima & Buat Booking | Chat WhatsApp) muat sebaris di desktop. */
+.pb-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr)); gap: 14px; align-items: start; }
+/* Semua kartu SAMA tinggi (--pb-tinggi-kartu). Kepala kartu di atas & tombol
+   aksi di bawah tetap diam; bagian tengah (.pb-isi) yang di-scroll kalau
+   isinya lebih panjang dari ruang yang ada. */
+.pb-card {
+  --pb-tinggi-kartu: 430px;
+  background: color-mix(in srgb, var(--box-dashboard) 90%, transparent); border: 1px solid var(--line-box);
+  border-radius: 18px; padding: 16px; box-shadow: var(--shadow-card); min-width: 0;
+  height: var(--pb-tinggi-kartu); display: flex; flex-direction: column;
+}
+.pb-card > * { flex-shrink: 0; }
+.pb-card > .pb-isi {
+  flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain;
+  padding-right: 4px; margin-right: -4px;
+  scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--ink-soft) 35%, transparent) transparent;
+}
+.pb-isi::-webkit-scrollbar { width: 6px; }
+.pb-isi::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--ink-soft) 35%, transparent); border-radius: 999px; }
+/* Tombol aksi selalu nempel di dasar kartu. */
+.pb-card > .pb-aksi { margin-top: auto; padding-top: 12px; }
+.pb-card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
+.pb-nama { font-family: 'Poppins', sans-serif; font-size: 15.5px; font-weight: 600; color: var(--h9); overflow-wrap: anywhere; }
+.pb-masuk { font-size: 11.5px; color: var(--ink-soft); opacity: 0.8; margin-top: 2px; }
+.pb-status { flex-shrink: 0; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px; }
+.pb-status.baru { background: var(--h3); color: var(--h7); }
+.pb-status.diterima { background: color-mix(in srgb, var(--bar-pengeluaran-bisnis) 80%, transparent); color: var(--h7); }
+.pb-status.ditolak { background: var(--pill); color: var(--h8); }
+
+.pb-detail { display: flex; flex-direction: column; gap: 6px; font-size: 13px; margin-bottom: 10px; }
+.pb-detail div { display: grid; grid-template-columns: 90px minmax(0, 1fr); gap: 8px; }
+.pb-detail span { color: var(--ink-soft); opacity: 0.85; }
+.pb-detail b { color: var(--h5); font-weight: 600; overflow-wrap: anywhere; }
+.pb-orang { border-radius: 12px; padding: 8px 12px; background: color-mix(in srgb, var(--ink-faint) 40%, transparent); font-size: 12.5px; }
+.pb-orang-baris { display: flex; justify-content: space-between; gap: 10px; padding: 4px 0; color: var(--ink-soft); }
+.pb-orang-baris span:first-child { color: var(--h9); font-weight: 600; min-width: 0; overflow-wrap: anywhere; }
+.pb-orang-baris span:last-child { text-align: right; }
+.pb-belum { font-style: italic; opacity: 0.75; }
+/* Add On Layanan Rambut pilihan calon klien (tanpa harga). */
+.pb-rambut { display: block; font-size: 11.5px; font-weight: 700; color: var(--h5); }
+.pb-estimasi { border-top: 1px solid var(--line-box); margin-top: 4px; padding-top: 6px; }
+.pb-estimasi span:last-child { font-weight: 700; color: var(--h5); }
+/* Garis pemisah: garis TIPIS di antara baris klien, garis sedikit LEBIH TEBAL
+   di atas Estimasi Biaya (pembeda baris total). */
+.pb-orang-baris + .pb-orang-baris:not(.pb-estimasi) {
+  border-top: 1px solid color-mix(in srgb, var(--ink-soft) 22%, transparent); padding-top: 6px; margin-top: 2px;
+}
+.pb-orang-baris.pb-estimasi { border-top: 1.5px solid color-mix(in srgb, var(--ink-soft) 40%, transparent); padding-top: 7px; }
+.pb-catatan { font-size: 12.5px; line-height: 1.5; white-space: pre-line; margin-top: 10px; padding: 8px 12px; border-left: 3px solid var(--h3); color: var(--ink-soft); overflow-wrap: anywhere; }
+/* Label "Catatan" di atas isi catatan calon klien. */
+.pb-catatan-label { font-size: 12px; font-weight: 700; color: var(--ink-soft); margin-top: 12px; }
+.pb-catatan-label + .pb-catatan { margin-top: 10px; }
+.pb-catatan-kecil { font-size: 11.5px; color: var(--ink-soft); opacity: 0.8; margin-top: 8px; }
+
+/* Konfirmasi Tolak/Hapus: yang dibungkus merah CUMA kalimatnya; tombol
+   Batal & Ya ada di luar pembungkus, rata kanan di bawahnya. */
+.pb-konfirmasi {
+  margin-top: 12px; font-size: 12.5px; line-height: 1.5;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.pb-konfirmasi > span { display: block; padding: 10px 12px; border-radius: 12px; background: var(--pill); color: var(--h8); }
+.pb-konfirmasi div { display: flex; gap: 8px; justify-content: flex-end; }
+.pb-aksi { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; justify-content: flex-end; }
+.pb-btn {
+  border: none; cursor: pointer; font-family: inherit; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 8px 14px; border-radius: 10px; font-size: 12.5px; font-weight: 700;
+  background: var(--button-prm-hover); color: var(--button-tx-hover); transition: background 0.15s;
+}
+.pb-btn:hover { background: var(--h3); color: var(--h7); }
+.pb-btn.utama { background: var(--button-prm-hover); color: var(--h7); }
+.pb-btn.utama:hover { background: var(--h3); }
+.pb-btn-batal { border: none; cursor: pointer; font-family: inherit; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 8px 14px; border-radius: 10px; font-size: 12.5px; font-weight: 700;
+  background: var(--button-prm-hover); color: var(--button-tx-hover); transition: background 0.15s;
+}
+.pb-btn-batal:hover { background: var(--h3); }
+.pb-btn.wa { background: #1da750; color: var(--h7); }
+.pb-btn.wa:hover { background: #25d366;}
+.pb-btn-ikon { width: 15px; height: 15px; flex-shrink: 0; }
+.pb-btn.bahaya { background: var(--h3); color: var(--h7); }
+.pb-btn.bahaya:hover { background: var(--button-prm-hover); }
+
+/* Toast SEKARANG pakai komponen bersama (components/Toast.jsx & Toast.css),
+   sama dengan Dashboard, Booking, & Kalender -- ubah posisinya di Toast.css. */
+
+/* Tanda ":" di ujung kanan label detail (Tanggal, Jam, Acara, Lokasi,
+   WhatsApp) -- titik duanya (<i className="pb-titik-dua"> di JSX) didorong
+   ke ujung kanan kolom label, jadi sejajar lurus ke bawah. */
+.pb-detail span { display: flex; justify-content: space-between; gap: 4px; }
+.pb-titik-dua { font-style: normal; }
+
+/* Desktop: 3 tombol dikunci sebaris, Chat WhatsApp paling kanan. */
+@media (min-width: 641px) {
+  .pb-aksi { flex-wrap: nowrap; }
+  .pb-btn { white-space: nowrap; }
+}
+
+@media (max-width: 640px) {
+  /* Di HP teks lebih sering turun baris & tombolnya 2 baris -> kartu dikasih
+     ruang lebih tinggi. */
+  .pb-card { --pb-tinggi-kartu: 480px; }
+  .pb-aksi { justify-content: stretch; }
+  .pb-aksi .pb-btn { flex: 1 1 auto; justify-content: center; }
+  /* Tolak | Terima sebaris, Chat WhatsApp turun ke baris sendiri selebar kartu. */
+  .pb-aksi .pb-btn.wa { flex-basis: 100%; }
+}

@@ -82,7 +82,7 @@
 
 .empty-state-bookinglist {
   text-align: left; padding: 32px 16px; background: color-mix(in srgb, var(--box-dashboard) 90%, transparent); border-radius: 20px; color: var(--ink-soft); font-size: 13px; font-weight: 500;
-  box-shadow: var(--shadow-card); border: 1px solid var(--button-border);
+  box-shadow: var(--shadow-card); border: none;
 }
 
 /* ---- Pagination -- disamain persis pola & styling-nya kayak

@@ -480,8 +480,8 @@
    .booking-modal-overlay. align-self:flex-start biar tombolnya selebar
    teksnya saja (.field itu flex-column). */
 .booking-detail-overlay .quickfill-btn {
-  font-size: 10px; font-weight: 500; color: var(--h1); background: var(--ink-faint);
+  font-size: 10px; font-weight: 500; color: var(--h7); background: color-mix(in srgb, var(--button-prm-hover) 70%, transparent);
   border: none; border-radius: 5px; padding: 4px 6px; cursor: pointer; transition: background 0.15s;
   align-self: flex-start; margin-top: 2px; font-family: inherit;
 }
-.booking-detail-overlay .quickfill-btn:hover { background: color-mix(in srgb, var(--ink-faint) 50%, transparent); }
+.booking-detail-overlay .quickfill-btn:hover { background: var(--button-prm-hover); }

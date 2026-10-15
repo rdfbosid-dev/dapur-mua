@@ -12,20 +12,16 @@ import { cariAngkaTakWajar, itemKewajaranForm } from '../lib/validasiBooking'
 import PeringatanKewajaran from './PeringatanKewajaran'
 import './BookingModal.css'
 import { adaNilaiTagihan } from '../lib/statusPembayaran'
-import { muatLayanan, biayaKeForm, layananDipakai, namaLayanan, eventDariForm, peringatanKategoriEvent, kategoriKlien } from '../lib/layanan'
+import { muatLayanan, biayaKeForm, layananDipakai, namaLayanan, eventDariForm, peringatanKategoriEvent, kategoriKlien, eventKeForm } from '../lib/layanan'
 import PilihLayanan, { PetunjukEventLayanan, CatatanKategoriKartu, CatatanHargaLayanan, pesanKonfirmasiKategori } from './PilihLayanan'
 import DiskonBooking from './DiskonBooking'
 import { tagihanSebelumDiskonForm, pesanDiskonTidakValid, nilaiSimpanDiskon } from '../lib/tagihan'
 import { muatLayananRambut, paketRambutDipakai, namaPaketRambut, biayaRambutKeForm, gantiJenisRambut, nilaiSimpanRambut } from '../lib/layananRambut'
 import PilihPaketRambut, { CatatanHargaRambut } from './PilihPaketRambut'
+import { rapikanKetikanWa, pesanNomorWaTidakValid } from '../lib/nomorWa'
 
-// Nomor WhatsApp dianggap terisi kalau berisi minimal 8 ANGKA (spasi, "+",
-// "-" diabaikan) -- isian asal kayak "-" atau "0" nggak lolos, tapi format
-// apa pun (0812..., +62 812-..., nomor luar negeri) tetap diterima.
-// SAMA PERSIS dengan yang di BookingDetailModal.jsx -- ubah dua-duanya.
-function nomorWhatsAppValid(nomor) {
-  return (String(nomor || '').match(/\d/g) || []).length >= 8
-}
+// Aturan Nomor WhatsApp (minimal 8 angka, tanpa huruf) -- satu sumber di
+// lib/nomorWa.js, dipakai juga di Edit Booking, Pengaturan, & link booking.
 import IconClose from './IconClose'
 
 function todayStr() {
@@ -135,21 +131,39 @@ function blankPeserta(nama = '') {
   }
 }
 
-export default function BookingModal({ onClose, onSaved }) {
+// Isi awal form dari PERMINTAAN BOOKING online (halaman Permintaan Booking):
+// `awal` = { namaKlien, nomorWhatsApp, tanggalAcara, jamStartMakeup, lokasi,
+// event, catatan, peserta: [{ nama, peran, layananId, kategoriMakeup,
+// jenisPaket, biayaMakeup, rambut }] }. Tanpa `awal` -> form kosong seperti
+// biasa. `rambut` = pilihan Add On Layanan Rambut calon klien (Tidak Ada/
+// Hairdo/Hijabdo+) -- paket, biaya & Me/Tim-nya tetap dilengkapi MUA.
+function pesertaDariAwal(o) {
+  return {
+    ...blankPeserta(o.nama || ''),
+    peran: o.peran || '',
+    layananId: o.layananId || null,
+    kategoriMakeup: o.kategoriMakeup || '',
+    jenisPaket: o.jenisPaket || '',
+    biayaMakeup: o.biayaMakeup ? String(Math.round(Number(o.biayaMakeup))) : '',
+    layananTambahan: o.rambut === 'Hairdo' || o.rambut === 'Hijabdo+' ? o.rambut : 'Tidak Ada',
+  }
+}
+
+export default function BookingModal({ onClose, onSaved, awal = null }) {
   const { user } = useAuth()
 
   const [tanggalBooking, setTanggalBooking] = useState(todayStr())
-  const [namaKlien, setNamaKlien] = useState('')
-  const [nomorWhatsApp, setNomorWhatsApp] = useState('')
+  const [namaKlien, setNamaKlien] = useState(awal?.namaKlien || '')
+  const [nomorWhatsApp, setNomorWhatsApp] = useState(awal?.nomorWhatsApp || '')
   const [sumber, setSumber] = useState('Instagram')
-  const [tanggalAcara, setTanggalAcara] = useState('')
-  const [jamStartMakeup, setJamStartMakeup] = useState('')
+  const [tanggalAcara, setTanggalAcara] = useState(awal?.tanggalAcara || '')
+  const [jamStartMakeup, setJamStartMakeup] = useState(awal?.jamStartMakeup ? String(awal.jamStartMakeup).slice(0, 5) : '')
   const [jamSelesai, setJamSelesai] = useState('')
-  const [lokasi, setLokasi] = useState('')
+  const [lokasi, setLokasi] = useState(awal?.lokasi || '')
   // Event SENGAJA mulai kosong ("Pilih Event") & wajib dipilih -- Event juga
   // jadi penyaring pilihan Layanan di kartu klien (lihat lib/layanan.js).
-  const [event, setEvent] = useState('')
-  const [eventCustom, setEventCustom] = useState('')
+  const [event, setEvent] = useState(() => (awal?.event ? eventKeForm(awal.event).event : ''))
+  const [eventCustom, setEventCustom] = useState(() => (awal?.event ? eventKeForm(awal.event).eventCustom : ''))
   const [biayaTransport, setBiayaTransport] = useState('')
   const [dp, setDp] = useState('')
   const [dpMetode, setDpMetode] = useState('Transfer Bank')
@@ -157,8 +171,8 @@ export default function BookingModal({ onClose, onSaved }) {
   const [adaDiskon, setAdaDiskon] = useState(false)
   const [diskon, setDiskon] = useState('')
   const [keteranganDiskon, setKeteranganDiskon] = useState('')
-  const [catatan, setCatatan] = useState('')
-  const [pesertaList, setPesertaList] = useState([blankPeserta()])
+  const [catatan, setCatatan] = useState(awal?.catatan || '')
+  const [pesertaList, setPesertaList] = useState(() => (awal?.peserta?.length ? awal.peserta.map(pesertaDariAwal) : [blankPeserta()]))
 
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -516,7 +530,7 @@ export default function BookingModal({ onClose, onSaved }) {
     // biaya/komisi dll BOLEH kosong (dianggap Rp0) -- itu sengaja nggak dicek.
     if (!namaKlien.trim()) { tolakSimpan('Nama klien wajib diisi.'); return }
     if (!nomorWhatsApp.trim()) { tolakSimpan('Nomor WhatsApp wajib diisi.'); return }
-    if (!nomorWhatsAppValid(nomorWhatsApp)) { tolakSimpan('Nomor WhatsApp belum benar (minimal 8 angka).'); return }
+    if (pesanNomorWaTidakValid(nomorWhatsApp)) { tolakSimpan(pesanNomorWaTidakValid(nomorWhatsApp)); return }
     if (!tanggalAcara) { tolakSimpan('Tanggal acara wajib diisi.'); return }
     if (!event) { tolakSimpan('Event wajib dipilih.'); return }
     if (!eventSekarang) { tolakSimpan('Tulis nama event-nya dulu.'); return }
@@ -747,14 +761,14 @@ export default function BookingModal({ onClose, onSaved }) {
     }
 
     setSaving(false)
-    onSaved(booking.kode_booking)
+    onSaved(booking.kode_booking, booking.id)
   }
 
   return (
     <div className="modal-overlay booking-modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose() }}>
       <div className="modal">
         <div className="modal-head">
-          <h2>Booking Baru</h2>
+          <h2>{awal ? 'Booking dari Permintaan' : 'Booking Baru'}</h2>
           <button className="modal-close" onClick={onClose} type="button" aria-label="Tutup"><IconClose /></button>
         </div>
 
@@ -798,7 +812,7 @@ export default function BookingModal({ onClose, onSaved }) {
               </div>
               <div className="field">
                 <label>Nomor WhatsApp</label>
-                <input type="text" placeholder="0812xxxxxxx" value={nomorWhatsApp} onChange={(e) => setNomorWhatsApp(e.target.value)} />
+                <input type="text" inputMode="tel" placeholder="0812xxxxxxx" value={nomorWhatsApp} onChange={(e) => setNomorWhatsApp(rapikanKetikanWa(e.target.value))} />
               </div>
             </div>
 
@@ -901,7 +915,9 @@ export default function BookingModal({ onClose, onSaved }) {
                   <div className="peserta-card" key={i}>
                     <div className="peserta-head">
                       <div className="peserta-title"><span className="peserta-num">{i + 1}</span>Klien {i + 1}</div>
-                      {pesertaList.length > 1 && (
+                      {/* Klien 1 nggak bisa dihapus -- tombol Hapus cuma di Klien 2 dst
+                          (sama dengan form Edit Booking). */}
+                      {i > 0 && (
                         <button type="button" className="peserta-remove" onClick={() => removePeserta(i)}>Hapus</button>
                       )}
                     </div>

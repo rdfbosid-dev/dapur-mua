@@ -85,18 +85,18 @@
 .kalender-nav { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
 .kalender-title { color: var(--ink-soft); font-family: 'Poppins', sans-serif; font-size: 20px; font-weight: 700; flex: 1; text-align: center; }
 .nav-btn {
-  width: 32px; height: 32px; border-radius: 9px; border: 1.5px solid color-mix(in srgb, var(--h5) 60%, transparent); background: color-mix(in srgb, var(--sidebar) 50%, transparent);
+  width: 32px; height: 32px; border-radius: 9px; border: 1.5px solid color-mix(in srgb, var(--h5) 70%, transparent); background: color-mix(in srgb, var(--sidebar) 50%, transparent);
   display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--h5);
   transition: background 0.15s;
 }
-.nav-btn:hover { background: color-mix(in srgb, var(--h3) 50%, transparent); border: 1.5px solid color-mix(in srgb, var(--h3) 10%, transparent); color: var(--h7); }
+.nav-btn:hover { background: color-mix(in srgb, var(--h3) 70%, transparent); border: 1.5px solid color-mix(in srgb, var(--h3) 10%, transparent); color: var(--h7); }
 
 .nav-btn svg { width: 15px; height: 15px; }
 .today-btn {
   font-size: 13px; font-weight: 600; color: var(--h5); background: color-mix(in srgb, var(--sidebar) 50%, transparent);
-  border: 2px solid color-mix(in srgb, var(--h9) 90%, transparent); border-radius: 8px; padding: 7px 14px; cursor: pointer; transition: background 0.15s;
+  border: 1.5px solid color-mix(in srgb, var(--h5) 70%, transparent); border-radius: 8px; padding: 7px 14px; cursor: pointer; transition: background 0.15s;
 }
-.today-btn:hover { filter: brightness(0.95); background: color-mix(in srgb, var(--h9) 90%, transparent); border: 2px solid color-mix(in srgb, var(--h3) 10%, transparent); color: var(--field); }
+.today-btn:hover { background: color-mix(in srgb, var(--h3) 70%, transparent); border: 1.5px solid color-mix(in srgb, var(--h3) 10%, transparent); color: var(--h7); }
 
 .kalender-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0 4px; }
 .kalender-head { margin-bottom: 6px; }
@@ -182,7 +182,7 @@
   display: block;
   text-decoration: underline;
   text-decoration-color: var(--ink-soft);
-  text-decoration-thickness: 2px;
+  text-decoration-thickness: 1px;
   text-underline-offset: 8px;
   margin-bottom: 20px;
 }

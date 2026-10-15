@@ -1,11 +1,13 @@
-// Info PEMBARUAN ("Update 1.1", dst) -- modal yang muncul SEKALI per user
+// Info PEMBARUAN ("Update 1.2", dst) -- modal yang muncul SEKALI per user
 // (per akun, per perangkat) di Dashboard, plus item di lonceng notifikasi
 // selama beberapa hari setelahnya. Isi modalnya di components/PembaruanModal.jsx.
 //
 // Rilis berikutnya: ganti VERSI_PEMBARUAN (misal '1.2') & isi modalnya --
 // karena kunci penyimpanannya ikut nomor versi, modalnya otomatis muncul
 // lagi sekali ke semua user lama.
-export const VERSI_PEMBARUAN = '1.1'
+// 1.1 = Pengeluaran, Paket Layanan, zona waktu.
+// 1.2 = Link Booking Online & Permintaan Booking.
+export const VERSI_PEMBARUAN = '1.2'
 
 // Berapa hari item "Yang baru di Update x" tetap ada di lonceng setelah
 // modalnya ditutup (buat yang kelewat baca / mau buka lagi).

@@ -3,7 +3,7 @@
 .cselect-trigger {
   width: 100%; display: flex; align-items: center; justify-content: space-between;
   border: 1.5px solid color-mix(in srgb, var(--button-border) 70%, transparent); border-radius: 11px; padding: 8px 10px 8px 12px;
-  font-size: 12px; font-family: inherit; color: color-mix(in srgb, var(--ink-soft) 70%, transparent); background: color-mix(in srgb, var(--box-dashboard) 90%, transparent);
+  font-size: 12px; font-family: inherit; color: var(--ink-soft); background: color-mix(in srgb, var(--box-dashboard) 90%, transparent);
   cursor: pointer; text-align: left; transition: border-color 0.15s, box-shadow 0.15s;
   white-space: nowrap;
 }

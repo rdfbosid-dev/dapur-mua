@@ -61,7 +61,8 @@
 .pgl-kategori-fill { height: 100%; border-radius: 999px; background: var(--pill); transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1); }
 
 /* Kosong / gagal muat */
-.pgl-kosong { font-size: 13.5px; color: var(--ink-soft); line-height: 1.6; text-align: center; padding: 28px 22px; }
+.pgl-kosong { text-align: left; padding: 32px 16px; background: color-mix(in srgb, var(--box-dashboard) 90%, transparent); border-radius: 20px; color: var(--ink-soft); font-size: 13px; font-weight: 500;
+  box-shadow: var(--shadow-card); border: none; }
 
 /* ---------- Daftar per bulan -- 1 kartu per bulan, tiap transaksi 1
    baris yang bisa diklik buat buka Detail. ---------- */

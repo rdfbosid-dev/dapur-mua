@@ -1,0 +1,33 @@
+/* Penanda PERMINTAAN BOOKING (link booking online) yang dipakai di luar
+   halaman Permintaan Booking: ikon di lonceng notifikasi Dashboard & angka
+   jumlah permintaan baru di menu Sidebar. */
+.notif-icon.permintaan { background: color-mix(in srgb, var(--bar-pengeluaran-bisnis) 20%, transparent); color: var(--bar-pengeluaran-bisnis); }
+.nav-jumlah {
+  margin-left: auto; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--notif); color: var(--h7); font-size: 10px; font-weight: 700;
+}
+
+/* DESKTOP: angka permintaan pindah ke SUDUT KANAN ATAS menu (posisi sama
+   kayak penanda "Fitur Baru"), biar teks "Permintaan Booking" tetap 1 baris
+   -- sidebar desktop cuma 244px, kalau angkanya ikut sebaris, teksnya
+   kedorong turun jadi 2 baris. Di HP (drawer lebih lebar) tetap di kanan
+   sebaris seperti biasa. */
+/* Pembungkus angka + penanda "Fitur Baru" di menu Permintaan Booking.
+   HP: display contents -> anak-anaknya diatur seperti biasa (angka sebaris
+   di kanan, Fitur Baru di sudut kanan atas kayak menu lain). */
+.nav-penanda { display: contents; }
+@media (min-width: 901px) {
+  .nav-item.punya-jumlah { position: relative; white-space: nowrap; }
+  /* Desktop: dua-duanya berjajar di sudut kanan atas (angka di kiri,
+     Fitur Baru di kanan), jadi nggak saling tumpuk. */
+  .nav-item .nav-penanda {
+    position: absolute; top: -6px; right: 10px;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .nav-item .nav-penanda .nav-jumlah { margin-left: 0; }
+  .nav-item .nav-penanda .tanda-fitur-baru { position: static; }
+  /* Angka & Fitur Baru tampil bareng: angkanya dikecilin setinggi penanda
+     Fitur Baru, biar nggak nyenggol teks "Permintaan Booking" di bawahnya. */
+  .nav-item .nav-penanda.dua .nav-jumlah { min-width: 16px; height: 16px; padding: 0 5px; font-size: 9.5px; }
+}

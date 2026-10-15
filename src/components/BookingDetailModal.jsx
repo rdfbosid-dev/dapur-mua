@@ -22,13 +22,8 @@ import './BookingModal.css'
 // yang ke-load belakangan & menang buat elemen mereka sendiri.
 import './BookingDetailModal.css'
 
-// Nomor WhatsApp dianggap terisi kalau berisi minimal 8 ANGKA (spasi, "+",
-// "-" diabaikan) -- isian asal kayak "-" atau "0" nggak lolos, tapi format
-// apa pun (0812..., +62 812-..., nomor luar negeri) tetap diterima.
-// SAMA PERSIS dengan yang di BookingModal.jsx -- ubah dua-duanya.
-function nomorWhatsAppValid(nomor) {
-  return (String(nomor || '').match(/\d/g) || []).length >= 8
-}
+// Aturan Nomor WhatsApp (minimal 8 angka, tanpa huruf) -- satu sumber di
+// lib/nomorWa.js, dipakai juga di form Booking Baru, Pengaturan, & link booking.
 import InvoiceModal from './InvoiceModal'
 import RincianKeuanganModal from './RincianKeuanganModal'
 import IconClose from './IconClose'
@@ -42,6 +37,7 @@ import DiskonBooking from './DiskonBooking'
 import { tagihanSebelumDiskonRow, pesanDiskonTidakValid, nilaiSimpanDiskon, labelDiskon } from '../lib/tagihan'
 import { muatLayananRambut, paketRambutDipakai, namaPaketRambut, gantiJenisRambut, nilaiSimpanRambut, labelLayananRambut } from '../lib/layananRambut'
 import PilihPaketRambut, { CatatanHargaRambut } from './PilihPaketRambut'
+import { rapikanKetikanWa, pesanNomorWaTidakValid } from '../lib/nomorWa'
 
 function formatRupiah(n) {
   const num = Number(n) || 0
@@ -574,7 +570,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
     // disimpan ulang setelah kolom itu dilengkapi.
     if (!namaKlien.trim()) { tolakSimpan('Nama klien wajib diisi.'); return }
     if (!nomorWhatsApp.trim()) { tolakSimpan('Nomor WhatsApp wajib diisi.'); return }
-    if (!nomorWhatsAppValid(nomorWhatsApp)) { tolakSimpan('Nomor WhatsApp belum benar (minimal 8 angka).'); return }
+    if (pesanNomorWaTidakValid(nomorWhatsApp)) { tolakSimpan(pesanNomorWaTidakValid(nomorWhatsApp)); return }
     if (!tanggalAcara) { tolakSimpan('Tanggal acara wajib diisi.'); return }
     if (!eventSekarang) { tolakSimpan(event === EVENT_CUSTOM_SENTINEL ? 'Tulis nama event-nya dulu.' : 'Event wajib dipilih.'); return }
     if (editPeserta.length === 0) { tolakSimpan('Tambahkan minimal 1 peserta.'); return }
@@ -1069,7 +1065,7 @@ export default function BookingDetailModal({ booking, onClose, onChanged }) {
                 </div>
                 <div className="field">
                   <label>Nomor WhatsApp</label>
-                  <input type="text" value={nomorWhatsApp} onChange={(e) => setNomorWhatsApp(e.target.value)} />
+                  <input type="text" inputMode="tel" value={nomorWhatsApp} onChange={(e) => setNomorWhatsApp(rapikanKetikanWa(e.target.value))} />
                 </div>
               </div>
 

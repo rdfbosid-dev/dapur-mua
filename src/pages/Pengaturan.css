@@ -85,7 +85,7 @@
    Rekening" (nunjukin ke mana rekening ini bakal ditampilin), tapi
    ditulis generik (bukan .rekening-note) biar bisa dipake ulang buat
    field lain kalau nanti butuh catatan serupa. */
-.field-note-italic { font-size: 11px; font-style: italic; color: var(--ink-soft); opacity: 0.75; margin-bottom: 8px; margin-top: -3px; }
+.field-note-italic { font-size: 11px; font-style: italic; color: var(--ink); opacity: 0.75; margin-bottom: 8px; margin-top: -3px; }
 
 /* Rekening -- daftar baris (Bank + Nomor) yang bisa ditambah/dihapus.
    Bank dikasih lebar TETAP (numpang flex-basis) soalnya nama bank
@@ -100,7 +100,7 @@
   background: var(--notif); color: var(--h7); cursor: pointer; font-family: inherit;
   display: flex; align-items: center; justify-content: center; transition: background 0.15s, color 0.15s; padding: 0;
 }
-.rekening-hapus:hover { background: color-mix(in srgb, var(--notif) 85%, black);; color: var(--h7); }
+.rekening-hapus:hover { background: color-mix(in srgb, var(--notif) 85%, black); color: var(--h7); }
 
 .btn-primary {
   background: var(--button-prm-hover); color: var(--button-tx-hover); border: none; border-radius: 11px;
@@ -130,4 +130,99 @@
   .logo-preview-overlay svg { width: 16px; height: 16px; }
   .field-control-link { flex-direction: column; align-items: flex-start; }
   .field-control-link input { width: 100%; }
+}
+
+/* Link Booking Online -- pilihan 2 tombol (numpang gaya .zona-opt), kolom
+   alamat link dengan awalan domain, & kolom pesan untuk calon klien. */
+.lb-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; max-width: 280px; }
+.lb-row .zona-opt { padding: 9px 6px; }
+.lb-slug {
+  display: flex; align-items: stretch; border: 1.5px solid color-mix(in srgb, var(--button-border) 70%, transparent);
+  border-radius: 11px; overflow: hidden; background: var(--field);
+}
+.lb-slug:focus-within { border-color: var(--h3); box-shadow: 0 0 0 3px color-mix(in srgb, var(--h3) 18%, transparent); }
+.lb-slug-awal {
+  display: flex; align-items: center; padding: 0 4px 0 12px; font-size: 13px; color: var(--ink-soft); opacity: 0.8;
+  white-space: nowrap; flex-shrink: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; max-width: 55%;
+}
+.field .lb-slug input { border: none; box-shadow: none; flex: 1; min-width: 0; padding-left: 2px; background: transparent; }
+.field .lb-slug input:focus { box-shadow: none; }
+.lb-pesan {
+  width: 100%; border: 1.5px solid color-mix(in srgb, var(--button-border) 70%, transparent); border-radius: 11px; padding: 10px 14px;
+  font-size: 13.5px; font-family: inherit; color: var(--button-tx); background: var(--field); resize: vertical; min-height: 70px; box-sizing: border-box;
+}
+.lb-pesan::placeholder { color: var(--placeholder); opacity: 1; }
+.lb-pesan:focus { outline: none; border-color: var(--h3); box-shadow: 0 0 0 3px color-mix(in srgb, var(--h3) 18%, transparent); }
+.lb-opsional { font-weight: 400; opacity: 0.75; }
+.lb-hint { display: block; margin: -4px 0 14px; }
+
+.lb-link input { box-sizing: border-box; }
+.lb-link .btn-primary { justify-content: center; }
+
+@media (max-width: 700px) {
+  .lb-row { max-width: none; }
+  /* Link penuh 1 baris, tombol Salin & Buka berdampingan di bawahnya. */
+  .field-control-link.lb-link { flex-direction: row; flex-wrap: wrap; }
+  .field-control-link.lb-link input { flex: 1 1 100%; }
+  .field-control-link.lb-link .btn-primary { flex: 1 1 0; }
+}
+
+/* Mode gelap: tombol pilihan yang TIDAK dipilih dibuat lebih transparan &
+   yang dipilih pakai warna aksen yang lebih terang -- sebelumnya dua-duanya
+   (--ink-faint vs --h3) hampir sama warnanya, jadi susah dibedakan.
+   Berlaku buat Zona Waktu & semua pilihan di kartu Link Booking. */
+[data-theme="dark"] .zona-opt { background: color-mix(in srgb, var(--ink-faint) 35%, transparent); color: var(--ink-soft); }
+[data-theme="dark"] .zona-opt:not(.sel):hover { background: color-mix(in srgb, var(--ink-faint) 60%, transparent); }
+[data-theme="dark"] .zona-opt.sel { background: color-mix(in srgb, var(--pill-alt) 70%, black); color: #fff; box-shadow: inset 0 0 0 1.5px var(--h5); }
+
+/* Isi Halaman Link -- daftar Link Tambahan (judul + alamat), tiap link
+   punya tombol naik/turun, Tampil/Disembunyikan, & hapus. */
+.lt-hint { margin: -4px 0 8px; }
+.lt-item {
+  border: 1.5px solid color-mix(in srgb, var(--button-border) 45%, transparent); border-radius: 12px;
+  padding: 10px; margin-bottom: 8px; display: flex; flex-direction: column; gap: 8px;
+}
+.lt-item.lt-nonaktif { opacity: 0.6; }
+.lt-isian { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr); gap: 8px; }
+.lt-isian input { min-width: 0; }
+.lt-aksi { display: flex; align-items: center; gap: 6px; justify-content: flex-end; }
+.lt-btn {
+  height: 34px; min-width: 34px; padding: 0 10px; border-radius: 9px; border: none; cursor: pointer; font-family: inherit;
+  font-size: 12px; font-weight: 600; background: var(--ink-faint); color: var(--ink-soft);
+  display: flex; align-items: center; justify-content: center; transition: background 0.15s;
+}
+.lt-btn svg { width: 15px; height: 15px; }
+.lt-btn:not(:disabled):hover { background: color-mix(in srgb, var(--ink-faint) 55%, transparent); }
+.lt-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.lt-btn.lt-tampil.sel { background: var(--h3); color: #fff; }
+[data-theme="dark"] .lt-btn { background: color-mix(in srgb, var(--ink-faint) 35%, transparent); }
+[data-theme="dark"] .lt-btn.lt-tampil.sel { background: color-mix(in srgb, var(--pill-alt) 70%, black); color: #fff; box-shadow: inset 0 0 0 1.5px var(--h5); }
+.lt-tambah { align-self: flex-start; }
+.lt-tambah-baris { display: flex; flex-wrap: wrap; gap: 8px; }
+/* Link WhatsApp: kolom Teks pembuka chat (di bawah Judul | Nomor). */
+.lt-wa-teks { display: flex; flex-direction: column; gap: 5px; margin-top: 5px; }
+.lt-wa-teks label { font-size: 12px; font-weight: 600; color: var(--ink-soft); margin-bottom: 5px; }
+.lt-wa-teks .lb-pesan { min-height: 56px; }
+.lt-link-kecil {
+  background: none; border: none; padding: 0; cursor: pointer; font-family: inherit;
+  font-size: 11px; font-weight: 700; color: color-mix(in srgb, var(--ink-soft) 80%, transparent);
+}
+.lt-link-kecil:hover { color: var(--h5); }
+.lt-tambah-baris .lt-tambah { margin-bottom: 0; }
+/* Pilihan ikon per link -- pratinjau ikon tampil di dalam tombol pilihan. */
+.lt-ikon-baris { display: flex; align-items: center; gap: 10px; margin-top: 5px; }
+.lt-ikon-label { font-size: 12px; font-weight: 600; color: var(--ink-soft); flex-shrink: 0; }
+.lt-ikon-pilih { flex: 1; min-width: 0; max-width: 280px; }
+.lt-ikon-pilih .cselect-trigger > span { display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
+.lt-ikon { width: 16px; height: 16px; flex-shrink: 0; vertical-align: middle; }
+.lt-ikon-pilih .cselect-icon { display: inline-flex; }
+
+@media (max-width: 700px) {
+  .lt-isian { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Garis pembatas tipis antar bagian di dalam kartu Pengaturan. */
+.pengaturan-garis {
+  border: none; height: 0; margin: 10px 0;
+  border-top: 1.5px solid color-mix(in srgb, var(--button-border) 30%, transparent);
 }

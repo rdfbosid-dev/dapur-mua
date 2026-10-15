@@ -22,6 +22,8 @@ import AdminDashboard from './pages/AdminDashboard'
 import AdminUsers from './pages/AdminUsers'
 import AdminLangganan from './pages/AdminLangganan'
 import PasangAplikasi from './components/PasangAplikasi'
+import BookingOnline from './pages/BookingOnline'
+import PermintaanBooking from './pages/PermintaanBooking'
 
 function ProtectedRoute({ children }) {
   const { user, loading, isLocked, isAdmin } = useAuth()
@@ -129,6 +131,9 @@ export default function App() {
             <Route path="/register" element={<GuestRoute><Register /></GuestRoute>} />
             <Route path="/lupa-password" element={<LupaPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            {/* Link booking online -- PUBLIK (tanpa login, tanpa guard apa pun):
+                dibuka calon klien. Data yang tampil diatur fungsi database. */}
+            <Route path="/b/:slug" element={<BookingOnline />} />
             <Route
               path="/trial-habis"
               element={
@@ -182,6 +187,14 @@ export default function App() {
               element={
                 <ProtectedRoute>
                   <Layanan />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/permintaan"
+              element={
+                <ProtectedRoute>
+                  <PermintaanBooking />
                 </ProtectedRoute>
               }
             />

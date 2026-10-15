@@ -5,6 +5,8 @@ import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
 import Sidebar from '../components/Sidebar'
 import BookingModal from '../components/BookingModal'
+import Toast from '../components/Toast'
+import { useToast } from '../lib/useToast'
 import BookingDetailModal from '../components/BookingDetailModal'
 import OnboardingModal from '../components/OnboardingModal'
 import PembaruanModal from '../components/PembaruanModal'
@@ -15,7 +17,10 @@ import { bookingSelesai } from '../lib/durasiBooking'
 import { kelasStatusPembayaran, STATUS_BELUM_ADA_TAGIHAN } from '../lib/statusPembayaran'
 import { jamZona, kodeZona } from '../lib/zonaWaktu'
 import { VERSI_PEMBARUAN, bacaPembaruan, tandaiPembaruan, pembaruanDiLonceng } from '../lib/pembaruan'
+import { muatPermintaanBaru } from '../lib/bookingOnline'
+import { usePantauPermintaan } from '../lib/pantauPermintaan'
 import './Dashboard.css'
+import '../components/Permintaan.css'
 
 function formatRupiah(n) {
   return 'Rp' + (Number(n) || 0).toLocaleString('id-ID')
@@ -72,7 +77,20 @@ export default function Dashboard() {
   const [notifOpen, setNotifOpen] = useState(false)
   const [notifReadKey, setNotifReadKey] = useState('')
   const navigate = useNavigate()
-  const [toast, setToast] = useState('')
+  const [toast, tampilkanToast] = useToast()
+  // Permintaan booking BARU dari link booking online (lib/bookingOnline.js).
+  // Gagal dimuat (misal SQL-nya belum dijalankan) -> kosong, Dashboard normal.
+  // Dimuat ulang otomatis begitu ada permintaan masuk/berubah (tanpa refresh,
+  // lib/pantauPermintaan.js) -> titik merah lonceng langsung nyala.
+  const uid = user?.id || null
+  const [permintaanBaru, setPermintaanBaru] = useState([])
+  const [versiPermintaan, setVersiPermintaan] = useState(0)
+  usePantauPermintaan(uid, () => setVersiPermintaan((v) => v + 1))
+  useEffect(() => {
+    let batal = false
+    if (uid) muatPermintaanBaru().then((d) => { if (!batal) setPermintaanBaru(d) })
+    return () => { batal = true }
+  }, [uid, versiPermintaan])
 
   async function loadBookings() {
     setLoading(true)
@@ -144,9 +162,8 @@ export default function Dashboard() {
 
   function handleBookingSaved(kodeBooking) {
     setShowModal(false)
-    setToast(`Booking ${kodeBooking} berhasil disimpan ✅`)
+    tampilkanToast(`Booking ${kodeBooking} berhasil disimpan ✅`)
     loadBookings()
-    setTimeout(() => setToast(''), 4000)
   }
 
   const today = new Date()
@@ -226,6 +243,15 @@ export default function Dashboard() {
   const namaLaporanBulan = new Date(laporanTahun, laporanBulan, 1).toLocaleDateString('id-ID', { month: 'long' })
 
   const notifications = [
+    // Permintaan booking dari link online -- paling atas, karena calon klien
+    // nunggu dikonfirmasi. Klik = buka halaman Permintaan Booking.
+    ...permintaanBaru.map((p) => ({
+      type: 'permintaan',
+      id: `permintaan-${p.id}`,
+      title: `Permintaan booking dari ${p.nama_klien}`,
+      desc: [formatTanggal(p.tanggal_acara), p.event].filter(Boolean).join(' · '),
+      lokasi: null,
+    })),
     ...perluInvoice.map((b) => ({
       type: 'invoice',
       // Prefix "invoice-" WAJIB ada -- booking yang sama bisa punya 2
@@ -272,7 +298,7 @@ export default function Dashboard() {
       type: 'pembaruan',
       id: `pembaruan-${VERSI_PEMBARUAN}`,
       title: `Yang baru di Update ${VERSI_PEMBARUAN}`,
-      desc: 'Pengeluaran, Paket Layanan, zona waktu, dan lainnya.',
+      desc: 'Link booking online, permintaan booking, dan lainnya.',
     }] : []),
   ]
   // Item pembaruan SENGAJA nggak ikut nyalain titik merah -- user udah
@@ -463,6 +489,7 @@ export default function Dashboard() {
                     setNotifOpen(false)
                     if (n.type === 'booking' || n.type === 'invoice') setSelectedBooking(n.booking)
                     else if (n.type === 'pembaruan') setShowPembaruan(true)
+                    else if (n.type === 'permintaan') navigate('/permintaan')
                     else navigate('/keuangan', { state: { highlightBulan: n.bulan, highlightTahun: n.tahun } })
                   }}
                 >
@@ -471,6 +498,8 @@ export default function Dashboard() {
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 3v3M16 3v3"/></svg>
                     ) : n.type === 'invoice' ? (
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M7 3h8l4 4v14H7z"/><path d="M15 3v4h4M9 12h6M9 16h6"/></svg>
+                    ) : n.type === 'permintaan' ? (
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16v12H5.2L4 17.2z"/><path d="M8 9h8M8 12h5"/></svg>
                     ) : n.type === 'pembaruan' ? (
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 17l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z"/></svg>
                     ) : (
@@ -800,15 +829,8 @@ export default function Dashboard() {
         />
       )}
 
-      {toast && (
-        <div style={{
-          position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)',
-          background: 'var(--ink)', color: '#fff', padding: '12px 22px', borderRadius: 12,
-          fontSize: 13.5, fontWeight: 600, boxShadow: '0 12px 30px -10px rgba(43,36,56,0.4)', zIndex: 60,
-        }}>
-          {toast}
-        </div>
-      )}
+      {/* Toast bersama -- posisi & gaya di components/Toast.css. */}
+      <Toast teks={toast} />
 
       {showPembaruan && !showOnboarding && <PembaruanModal onClose={tutupPembaruan} />}
 

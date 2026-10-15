@@ -4,7 +4,10 @@ import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
 import { openAdminWhatsApp } from '../lib/whatsapp'
 import { useFiturBaru } from '../lib/useFiturBaru'
+import { hitungPermintaanBaru } from '../lib/bookingOnline'
+import { usePantauPermintaan } from '../lib/pantauPermintaan'
 import './Sidebar.css'
+import './Permintaan.css'
 
 const navUtamaMUA = [
   { to: '/dashboard', label: 'Dashboard', icon: 'grid' },
@@ -25,6 +28,12 @@ const navUtamaMUA = [
 // nongol di bawah Pengeluaran, di HP nongol di drawer (menu ☰) di atas
 // Rekapan (section Utama disembunyiin di drawer HP, lihat .nav-utama-group).
 const navLayanan = { to: '/layanan', label: 'Paket Layanan', icon: 'tag', fiturBaru: 'layanan' }
+
+// Permintaan Booking (dari link booking online) -- sama kayak Paket Layanan,
+// di LUAR bottom nav HP (udah penuh), nongol di drawer menu ☰. Angka di
+// sebelahnya = jumlah permintaan yang belum diproses. `fiturBaru` -> penanda
+// "Fitur Baru" (kunci 'permintaan' di FITUR_BARU, lib/useFiturBaru.js).
+const navPermintaan = { to: '/permintaan', label: 'Permintaan Booking', icon: 'inbox', fiturBaru: 'permintaan' }
 
 const navRekapan = [
   { to: '/keuangan', label: 'Keuangan', icon: 'trend' },
@@ -83,6 +92,8 @@ function Icon({ name }) {
       return <svg {...common}><path d="M3 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v1"/><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M16 13.5h2"/></svg>
     case 'tag':
       return <svg {...common}><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>
+    case 'inbox':
+      return <svg {...common}><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11Z"/></svg>
     case 'logout':
       return <svg {...common}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
     default:
@@ -101,6 +112,19 @@ export default function Sidebar({ headerAction = null }) {
   const adaTandaBaru = (item) => !!(item.fiturBaru && fiturBaruAktif[item.fiturBaru])
   const [mobileOpen, setMobileOpen] = useState(false)
   const location = useLocation()
+  // Jumlah permintaan booking baru -- dicek tiap pindah halaman, DAN langsung
+  // begitu ada permintaan masuk/berubah tanpa perlu refresh (lib/pantauPermintaan.js).
+  // Ringan: cuma hitung, tanpa isi. Gagal -> 0, menu tetap tampil normal.
+  // Pakai uid (teks), bukan objek user: sesi diperbarui = objek baru, uid tetap.
+  const uid = user?.id || null
+  const [jumlahPermintaan, setJumlahPermintaan] = useState(0)
+  const [versiPermintaan, setVersiPermintaan] = useState(0)
+  usePantauPermintaan(isAdmin ? null : uid, () => setVersiPermintaan((v) => v + 1))
+  useEffect(() => {
+    let batal = false
+    if (uid && !isAdmin) hitungPermintaanBaru().then((n) => { if (!batal) setJumlahPermintaan(n) })
+    return () => { batal = true }
+  }, [uid, isAdmin, location.pathname, versiPermintaan])
 
   // Badge status trial/aktif -- CUMA buat user MUA biasa, admin nggak
   // punya konsep langganan buat dirinya sendiri jadi nggak ditampilin.
@@ -184,6 +208,23 @@ export default function Sidebar({ headerAction = null }) {
                 <Icon name={navLayanan.icon} />
                 {navLayanan.label}
                 {adaTandaBaru(navLayanan) && <span className="tanda-fitur-baru">Fitur Baru</span>}
+              </NavLink>
+              <NavLink
+                to={navPermintaan.to}
+                className={({ isActive }) => 'nav-item' + (isActive ? ' active' : '') + (jumlahPermintaan > 0 ? ' punya-jumlah' : '') + (adaTandaBaru(navPermintaan) ? ' punya-tanda-baru' : '')}
+                >
+                <Icon name={navPermintaan.icon} />
+                {navPermintaan.label}
+                {/* Angka permintaan + penanda Fitur Baru dibungkus .nav-penanda:
+                    di desktop berjajar di sudut kanan atas (nggak saling tumpuk),
+                    di HP pembungkusnya "hilang" (display: contents) jadi posisi
+                    masing-masing sama kayak menu lain. Lihat Permintaan.css. */}
+                {(jumlahPermintaan > 0 || adaTandaBaru(navPermintaan)) && (
+                  <span className={`nav-penanda${jumlahPermintaan > 0 && adaTandaBaru(navPermintaan) ? ' dua' : ''}`}>
+                    {jumlahPermintaan > 0 && <span className="nav-jumlah" aria-label={`${jumlahPermintaan} permintaan baru`}>{jumlahPermintaan > 99 ? '99+' : jumlahPermintaan}</span>}
+                    {adaTandaBaru(navPermintaan) && <span className="tanda-fitur-baru">Fitur Baru</span>}
+                  </span>
+                )}
               </NavLink>
               <div className="nav-section">Rekapan</div>
               {navRekapan.map((item) => (

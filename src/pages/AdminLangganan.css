@@ -21,7 +21,7 @@
 .rekening-input-bank { flex: 0 0 110px; min-width: 0; }
 .rekening-input-nomor { flex: 1; min-width: 0; }
 .rekening-hapus {
-  flex: 0 0 auto; width: 34px; height: 34px; border-radius: 9px; border: 1.5px solid color-mix(in srgb, var(--button-border) 70%, transparent);
+  flex: 0 0 auto; width: 34px; height: 34px; border-radius: 9px; border: none;
   background: var(--field); color: var(--ink-soft); cursor: pointer; font-family: inherit;
   display: flex; align-items: center; justify-content: center; transition: background 0.15s, color 0.15s; padding: 0;
 }

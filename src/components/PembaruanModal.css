@@ -1,4 +1,4 @@
-/* Modal info pembaruan ("Update 1.1") -- semua selector di-scope di bawah
+/* Modal info pembaruan ("Update 1.x") -- semua selector di-scope di bawah
    .pmb-overlay (prefix .pmb-*). Ukuran, warna, & huruf SENGAJA disamain
    sama OnboardingModal.css biar kerasa satu keluarga; bedanya isi modal
    ini lebih panjang, jadi bisa di-scroll (tombol Oke tetap nempel di
@@ -56,6 +56,9 @@
 }
 .pmb-link:hover { text-decoration: underline; text-underline-offset: 4px; }
 .pmb-link.inline { margin-top: 0; font-size: inherit; color: var(--h5); }
+/* Status link booking di kartu Link Booking Online (Update 1.2). */
+.pmb-link-booking { margin-top: 6px; font-size: 12.5px; color: var(--ink-soft); line-height: 1.5; overflow-wrap: anywhere; }
+.pmb-link-booking b { color: var(--h5); }
 
 /* Daftar "Lainnya" */
 .pmb-lainnya-judul { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-soft); opacity: 0.8; margin-bottom: 8px; }

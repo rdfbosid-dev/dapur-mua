@@ -24,6 +24,7 @@
   --h7: #FFFFFF;
   --h8: #FFFFFF;
   --h9: #2b3eb6;
+  --h10: #2b3eb6;
   --line-animation: linear-gradient(130deg, #4653aa 0%, #a6aee6 50%, #4653aa 100%);
   --button-theme: rgb(167, 176, 232);
   --page-a: #f6f8ff;
@@ -82,6 +83,7 @@
   --logout: #f00433;
   --teks-khusus: #f00433;
   --peringatan: #eeab2fe0;
+  --sukses-ikon: #2b3eb6;
 
   --shadow-modal: 0 24px 60px -12px rgb(29, 33, 58, 0.35);
   --shadow-card: 5px 5px 10px -5px rgb(29, 33, 58, 0.35);
@@ -117,6 +119,7 @@
   --h7: #FFFFFF;
   --h8: #FFFFFF;
   --h9: #FFFFFF;
+  --h10: #0d1f2d;
   --line-animation: linear-gradient(130deg, #99b2bc 0%, #cee2e9 50%, #99b2bc 100%);
   --button-theme: rgb(17, 30, 35);
   --page-a: #42535a;
@@ -155,7 +158,7 @@
   --growth-up-circle: #49aad4;
   --modal-overlay: #0d1f2d;
   --sidebar: rgb(13, 31, 45);
-  --box-dashboard: rgb(13, 31, 45);
+  --box-dashboard: #0d1f2d;
   --bar-fill: linear-gradient(130deg, #8ebbcd 0%, #587e8c 100%);
   --dot: #FFFFFF;
   --field: #22414c;
@@ -175,6 +178,7 @@
   --logout: #3f95ba;
   --teks-khusus: #51dfef;
   --peringatan: #51dfef;
+  --sukses-ikon: #6ec3e8;
 
   --shadow-modal: 0 6px 20px -5px rgb(142, 187, 205, 0.35);
   --shadow-card: 5px 6px 10px -5px rgba(142, 187, 205, 0.35);

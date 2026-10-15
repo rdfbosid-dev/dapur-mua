@@ -20,7 +20,18 @@ const LANGKAH = [
       'Buka menu Pengaturan di sidebar kiri.',
       'Upload logo brand (klik kotak logo atau tombol "Ganti Logo") dengan file format JPG/PNG, maksimal 2MB.',
       'Isi Nama Brand MUA (ini yang bakal muncul di invoice & sidebar), Kode Prefix Booking (buat kode otomatis kayak "Book-0001"), Instagram, dan Nomor WhatsApp.',
+      'Pilih Zona Waktu (WIB, WITA, atau WIT) sesuai lokasimu, biar jam di invoice, Dashboard, dan Kalender tepat.',
       'Klik "Simpan Perubahan". Data ini otomatis kepake di semua invoice yang kamu kirim ke klien.',
+    ],
+  },
+  {
+    title: 'Simpan Paket Layanan',
+    ringkas: 'Opsional: daftar paket & harga, biar isi booking lebih cepat.',
+    isi: [
+      'Buka menu Paket Layanan di sidebar (di HP lewat menu ☰).',
+      'Buat daftar paket layanan makeup/rambut beserta harganya, misalnya Wedding Premium atau Korean Waves.',
+      'Waktu bikin booking, tinggal pilih paketnya di form, biaya makeup langsung terisi otomatis.',
+      'Paket yang sama juga tampil di link booking online, jadi calon klien bisa memilih paket sendiri.',
     ],
   },
   {
@@ -29,7 +40,7 @@ const LANGKAH = [
     isi: [
       'Buka menu Booking, klik tombol "Booking Baru".',
       'Isi data klien (bisa lebih dari 1 klien dalam 1 booking, misal buat bridesmaid), tanggal & jam acara, event, lokasi, dan layanan makeup per klien.',
-      'Isi juga biaya transport (kalau ada) dan catatan pembayaran (DP/pelunasan).',
+      'Isi juga biaya transport (kalau ada) dan catatan pembayaran (DP/pelunasan). Kalau ada potongan harga, pilih "Ya" di bagian Diskon lalu isi nominalnya.',
       'Simpan. Data booking otomatis muncul di Dashboard, Kalender, dan Laporan.',
     ],
   },
@@ -71,6 +82,26 @@ const LANGKAH = [
       'Klik "Kirim ke WhatsApp" buat langsung ngirim ke nomor klien, atau "Cetak/Simpan PDF" buat diarsipin.',
     ],
   },
+  {
+    title: 'Pasang Link Booking Online',
+    ringkas: 'Satu link di bio medsos, calon klien bisa booking sendiri.',
+    isi: [
+      'Buka menu Pengaturan, cari bagian "Link Booking Online". Pilih Status Link "Aktif", isi Alamat Link (misalnya nama brand-mu), lalu klik "Simpan Link Booking".',
+      'Atur juga mau menampilkan Harga Paket dan Jam yang Sudah Terisi atau tidak. Nama klien lain, acara, dan lokasi nggak pernah tampil ke calon klien.',
+      'Di bagian "Isi Halaman Link", tambahkan tombol WhatsApp, Instagram, TikTok, pricelist Google Drive, atau link lainnya, lengkap dengan ikonnya. Untuk WhatsApp cukup ketik nomornya. Klik "Simpan Halaman Link".',
+      'Klik "Salin Link", lalu pasang di bio Instagram/TikTok atau kirim ke calon klien. Di halaman itu calon klien bisa cek tanggal yang masih kosong, lihat paketmu, dan mengirim permintaan booking.',
+    ],
+  },
+  {
+    title: 'Proses Permintaan Booking',
+    ringkas: 'Terima, tolak, atau balas permintaan dari link booking.',
+    isi: [
+      'Permintaan dari link booking masuk ke menu Permintaan Booking (di HP lewat menu ☰). Permintaan baru langsung muncul tanpa perlu refresh, ditandai angka di menu dan di lonceng Dashboard.',
+      'Permintaan BELUM mengunci jadwal dan belum masuk ke Keuangan/Laporan. Klik "Chat WhatsApp" buat ngobrol dulu sama calon klien kalau perlu.',
+      'Klik "Terima & Buat Booking": form Booking Baru terisi otomatis dari data permintaan. Cek, lengkapi, lalu simpan, baru jadi booking.',
+      'Klik "Tolak" kalau nggak bisa. Calon klien nggak dapat pemberitahuan otomatis, jadi kabari lewat WhatsApp. Permintaan yang ditolak bisa dikembalikan ke Baru atau dihapus.',
+    ],
+  },
 ]
 
 export default function Panduan() {
@@ -87,7 +118,7 @@ export default function Panduan() {
         <div className="topbar">
           <div>
             <div className="greeting">Panduan Penggunaan</div>
-            <div className="greeting-date">Dari daftar akun sampai kirim invoice, langkah demi langkah</div>
+            <div className="greeting-date">Dari daftar akun sampai link booking online, langkah demi langkah</div>
           </div>
         </div>
 

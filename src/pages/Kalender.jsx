@@ -4,6 +4,8 @@ import { useAuth } from '../context/AuthContext'
 import Sidebar from '../components/Sidebar'
 import BookingModal from '../components/BookingModal'
 import BookingDetailModal from '../components/BookingDetailModal'
+import Toast from '../components/Toast'
+import { useToast } from '../lib/useToast'
 import PengeluaranModal from '../components/PengeluaranModal'
 import PengeluaranDetailModal from '../components/PengeluaranDetailModal'
 import { KATEGORI_AGENDA } from '../lib/agendaPengeluaran'
@@ -69,6 +71,7 @@ export default function Kalender() {
 
   const [showModal, setShowModal] = useState(false)
   const [selectedBooking, setSelectedBooking] = useState(null)
+  const [toast, tampilkanToast] = useToast()
 
   // AGENDA = pelatihan/portofolio yang dicatat di halaman Pengeluaran. Ditampilin
   // di kalender ini (penanda --pill-later + baris di panel Agenda) karena
@@ -194,8 +197,11 @@ export default function Kalender() {
 
   const agendaPengeluaranHariIni = agendaOn(selectedDate)
 
-  function handleSaved() {
+  // BookingModal ngirim kode booking yang baru disimpan -> ditampilkan di toast
+  // (pesan SAMA dengan toast di Dashboard).
+  function handleSaved(kodeBooking) {
     setShowModal(false)
+    tampilkanToast(`Booking ${kodeBooking} berhasil disimpan ✅`)
     loadBookings()
   }
 
@@ -404,6 +410,8 @@ export default function Kalender() {
           onChanged={loadBookings}
         />
       )}
+
+      <Toast teks={toast} />
     </div>
   )
 }

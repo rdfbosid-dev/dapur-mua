@@ -14,6 +14,8 @@ import { useAuth } from '../context/AuthContext'
 export const FITUR_BARU = {
   pengeluaran: { durasiJam: 48 },
   layanan: { durasiJam: 48 },
+  // Menu Permintaan Booking (link booking online, Update 1.2).
+  permintaan: { durasiJam: 48 },
 }
 
 const MS_PER_JAM = 60 * 60 * 1000

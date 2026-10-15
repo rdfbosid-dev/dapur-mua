@@ -16,7 +16,7 @@
 }
 
 .diskon-ringkasan {
-  font-size: 11.5px;
+  font-size: 11px;
   line-height: 1.5;
   color: var(--ink-soft);
   background: color-mix(in srgb, var(--ink-faint) 45%, transparent);
@@ -46,7 +46,7 @@
     grid-column: 1 / -1;
   }
   .diskon-ringkasan {
-    font-size: 10px;}
+    font-size: 11px;}
 }
 
 /* Baris diskon di mode LIHAT Detail Booking (di bawah ringkasan
