@@ -1,6 +1,17 @@
 {
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" },
+    {
+      "source": "/b/:slug",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(WhatsApp|facebookexternalhit|Facebot|meta-externalagent|Twitterbot|TelegramBot|Slackbot|LinkedInBot|Discordbot|SkypeUriPreview|Pinterestbot|redditbot|Embedly|Googlebot|bingbot|Applebot).*"
+        }
+      ],
+      "destination": "/api/pratinjau-booking?slug=:slug"
+    },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
