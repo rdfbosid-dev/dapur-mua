@@ -769,7 +769,7 @@ export default function Pengaturan() {
                   </div>
                   <div className="field">
                     <label>Pesan untuk Calon Klien <span className="lb-opsional">(opsional)</span></label>
-                    <textarea className="lb-pesan" value={lbPesan} onChange={(e) => setLbPesan(e.target.value)} maxLength={300} rows={3} placeholder="contoh: Booking dikonfirmasi setelah DP diterima. Hanya melayani area Solo & Jogja." />
+                    <textarea className="lb-pesan" value={lbPesan} onChange={(e) => setLbPesan(e.target.value)} maxLength={300} rows={3} placeholder="contoh: Booking dikonfirmasi setelah DP diterima. Hanya melayani area Jabodetabek." />
                   </div>
                   <hr className="pengaturan-garis" />
                   {!profile?.whatsapp && <div className="msg-error">Isi Nomor WhatsApp di Profil Pengguna supaya calon klien bisa langsung menghubungimu setelah mengirim permintaan.</div>}
