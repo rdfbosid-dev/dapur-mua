@@ -133,7 +133,7 @@ export function jamBentrok(jam, slot = []) {
 export function pesanWaPermintaan({ namaMua, isian, zona }) {
   const rambut = isian.peserta.filter((o) => o.rambut && o.rambut !== 'Tidak Ada').map((o) => `${o.rambut} (${o.nama})`).join(', ')
   const baris = [
-    `Halo Kak ${namaMua}, saya *${isian.nama_klien}* baru saja mengirim permintaan booking lewat link booking online.`,
+    `Halo, Kak ${namaMua}. Saya *${isian.nama_klien}* baru saja mengirim permintaan booking lewat link booking online.`,
     '',
     `*Tanggal*: ${tanggalPanjang(isian.tanggal_acara)}${isian.jam_mulai ? ` · ${isian.jam_mulai} ${zona}` : ''}`,
     `*Acara*: ${isian.event}`,
