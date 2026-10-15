@@ -16,6 +16,9 @@ export const FITUR_BARU = {
   layanan: { durasiJam: 48 },
   // Menu Permintaan Booking (link booking online, Update 1.2).
   permintaan: { durasiJam: 48 },
+  // Menu Pengaturan -- banyak pengaturan baru (Link Booking Online, Isi
+  // Halaman Link, dll; Update 1.2).
+  pengaturan: { durasiJam: 48 },
 }
 
 const MS_PER_JAM = 60 * 60 * 1000

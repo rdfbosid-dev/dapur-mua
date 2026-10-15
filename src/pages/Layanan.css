@@ -53,18 +53,27 @@
   .lyn-nama, .lyn-harga { font-size: 13px; }
 }
 
-/* Tab Makeup / Rambut -- ukuran & warna SAMA kayak tombol Aktif/Nonaktif
-   di form paket (.layanan-toggle-opt, LayananModal.css). */
-.lyn-tabs { display: flex; gap: 6px; max-width: 280px; margin-bottom: 16px; }
+/* Tab Makeup / Rambut -- SAKLAR GESER, gaya SAMA dengan tab Baru | Diterima |
+   Ditolak di halaman Permintaan Booking (.pb-tabs, PermintaanBooking.css):
+   rel = --button-prm-hover, thumb = --h3, teks = --h7. Thumb bergeser ke tab
+   aktif lewat --lyn-tab-i (0 = Makeup, 1 = Rambut) yang diisi dari JSX. */
+.lyn-tabs {
+  position: relative; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  width: 100%; max-width: 280px; padding: 4px; margin-bottom: 16px; border-radius: 999px;
+  background: var(--button-prm-hover);
+}
+.lyn-tabs-thumb {
+  position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc((100% - 8px) / 2);
+  border-radius: 999px; background: var(--h3); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+  transform: translateX(calc(var(--lyn-tab-i, 0) * 100%));
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
 .lyn-tab {
-  flex: 1; text-align: center; padding: 8px; border-radius: 8px; border: none; cursor: pointer;
-  font-family: inherit; font-size: 13px; font-weight: 600;
-  background: var(--ink-faint); color: var(--ink-soft);
-  transition: background 0.15s, color 0.15s;
+  position: relative; z-index: 1; display: inline-flex; align-items: center; justify-content: center;
+  border: none; cursor: pointer; font-family: inherit; background: none; white-space: nowrap;
+  padding: 8px 10px; border-radius: 999px; font-size: 13px; font-weight: 700;
+  color: var(--h7); opacity: 0.7; transition: opacity 0.15s;
 }
-.lyn-tab:not(.sel):hover { background: color-mix(in srgb, var(--ink-faint) 50%, transparent); }
-.lyn-tab.sel { background: var(--h3); color: #fff; }
-@media (max-width: 640px) {
-  .lyn-tabs { max-width: none; }
-  .lyn-tab { font-size: 12px; }
-}
+.lyn-tab:hover, .lyn-tab.sel { opacity: 1; }
+.lyn-tab:focus-visible { outline: 2px solid var(--h5); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .lyn-tabs-thumb { transition: none; } }

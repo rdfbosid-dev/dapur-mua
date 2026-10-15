@@ -35,6 +35,11 @@ const navLayanan = { to: '/layanan', label: 'Paket Layanan', icon: 'tag', fiturB
 // "Fitur Baru" (kunci 'permintaan' di FITUR_BARU, lib/useFiturBaru.js).
 const navPermintaan = { to: '/permintaan', label: 'Permintaan Booking', icon: 'inbox', fiturBaru: 'permintaan' }
 
+// Pengaturan -- ditandai "Fitur Baru" (kunci 'pengaturan' di FITUR_BARU)
+// karena ada banyak pengaturan baru di dalamnya (Link Booking Online, Isi
+// Halaman Link, dll).
+const navPengaturan = { fiturBaru: 'pengaturan' }
+
 const navRekapan = [
   { to: '/keuangan', label: 'Keuangan', icon: 'trend' },
   { to: '/laporan', label: 'Laporan', icon: 'file' },
@@ -271,9 +276,10 @@ export default function Sidebar({ headerAction = null }) {
               Langganan
             </NavLink>
 
-            <NavLink to="/pengaturan" className={({ isActive }) => 'nav-item nav-item-pengaturan' + (isActive ? ' active' : '')} style={{ marginBottom: 12 }}>
+            <NavLink to="/pengaturan" className={({ isActive }) => 'nav-item nav-item-pengaturan' + (isActive ? ' active' : '') + (adaTandaBaru(navPengaturan) ? ' punya-tanda-baru' : '')} style={{ marginBottom: 12 }}>
               <Icon name="settings" />
               Pengaturan
+              {adaTandaBaru(navPengaturan) && <span className="tanda-fitur-baru">Fitur Baru</span>}
             </NavLink>
           </>
         )}

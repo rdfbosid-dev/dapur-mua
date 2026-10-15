@@ -118,7 +118,10 @@ export default function Layanan() {
         </div>
 
         <div className="lyn-opsional">Fitur ini opsional, silakan digunakan jika dibutuhkan.</div>
-        <div className="lyn-tabs" role="tablist" aria-label="Jenis paket">
+        {/* Saklar geser Makeup | Rambut -- sama dengan tab di halaman Permintaan
+            Booking: "thumb" bergeser ke tab aktif lewat variabel CSS --lyn-tab-i. */}
+        <div className="lyn-tabs" role="tablist" aria-label="Jenis paket" style={{ '--lyn-tab-i': tabRambut ? 1 : 0 }}>
+          <span className="lyn-tabs-thumb" aria-hidden="true" />
           <button type="button" role="tab" aria-selected={!tabRambut} className={`lyn-tab${!tabRambut ? ' sel' : ''}`} onClick={() => setTab('makeup')}>Makeup</button>
           <button type="button" role="tab" aria-selected={tabRambut} className={`lyn-tab${tabRambut ? ' sel' : ''}`} onClick={() => setTab('rambut')}>Rambut</button>
         </div>
