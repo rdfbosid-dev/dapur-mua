@@ -232,7 +232,7 @@ export default function PermintaanBooking() {
                     <div><Label>Hari, Tanggal</Label><b>{tanggalPanjang(p.tanggal_acara)}</b></div>
                     {/* Jam dipisah ke baris sendiri. Calon klien boleh nggak
                         isi jam (opsional di link booking) -> "Belum ditentukan". */}
-                    <div><Label>Jam</Label>{p.jam_mulai ? <b>{String(p.jam_mulai).slice(0, 5)} {zona}</b> : <b className="pb-belum">Belum ditentukan</b>}</div>
+                    <div><Label>Jam Mulai Makeup</Label>{p.jam_mulai ? <b>{String(p.jam_mulai).slice(0, 5)} {zona}</b> : <b className="pb-belum">Belum ditentukan</b>}</div>
                     <div><Label>Acara</Label><b>{p.event}</b></div>
                     <div><Label>Lokasi</Label><b>{p.lokasi}</b></div>
                     <div><Label>WhatsApp</Label><b>{p.nomor_whatsapp}</b></div>

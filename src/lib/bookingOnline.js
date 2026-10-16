@@ -135,7 +135,8 @@ export function pesanWaPermintaan({ namaMua, isian, zona }) {
   const baris = [
     `Halo, Kak ${namaMua}. Saya *${isian.nama_klien}* baru saja mengirim permintaan booking lewat link booking online.`,
     '',
-    `*Tanggal*: ${tanggalPanjang(isian.tanggal_acara)}${isian.jam_mulai ? ` · ${isian.jam_mulai} ${zona}` : ''}`,
+    `*Hari, Tanggal*: ${tanggalPanjang(isian.tanggal_acara)}`,
+    `*Jam Mulai Makeup*: ${isian.jam_mulai ? `${isian.jam_mulai} ${zona}` : ''}`,
     `*Acara*: ${isian.event}`,
     `*Lokasi*: ${isian.lokasi}`,
     `*Jumlah klien*: ${isian.peserta.length}`,

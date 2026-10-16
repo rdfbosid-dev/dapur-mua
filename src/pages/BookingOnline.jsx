@@ -468,9 +468,9 @@ export default function BookingOnline() {
             <h2>Permintaan booking terkirim!</h2>
             <p><b>{profil.nama}</b> akan mengecek jadwal dan mengonfirmasi lewat WhatsApp ke nomor <b>{terkirim.nomor_whatsapp}</b>. Jadwal belum terkunci sampai dikonfirmasi MUA.</p>
             <div className="bo-ringkas">
-              <div><span>Tanggal</span><b>{tanggalPanjang(terkirim.tanggal_acara)}</b></div>
+              <div><span>Hari, Tanggal</span><b>{tanggalPanjang(terkirim.tanggal_acara)}</b></div>
               {/* Jam dipisah ke baris sendiri (jam opsional -> "Belum ditentukan"). */}
-              <div><span>Jam</span><b>{terkirim.jam_mulai ? `${terkirim.jam_mulai} ${profil.zona_waktu}` : 'Belum ditentukan'}</b></div>
+              <div><span>Jam Mulai Makeup</span><b>{terkirim.jam_mulai ? `${terkirim.jam_mulai} ${profil.zona_waktu}` : 'Belum ditentukan'}</b></div>
               <div><span>Acara</span><b>{terkirim.event}</b></div>
               <div><span>Lokasi</span><b>{terkirim.lokasi}</b></div>
               <div><span>Jumlah klien</span><b>{terkirim.peserta.length}</b></div>

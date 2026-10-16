@@ -67,7 +67,7 @@
 .pb-status.ditolak { background: var(--pill); color: var(--h8); }
 
 .pb-detail { display: flex; flex-direction: column; gap: 6px; font-size: 13px; margin-bottom: 10px; }
-.pb-detail div { display: grid; grid-template-columns: 90px minmax(0, 1fr); gap: 8px; }
+.pb-detail div { display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 8px; }
 .pb-detail span { color: var(--ink-soft); opacity: 0.85; }
 .pb-detail b { color: var(--h5); font-weight: 600; overflow-wrap: anywhere; }
 .pb-orang { border-radius: 12px; padding: 8px 12px; background: color-mix(in srgb, var(--ink-faint) 40%, transparent); font-size: 12.5px; }
