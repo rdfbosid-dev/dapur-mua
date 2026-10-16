@@ -187,13 +187,13 @@
 .bo-paket .cselect-menu { max-height: 260px; }
 .bo-paket .cselect-option { white-space: normal; align-items: flex-start; gap: 10px; }
 .bo-paket .cselect-trigger > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-.bo-paket-nama { flex: 1; min-width: 0; }
+.bo-paket-nama { flex: 1; min-width: 0; font-size: 12px; text-transform: uppercase; }
 /* Judul kelompok (Kategori) & anak (Jenis Makeup) yang menjorok -- nilai SAMA
    dengan dropdown Paket Layanan Makeup di form booking (PilihLayanan.css). */
 .bo-paket .bo-paket-kelompok { display: flex; flex-direction: column; gap: 4px; }
 .bo-paket .bo-paket-judul {
-  font-size: 10.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
-  color: var(--ink-soft); opacity: 0.75; padding: 8px 10px 2px;
+  font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+  color: var(--ink-soft); padding: 8px 10px 2px;
 }
 .bo-paket .bo-paket-judul.cocok { color: var(--h5); opacity: 1; }
 .bo-paket .cselect-option.bo-paket-anak { margin-left: 14px; }
